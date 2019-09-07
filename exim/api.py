@@ -1,6 +1,7 @@
 import frappe
 from frappe import _
 from frappe.utils import flt, getdate
+from frappe.contacts.doctype.address.address import get_company_address
 
 @frappe.whitelist()
 def si_validate(self, method):
@@ -369,6 +370,10 @@ def get_custom_default_address(doctype, name, sort_key='is_primary_address'):
 		return sorted(out, key = functools.cmp_to_key(lambda x,y: cmp(y[1], x[1])))[0][0]
 	else:
 		return None
+
+@frappe.whitelist()
+def company_address(company):
+	return get_company_address(company)
 
 @frappe.whitelist()
 def make_lc(source_name, target_doc=None):

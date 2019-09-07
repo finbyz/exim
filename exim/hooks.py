@@ -31,6 +31,15 @@ app_license = "GPL 3.0"
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
+doctype_js = {
+	"Sales Order": "public/js/doctype_js/sales_order.js",
+	"Sales Invoice": "public/js/doctype_js/sales_invoice.js",
+	"Delivery Note": "public/js/doctype_js/delivery_note.js",
+	"Purchase Receipt": "public/js/doctype_js/purchase_receipt.js",
+	"Purchase Invoice": "public/js/doctype_js/purchase_invoice.js",
+	"Purchase Order": "public/js/doctype_js/purchase_order.js",
+}
+
 # Home Pages
 # ----------
 
