@@ -109,31 +109,37 @@ frappe.ui.form.on("Delivery Note", {
     },
     cal_igst_amount: function (frm) {
         let total_igst = 0.0;
-        frm.doc.items.forEach(function (d) {
-            if (d.igst_rate && d.fob_value) {
-                frappe.model.set_value(d.doctype, d.name, 'igst_amount', d.fob_value * parseInt(d.igst_rate) / 100);
-            } else {
-                frappe.model.set_value(d.doctype, d.name, 'igst_amount', 0.0);
-            }
-            total_igst += flt(d.igst_amount);
-        });
-        frm.set_value('total_igst_amount', total_igst);
+        if (frm.doc.currncy != "INR") {
+            frm.doc.items.forEach(function (d) {
+                if (d.igst_rate && d.fob_value) {
+                    frappe.model.set_value(d.doctype, d.name, 'igst_amount', d.fob_value * parseInt(d.igst_rate) / 100);
+                } else {
+                    frappe.model.set_value(d.doctype, d.name, 'igst_amount', 0.0);
+                }
+                total_igst += flt(d.igst_amount);
+            });
+            frm.set_value('total_igst_amount', total_igst);
+        }
     },
     duty_drawback_cal: function (frm) {
         let total_dt = 0;
-        frm.doc.items.forEach(function (d) {
-            frappe.model.set_value(d.doctype, d.name, "duty_drawback_amount", flt(d.fob_value * d.duty_drawback_rate / 100));
-            total_dt += flt(d.duty_drawback_amount);
-        });
-        frm.set_value("total_duty_drawback", total_dt);
+        if (frm.doc.currncy != "INR") {
+            frm.doc.items.forEach(function (d) {
+                frappe.model.set_value(d.doctype, d.name, "duty_drawback_amount", flt(d.fob_value * d.duty_drawback_rate / 100));
+                total_dt += flt(d.duty_drawback_amount);
+            });
+            frm.set_value("total_duty_drawback", total_dt);
+        }
     },
     calculate_total_fob_value: function (frm) {
         let total_fob_value = 0;
-        frm.doc.items.forEach(function (d) {
-            total_fob_value += flt(d.fob_value);
-            console.log(total_fob_value);
-        });
-        frm.set_value("total_fob_value", flt(total_fob_value - (frm.doc.freight * frm.doc.conversion_rate) - (frm.doc.insurance * frm.doc.conversion_rate)));
+        if (frm.doc.currncy != "INR") {
+            frm.doc.items.forEach(function (d) {
+                total_fob_value += flt(d.fob_value);
+                console.log(total_fob_value);
+            });
+            frm.set_value("total_fob_value", flt(total_fob_value - (frm.doc.freight * frm.doc.conversion_rate) - (frm.doc.insurance * frm.doc.conversion_rate)));
+        }
     },
 });
 frappe.ui.form.on("Delivery Note Item", {
@@ -210,10 +216,12 @@ frappe.ui.form.on("Delivery Note Item", {
     capped_amount: function (frm, cdt, cdn) {
         let d = locals[cdt][cdn];
         if (d.maximum_cap == 1) {
-            if (d.capped_amount < d.duty_drawback_amount) {
-                frappe.model.set_value(cdt, cdn, "duty_drawback_amount", d.capped_amount);
+            if (frm.doc.currncy != "INR") {
+                if (d.capped_amount < d.duty_drawback_amount) {
+                    frappe.model.set_value(cdt, cdn, "duty_drawback_amount", d.capped_amount);
+                }
+                frappe.model.set_value(cdt, cdn, "effective_rate", flt(d.capped_amount / d.fob_value * 100));
             }
-            frappe.model.set_value(cdt, cdn, "effective_rate", flt(d.capped_amount / d.fob_value * 100));
         }
     },
 
