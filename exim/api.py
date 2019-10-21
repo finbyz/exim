@@ -118,65 +118,7 @@ def cancel_jv(self, method):
 		self.meis_jv = ''
 	frappe.db.commit()
 	
-def create_igst_jv(self):
-	abbr = frappe.db.get_value("Company", self.company, 'abbr')
-	
-	if len(self.taxes):
-		for row in self.taxes:
-			if self.export_type == "With Payment of Tax" and self.currency != "INR" and 'IGST' in row.account_head:
-				jv = frappe.new_doc("Journal Entry")
-				jv.voucher_type = "Export IGST Entry"
-				jv.posting_date = self.posting_date
-				jv.company = self.company
-				jv.cheque_no = self.invoice_no
-				jv.cheque_date = self.posting_date
-				
-				#jv.user_remark = "IGST Payable against" + self.name + " for " + self.customer
-					
-				jv.append("accounts", {
-					"account": 'Sales - %s' % abbr,
-					"cost_center": 'Main - %s' % abbr,
-					"debit_in_account_currency": row.base_tax_amount
-				})
-				if self.debit_to == "Debtors - %s" % abbr:
-					jv.multi_currency = 0
-					jv.append("accounts", {
-						"account": self.debit_to,
-						"cost_center": 'Main - %s' % abbr,
-						"party_type": 'Customer',
-						"party": self.customer,
-						"reference_type": 'Sales Invoice',
-						"reference_name": self.name,
-						"credit_in_account_currency": row.base_tax_amount
-					})
-				else:
-					jv.multi_currency = 1
-					jv.append("accounts", {
-						"account": self.debit_to,
-						"cost_center": 'Main - %s' % abbr,
-						"exchange_rate":  self.conversion_rate,
-						"party_type": 'Customer',
-						"party": self.customer,
-						"reference_type": 'Sales Invoice',
-						"reference_name": self.name,
-						"credit_in_account_currency": row.tax_amount_after_discount_amount
-					})
-				try:
-					jv.save(ignore_permissions=True)
-					jv.submit()
-				except Exception as e:
-					frappe.throw(str(e))
-				else:
-					self.db_set('gst_jv',jv.name)
-				frappe.db.commit()
-	
-def cancel_igst_jv(self):
-	if self.gst_jv:
-		jv = frappe.get_doc("Journal Entry", self.gst_jv)
-		jv.cancel()
-		self.db_set('gst_jv', '')
-	frappe.db.commit()
-	
+
 def duty_calculation(self):
 	total_duty_drawback = 0.0;
 	for row in self.items:

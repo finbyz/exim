@@ -221,7 +221,7 @@ frappe.ui.form.on("Sales Invoice", {
     },
     cal_igst_amount: function (frm) {
         let total_igst = 0.0;
-        if (frm.doc.currncy != "INR") {    
+        if (frm.doc.currency != "INR") {    
             frm.doc.items.forEach(function (d) {
                 if (d.igst_rate && d.fob_value) {
                     frappe.model.set_value(d.doctype, d.name, 'igst_amount', d.fob_value * parseInt(d.igst_rate) / 100);
@@ -236,7 +236,7 @@ frappe.ui.form.on("Sales Invoice", {
     duty_drawback_cal: function (frm) {
         let total_dt = 0;
         let total_meis = 0.0;
-        if (frm.doc.currncy != "INR") {
+        if (frm.doc.currency != "INR") {
             frm.doc.items.forEach(function (d) {
                 frappe.model.set_value(d.doctype, d.name, "duty_drawback_amount", flt(d.fob_value * d.duty_drawback_rate / 100));
                 frappe.model.set_value(d.doctype, d.name, "meis_value", flt(d.fob_value * d.meis_rate / 100.0));
@@ -249,7 +249,7 @@ frappe.ui.form.on("Sales Invoice", {
     },
     calculate_total_fob_value: function (frm) {
         let total_fob_value = 0;
-        if (frm.doc.currncy != "INR") {
+        if (frm.doc.currency != "INR") {
             frm.doc.items.forEach(function (d) {
                 total_fob_value += flt(d.fob_value);
             });
