@@ -68,7 +68,19 @@ frappe.ui.form.on("Sales Order", {
             }
 
         }
+		
     },
+	onload_post_render: function(frm){
+		// hide delivery note from make button
+		let $group = cur_frm.page.get_inner_group_button("Make");
+		
+		let li_length = $group.find("ul li");
+		for (let i = 0; i < li_length.length -1; i++) {		
+			var li = $group.find(".dropdown-menu").children("li")[i];
+			if (li.getElementsByTagName("a")[0].innerHTML == "Delivery")
+				$group.find(".dropdown-menu").children("li")[i].remove();
+		}
+	},
     cal_total: function (frm) {
         let total_qty = 0.0;
         let total_gr_wt = 0.0;
