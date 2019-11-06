@@ -39,7 +39,7 @@ doctype_js = {
 	"Purchase Invoice": "public/js/doctype_js/purchase_invoice.js",
 	"Purchase Order": "public/js/doctype_js/purchase_order.js",
 }
-
+fixtures = ["Custom Field"]
 # Home Pages
 # ----------
 
