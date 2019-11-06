@@ -70,6 +70,20 @@ frappe.ui.form.on("Sales Order", {
         }
 		
     },
+	onload:function(frm){
+		if(frm.doc.customer_address || frm.doc.shipping_address_name){
+			frappe.db.get_value("Address", frm.doc.customer_address, "country", function (r) {
+				frappe.db.get_value("Address", frm.doc.shipping_address_name, "country", function (d) {
+					if(r.country == "India" || d.country == "India"){
+						cur_frm.set_df_property("shipping_details", "hidden", 1);
+					}
+					else{
+						cur_frm.set_df_property("shipping_details", "hidden", 0);
+					}
+				});
+			});
+		}
+	},
 	onload_post_render: function(frm){
 		// hide delivery note from make button
 		let $group = cur_frm.page.get_inner_group_button("Make");

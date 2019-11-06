@@ -44,7 +44,21 @@ frappe.ui.form.on("Purchase Invoice", {
                 }
             }
         });
-    }
+    },
+	onload:function(frm){
+		if(frm.doc.supplier_address || frm.doc.shipping_address){
+			frappe.db.get_value("Address", frm.doc.supplier_address, "country", function (r) {
+				frappe.db.get_value("Address", frm.doc.shipping_address, "country", function (d) {
+					if(r.country == "India" || d.country == "India"){
+						cur_frm.set_df_property("shipping_details", "hidden", 1);
+					}
+					else{
+						cur_frm.set_df_property("shipping_details", "hidden", 0);
+					}
+				});
+			});
+		}
+	},
 });
 
 frappe.ui.form.on("Purchase Invoice Item", {

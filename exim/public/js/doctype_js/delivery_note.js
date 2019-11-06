@@ -29,6 +29,20 @@ frappe.ui.form.on("Delivery Note", {
             }
         })
     },
+	onload:function(frm){
+		if(frm.doc.customer_address || frm.doc.shipping_address_name){
+			frappe.db.get_value("Address", frm.doc.customer_address, "country", function (r) {
+				frappe.db.get_value("Address", frm.doc.shipping_address_name, "country", function (d) {
+					if(r.country == "India" || d.country == "India"){
+						cur_frm.set_df_property("shipping_details", "hidden", 1);
+					}
+					else{
+						cur_frm.set_df_property("shipping_details", "hidden", 0);
+					}
+				});
+			});
+		}
+	},
     refresh: function (frm) {
         if (frm.doc.docstatus === 0) {
             cur_frm.add_custom_button(__('Sales Invoice'), function () {
