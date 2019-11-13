@@ -38,6 +38,8 @@ doctype_js = {
 	"Purchase Receipt": "public/js/doctype_js/purchase_receipt.js",
 	"Purchase Invoice": "public/js/doctype_js/purchase_invoice.js",
 	"Purchase Order": "public/js/doctype_js/purchase_order.js",
+	"Lead": "public/js/doctype_js/lead.js",
+
 }
 fixtures = ["Custom Field"]
 # Home Pages
