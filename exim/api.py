@@ -2,6 +2,8 @@ import frappe
 from frappe import _
 from frappe.utils import flt, getdate
 from frappe.contacts.doctype.address.address import get_company_address
+from frappe.core.doctype.communication.email import make
+from frappe.email.smtp import get_outgoing_email_account
 
 @frappe.whitelist()
 def si_validate(self, method):
@@ -377,15 +379,18 @@ def send_lead_mail(recipients, person, email_template, doc_name):
 	doc = frappe.get_doc('Email Template',email_template)
 	context = {"person": person}
 	message = frappe.render_template(doc.response, context)
-	
 	subject = doc.subject
+	email_account = get_outgoing_email_account(True, append_to = "Lead")
+	sender = email_account.default_sender
 
-	frappe.sendmail(
-		recipients=recipients,
+	make(
+		recipients = recipients,
 		subject = subject,
-		message = message,
-		reference_doctype = "Lead",
-		reference_name = doc_name,
+		content = message,
+		sender = sender,
+		doctype = "Lead",
+		name = doc_name,
+		send_email = True
 	)
 
 	return "Mail send successfully!"
