@@ -372,63 +372,20 @@ def docs_before_naming(self, method):
 		self.fiscal = fiscal
 
 @frappe.whitelist()
-def send_lead_mail(recipients, person,email_template=None):
+def send_lead_mail(recipients, person, email_template, doc_name):
 
 	doc = frappe.get_doc('Email Template',email_template)
 	context = {"person": person}
 	message = frappe.render_template(doc.response, context)
 	
-	# message = """
-	# 	<p>
-	# 		Dear {person},
-	# 	</p>
-	# 	<p>
-	# 		<i>Thank you for taking the time to meet me and my colleagues at</i> CHINA INTER-DYE Exhibition <i>on our Stall A-588. It's been a pleasure talking to you and learning about Your Company. We Parshwanath Group Of Industries look forward to successful working relationship with your company.</i>
-	# 	</p>
-	# 	<p>
-	# 		<i>{company_message}</i>
-	# 	</p>
-	# 	<p>
-	# 		I hope that we can support & assist you further on your requirements.
-	# 	</p>
-	# 	<p>
-	# 		We shall get back to you soon with more details &  information on our meeting. In the meanwhile, if you have any query, please feel free to Contact us.
-	# 	</p>
-	# 	<br>
-	# 	<p>
-	# 		<table border="0">
-	# 			<tr>
-	# 				<td><i><u>Contact Person: </u></i></td>
-	# 				<td>{contact_person}</td>
-	# 			</tr>
-	# 			<tr>
-	# 				<td><i><u>Designation: </u></i></td>
-	# 				<td>{designation}</td>
-	# 			</tr>
-	# 			<tr>
-	# 				<td><i><u>Email: </u></i></td>
-	# 				<td>{email_id}</td>
-	# 			</tr>
-	# 			<tr>
-	# 				<td><i><u>Contact: </u></i></td>
-	# 				<td>{contact}</td>
-	# 			</tr>
-	# 		</table>
-	# 	</p>""".format(
-	# 		person=person,
-	# 		company_message=company[group_company]["message"],
-	# 		contact_person=company[group_company]["contact_person"],
-	# 		designation=company[group_company]["designation"],
-	# 		email_id=company[group_company]["email_id"],
-	# 		contact=company[group_company]["contact"],
-	# 	)
-
 	subject = doc.subject
 
-	frappe.sendmail(recipients=recipients,
+	frappe.sendmail(
+		recipients=recipients,
 		subject = subject,
-		message = message)
+		message = message,
+		reference_doctype = "Lead",
+		reference_name = doc_name,
+	)
 
-	return "Mail send successfully"
-
-		
+	return "Mail send successfully!"
