@@ -165,7 +165,7 @@ frappe.ui.form.on("Sales Invoice", {
                 });
             }
         });
-        frm.doc.items.forEach(function (d) {
+        /*frm.doc.items.forEach(function (d) {
             if (!d.item_code) {
                 frappe.throw("Please Select the item")
             }
@@ -183,7 +183,7 @@ frappe.ui.form.on("Sales Invoice", {
                     }
                 }
             })
-        })
+        })*/
     },
     //EXIM
     customer: function (frm) {
