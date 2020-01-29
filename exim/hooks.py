@@ -10,6 +10,7 @@ app_icon = "fa fa-ship"
 app_color = "#61b590"
 app_email = "info@finbyz.com"
 app_license = "GPL 3.0"
+app_version = "3.1.0"
 
 # Includes in <head>
 # ------------------
