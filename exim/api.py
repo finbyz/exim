@@ -107,7 +107,7 @@ def create_jv(self):
 					frappe.throw(str(e))
 				else:
 					self.db_set('meis_jv',meis_jv.name)
-		frappe.db.commit()
+		#frappe.db.commit()
 	
 def cancel_jv(self, method):
 	if self.duty_drawback_jv:
@@ -118,7 +118,7 @@ def cancel_jv(self, method):
 		jv = frappe.get_doc("Journal Entry", self.meis_jv)
 		jv.cancel()
 		self.meis_jv = ''
-	frappe.db.commit()
+	#frappe.db.commit()
 	
 
 def duty_calculation(self):
@@ -171,8 +171,8 @@ def export_lic(self):
 			aal.total_export_qty = sum([flt(d.quantity) for d in aal.exports])
 			aal.total_export_amount = sum([flt(d.fob_value) for d in aal.exports])
 			aal.save()
-	else:
-		frappe.db.commit()
+	# else:
+	# 	frappe.db.commit()
 
 def export_lic_cancel(self):
 	doc_list = list(set([row.advance_authorisation_license for row in self.items if row.advance_authorisation_license]))
@@ -189,8 +189,8 @@ def export_lic_cancel(self):
 		doc.total_export_qty = sum([flt(d.quantity) for d in doc.exports])
 		doc.total_export_amount = sum([flt(d.fob_value) for d in doc.exports])
 		doc.save()
-	else:
-		frappe.db.commit()
+	# else:
+	# 	frappe.db.commit()
 
 def import_lic(self):
 	for row in self.items:
@@ -213,8 +213,8 @@ def import_lic(self):
 			aal.total_import_qty = sum([flt(d.quantity) for d in aal.imports])
 			aal.total_import_amount = sum([flt(d.cif_value) for d in aal.imports])
 			aal.save()
-	else:
-		frappe.db.commit()
+	# else:
+	# 	frappe.db.commit()
 
 def import_lic_cancel(self):
 	doc_list = list(set([row.advance_authorisation_license for row in self.items if row.advance_authorisation_license]))
@@ -231,8 +231,8 @@ def import_lic_cancel(self):
 		doc.total_import_qty = sum([flt(d.quantity) for d in doc.imports])
 		doc.total_import_amount = sum([flt(d.cif_value) for d in doc.imports])
 		doc.save()
-	else:
-		frappe.db.commit()		
+	# else:
+	# 	frappe.db.commit()		
 	
 @frappe.whitelist()
 def get_custom_address(party=None, party_type="Customer", ignore_permissions=False):
