@@ -133,9 +133,9 @@ fixtures = ["Custom Field"]
 # }
 fixtures = ["Custom Field"]
 
-override_whitelisted_methods = {
-	"frappe.utils.print_format.download_pdf": "exim.print_format.download_pdf",
-}
+# override_whitelisted_methods = {
+# 	"frappe.utils.print_format.download_pdf": "exim.print_format.download_pdf",
+# }
 
 doc_events = {
 	"Sales Invoice": {

@@ -8,6 +8,9 @@ from PyPDF2 import PdfFileReader
 
 from frappe.utils.pdf import cleanup, read_options_from_html
 
+def append_pdf(input,output):
+	# Merging multiple pdf files
+    [output.addPage(input.getPage(page_num)) for page_num in range(input.numPages)]
 
 @frappe.whitelist()
 def download_pdf(doctype, name, format=None, doc=None, no_letterhead=0):
