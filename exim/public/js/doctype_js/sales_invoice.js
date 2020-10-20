@@ -20,6 +20,15 @@ cur_frm.fields_dict.custom_address.get_query = function (doc) {
         ]
     }
 };
+// cur_frm.fields_dict.custom_buyer_address.get_query = function (doc) {
+//     return {
+//         filters: [
+//             ["address_type", "in", ["Custom-buyer",'Custom']],
+//             ["link_name", "=", cur_frm.doc.customer]
+//         ]
+//     }
+// };
+
 
 cur_frm.fields_dict.items.grid.get_field("advance_authorisation_license").get_query = function (doc, cdt, cdn) {
     let d = locals[cdt][cdn];
@@ -129,6 +138,22 @@ frappe.ui.form.on("Sales Invoice", {
             });
         });
     },
+    // custom_buyer_address: function (frm) {
+    //     if (cur_frm.doc.custom_address) {
+    //         return frappe.call({
+    //             method: "frappe.contacts.doctype.address.address.get_address_display",
+    //             args: {
+    //                 "address_dict": frm.doc.custom_buyer_address
+    //             },
+    //             callback: function (r) {
+    //                 if (r.message) {
+
+    //                     frm.set_value("custom_buyer_address_display", r.message);
+    //                 }
+    //             }
+    //         });
+    //     }
+    // },
 	/* get_details_of_lc: function (frm) {
 		frappe.db.get_value("Contract Term", frm.doc.contract_and_lc, ["marks_and_no", "no_and_kind_of_packages", "description_of_goods"], function (r) {
 			if(r){
