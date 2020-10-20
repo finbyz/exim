@@ -6,7 +6,7 @@ from frappe import _
 from PyPDF2 import PdfFileReader
 
 
-from frappe.utils.pdf import append_pdf, cleanup, read_options_from_html
+from frappe.utils.pdf import cleanup, read_options_from_html
 
 
 @frappe.whitelist()
