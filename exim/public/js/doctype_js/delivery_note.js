@@ -150,7 +150,6 @@ frappe.ui.form.on("Delivery Note", {
         if (frm.doc.currncy != "INR") {
             frm.doc.items.forEach(function (d) {
                 total_fob_value += flt(d.fob_value);
-                console.log(total_fob_value);
             });
             frm.set_value("total_fob_value", flt(total_fob_value - (frm.doc.freight * frm.doc.conversion_rate) - (frm.doc.insurance * frm.doc.conversion_rate)));
         }
