@@ -70,55 +70,12 @@ def create_jv(self):
 					frappe.throw(str(e))
 				else:
 					self.db_set('duty_drawback_jv',jv.name)
-					
-		if self.total_meis:
-			meis_receivable_account = frappe.db.get_value("Company", { "company_name": self.company}, "meis_receivable_account")
-			meis_income_account = frappe.db.get_value("Company", { "company_name": self.company}, "meis_income_account")
-			meis_cost_center = frappe.db.get_value("Company", { "company_name": self.company}, "meis_cost_center")
-			if not meis_receivable_account:
-				frappe.throw(_("Set MEIS Receivable Account in Company"))
-			elif not meis_income_account:
-				frappe.throw(_("Set MEIS Income Account in Company"))
-			elif not meis_cost_center:
-				frappe.throw(_("Set MEIS Cost Center in Company"))
-			else:
-				meis_jv = frappe.new_doc("Journal Entry")
-				meis_jv.voucher_type = "MEIS Entry"
-				meis_jv.posting_date = self.posting_date
-				meis_jv.company = self.company
-				meis_jv.cheque_no = self.name
-				meis_jv.cheque_date = self.posting_date
-				meis_jv.user_remark = "MEIS against " + self.name + " for " + self.customer
-				meis_jv.append("accounts", {
-					"account": meis_receivable_account,
-					"cost_center": meis_cost_center,
-					"debit_in_account_currency": self.total_meis
-				})
-				meis_jv.append("accounts", {
-					"account": meis_income_account,
-					"cost_center": meis_cost_center,
-					"credit_in_account_currency": self.total_meis
-				})
-				
-				try:
-					meis_jv.save(ignore_permissions=True)
-					meis_jv.submit()
-				except Exception as e:
-					frappe.throw(str(e))
-				else:
-					self.db_set('meis_jv',meis_jv.name)
-		#frappe.db.commit()
-	
+						
 def cancel_jv(self, method):
 	if self.duty_drawback_jv:
 		jv = frappe.get_doc("Journal Entry", self.duty_drawback_jv)
 		jv.cancel()
 		self.duty_drawback_jv = ''
-	if self.meis_jv:
-		jv = frappe.get_doc("Journal Entry", self.meis_jv)
-		jv.cancel()
-		self.meis_jv = ''
-	#frappe.db.commit()
 	
 
 def duty_calculation(self):
@@ -139,7 +96,7 @@ def duty_calculation(self):
 		row.fob_value = flt(row.base_amount)
 		row.igst_taxable_value = flt(row.amount)
 		total_duty_drawback += flt(row.duty_drawback_amount) or 0.0
-		row.meis_value = flt(row.fob_value * row.meis_rate / 100.0)
+		
 		
 	self.total_duty_drawback = total_duty_drawback
 	
