@@ -123,7 +123,7 @@ frappe.ui.form.on("Delivery Note", {
     },
     cal_igst_amount: function (frm) {
         let total_igst = 0.0;
-        if (frm.doc.currncy != "INR") {
+        if (frm.doc.currency != "INR") {
             frm.doc.items.forEach(function (d) {
                 if (d.igst_rate && d.fob_value) {
                     frappe.model.set_value(d.doctype, d.name, 'igst_amount', d.fob_value * parseInt(d.igst_rate) / 100);
@@ -137,7 +137,7 @@ frappe.ui.form.on("Delivery Note", {
     },
     duty_drawback_cal: function (frm) {
         let total_dt = 0;
-        if (frm.doc.currncy != "INR") {
+        if (frm.doc.currency != "INR") {
             frm.doc.items.forEach(function (d) {
                 frappe.model.set_value(d.doctype, d.name, "duty_drawback_amount", flt(d.fob_value * d.duty_drawback_rate / 100));
                 total_dt += flt(d.duty_drawback_amount);
@@ -147,7 +147,7 @@ frappe.ui.form.on("Delivery Note", {
     },
     calculate_total_fob_value: function (frm) {
         let total_fob_value = 0;
-        if (frm.doc.currncy != "INR") {
+        if (frm.doc.currency != "INR") {
             frm.doc.items.forEach(function (d) {
                 total_fob_value += flt(d.fob_value);
                 console.log(total_fob_value);
@@ -230,7 +230,7 @@ frappe.ui.form.on("Delivery Note Item", {
     capped_amount: function (frm, cdt, cdn) {
         let d = locals[cdt][cdn];
         if (d.maximum_cap == 1) {
-            if (frm.doc.currncy != "INR") {
+            if (frm.doc.currency != "INR") {
                 if (d.capped_amount < d.duty_drawback_amount) {
                     frappe.model.set_value(cdt, cdn, "duty_drawback_amount", d.capped_amount);
                 }

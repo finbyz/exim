@@ -301,7 +301,6 @@ frappe.ui.form.on("Sales Invoice", {
                 total_meis += flt(d.meis_value)
             });
             frm.set_value("total_duty_drawback", total_dt);
-            frm.set_value("total_meis", total_meis);
         }
     },
     calculate_total_fob_value: function (frm) {
@@ -451,7 +450,7 @@ frappe.ui.form.on("Sales Invoice Item", {
     capped_amount: function (frm, cdt, cdn) {
         let d = locals[cdt][cdn];
         if (d.maximum_cap == 1) {
-            if (frm.doc.currncy != "INR") {
+            if (frm.doc.currency != "INR") {
                 if (d.capped_amount < d.duty_drawback_amount) {
                     frappe.model.set_value(cdt, cdn, "duty_drawback_amount", d.capped_amount);
                 }

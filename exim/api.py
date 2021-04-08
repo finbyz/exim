@@ -70,8 +70,7 @@ def create_jv(self):
 					frappe.throw(str(e))
 				else:
 					self.db_set('duty_drawback_jv',jv.name)
-					
-	
+						
 def cancel_jv(self, method):
 	if self.duty_drawback_jv:
 		jv = frappe.get_doc("Journal Entry", self.duty_drawback_jv)
@@ -97,7 +96,7 @@ def duty_calculation(self):
 		row.fob_value = flt(row.base_amount)
 		row.igst_taxable_value = flt(row.amount)
 		total_duty_drawback += flt(row.duty_drawback_amount) or 0.0
-		row.meis_value = flt(row.fob_value * row.meis_rate / 100.0)
+		
 		
 	self.total_duty_drawback = total_duty_drawback
 	
