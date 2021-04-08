@@ -12,6 +12,12 @@ cur_frm.set_query("notify_party", function () {
     };
 });
 
+cur_frm.set_query("custom_consignee_address", function () {
+    return {
+        query: "frappe.contacts.doctype.address.address.address_query",
+        filters: { link_doctype: "Customer", link_name: cur_frm.doc.customer }
+    };
+});
 cur_frm.fields_dict.custom_address.get_query = function (doc) {
     return {
         filters: [
@@ -236,6 +242,20 @@ frappe.ui.form.on("Sales Invoice", {
                 callback: function (r) {
                     if (r.message)
                         frm.set_value("notify_address_display", r.message);
+                }
+            });
+        }
+    },
+    custom_consignee_address: function (frm) {
+        if (cur_frm.doc.custom_consignee_address) {
+            return frappe.call({
+                method: "frappe.contacts.doctype.address.address.get_address_display",
+                args: {
+                    "address_dict": frm.doc.custom_consignee_address
+                },
+                callback: function (r) {
+                    if (r.message)
+                        frm.set_value("custom_consignee_address_display", r.message);
                 }
             });
         }
