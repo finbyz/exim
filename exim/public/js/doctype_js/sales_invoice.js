@@ -361,7 +361,7 @@ frappe.ui.form.on("Sales Invoice Item", {
                 frappe.model.set_value(cdt, cdn, "fob_value", flt(d.base_amount - d.freight - d.insurance));
             }
         })
-        frappe.model.set_value(cdt, cdn, "no_of_packages", flt(d.qty / d.packing_size));
+        // frappe.model.set_value(cdt, cdn, "no_of_packages", flt(d.qty / d.packing_size));
         frappe.model.set_value(cdt, cdn, "total_pallets", Math.round(d.qty / d.pallet_size));
     },
     // packaging_material: function (frm, cdt, cdn) {
@@ -379,7 +379,7 @@ frappe.ui.form.on("Sales Invoice Item", {
     packing_size: function (frm, cdt, cdn) {
         // frm.events.cal_total(frm);
         let d = locals[cdt][cdn];
-        frappe.model.set_value(cdt, cdn, "no_of_packages", flt(d.qty / d.packing_size));
+        // frappe.model.set_value(cdt, cdn, "no_of_packages", flt(d.qty / d.packing_size));
     },
     pallet_size: function (frm, cdt, cdn) {
         frappe.run_serially([
