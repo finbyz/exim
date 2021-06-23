@@ -135,14 +135,17 @@ frappe.ui.form.on("Sales Invoice", {
                 frm.refresh_field('sales_invoice_contract_term_check')
             });
         }
-        frm.trigger("get_details_of_lc");
+        // frm.trigger("get_details_of_lc");
+    },
+    bl_date: function(frm){
+        frm.trigger('maturity_date')
     },
     maturity_date: function (frm) {
-        frappe.db.get_value("Contract Term", frm.doc.contract_and_lc, "payment_term", function (r) {
-            frappe.db.get_value("Payment Term", r.payment_term, "credit_days", function (n) {
+        // frappe.db.get_value("Contract Term", frm.doc.contract_and_lc, "payment_term", function (r) {
+            frappe.db.get_value("Payment Term", frm.doc.payment_schedule[0].payment_term, "credit_days", function (n) {
                 frm.set_value("maturity_date", frappe.datetime.add_days(frm.doc.bl_date, n.credit_days));
             });
-        });
+        // });
     },
     // custom_buyer_address: function (frm) {
     //     if (cur_frm.doc.custom_address) {
