@@ -12,6 +12,12 @@ cur_frm.set_query("notify_party", function () {
     };
 });
 
+cur_frm.set_query("custom_consignee_address", function () {
+    return {
+        query: "frappe.contacts.doctype.address.address.address_query",
+        filters: { link_doctype: "Customer", link_name: cur_frm.doc.customer }
+    };
+});
 cur_frm.fields_dict.custom_address.get_query = function (doc) {
     return {
         filters: [
@@ -129,14 +135,17 @@ frappe.ui.form.on("Sales Invoice", {
                 frm.refresh_field('sales_invoice_contract_term_check')
             });
         }
-        frm.trigger("get_details_of_lc");
+        // frm.trigger("get_details_of_lc");
+    },
+    bl_date: function(frm){
+        frm.trigger('maturity_date')
     },
     maturity_date: function (frm) {
-        frappe.db.get_value("Contract Term", frm.doc.contract_and_lc, "payment_term", function (r) {
-            frappe.db.get_value("Payment Term", r.payment_term, "credit_days", function (n) {
+        // frappe.db.get_value("Contract Term", frm.doc.contract_and_lc, "payment_term", function (r) {
+            frappe.db.get_value("Payment Term", frm.doc.payment_schedule[0].payment_term, "credit_days", function (n) {
                 frm.set_value("maturity_date", frappe.datetime.add_days(frm.doc.bl_date, n.credit_days));
             });
-        });
+        // });
     },
     // custom_buyer_address: function (frm) {
     //     if (cur_frm.doc.custom_address) {
@@ -240,6 +249,20 @@ frappe.ui.form.on("Sales Invoice", {
             });
         }
     },
+    custom_consignee_address: function (frm) {
+        if (cur_frm.doc.custom_consignee_address) {
+            return frappe.call({
+                method: "frappe.contacts.doctype.address.address.get_address_display",
+                args: {
+                    "address_dict": frm.doc.custom_consignee_address
+                },
+                callback: function (r) {
+                    if (r.message)
+                        frm.set_value("custom_consignee_address_display", r.message);
+                }
+            });
+        }
+    },
     custom_address: function (frm) {
         if (cur_frm.doc.custom_address) {
             return frappe.call({
@@ -281,7 +304,6 @@ frappe.ui.form.on("Sales Invoice", {
                 total_meis += flt(d.meis_value)
             });
             frm.set_value("total_duty_drawback", total_dt);
-            frm.set_value("total_meis", total_meis);
         }
     },
     calculate_total_fob_value: function (frm) {
@@ -431,7 +453,7 @@ frappe.ui.form.on("Sales Invoice Item", {
     capped_amount: function (frm, cdt, cdn) {
         let d = locals[cdt][cdn];
         if (d.maximum_cap == 1) {
-            if (frm.doc.currncy != "INR") {
+            if (frm.doc.currency != "INR") {
                 if (d.capped_amount < d.duty_drawback_amount) {
                     frappe.model.set_value(cdt, cdn, "duty_drawback_amount", d.capped_amount);
                 }
