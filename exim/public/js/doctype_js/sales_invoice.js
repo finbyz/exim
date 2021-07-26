@@ -167,7 +167,7 @@ frappe.ui.form.on("Sales Invoice", {
     }, */
     before_save: function (frm) {
         frm.trigger("cal_total");
-        frm.trigger("box_cal");
+        // frm.trigger("box_cal");
 
         //EXIM
         frm.events.cal_igst_amount(frm);
@@ -380,6 +380,7 @@ frappe.ui.form.on("Sales Invoice Item", {
     packing_size: function (frm, cdt, cdn) {
         // frm.events.cal_total(frm);
         let d = locals[cdt][cdn];
+        console.log(flt(d.qty / d.packing_size));
         frappe.model.set_value(cdt, cdn, "no_of_packages", flt(d.qty / d.packing_size));
     },
     pallet_size: function (frm, cdt, cdn) {
