@@ -125,8 +125,8 @@ frappe.ui.form.on("Delivery Note", {
         let total_igst = 0.0;
         if (frm.doc.currency != "INR") {
             frm.doc.items.forEach(function (d) {
-                if (d.igst_rate && d.fob_value) {
-                    frappe.model.set_value(d.doctype, d.name, 'igst_amount', d.fob_value * parseInt(d.igst_rate) / 100);
+                if (d.igst_rate) {
+                    frappe.model.set_value(d.doctype, d.name, 'igst_amount', d.base_amount * parseInt(d.igst_rate) / 100);
                 } else {
                     frappe.model.set_value(d.doctype, d.name, 'igst_amount', 0.0);
                 }
