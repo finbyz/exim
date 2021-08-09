@@ -95,7 +95,7 @@ def duty_calculation(self):
 			else:
 				row.duty_drawback_amount = duty_drawback_amount
 				
-		row.fob_value = flt(row.base_amount)
+		#row.fob_value = flt(row.base_amount)
 		row.igst_taxable_value = flt(row.amount)
 		total_duty_drawback += flt(row.duty_drawback_amount) or 0.0
 		

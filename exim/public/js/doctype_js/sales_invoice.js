@@ -179,6 +179,13 @@ frappe.ui.form.on("Sales Invoice", {
         // frm.trigger("box_cal");
 
         //EXIM
+        // frappe.db.get_value("Address", frm.doc.customer_address, 'country', function (r) {
+        //     if (r.country != "India") {
+        //         frm.doc.items.forEach(function(d){
+        //             frappe.model.set_value(d.doctype, d.name, "fob_value", flt(d.base_amount - d.freight - d.insurance));
+        //         })
+        //     }
+        // })
         frm.events.cal_igst_amount(frm);
         frm.trigger('calculate_total_fob_value');
         frm.trigger("duty_drawback_cal");
@@ -186,11 +193,6 @@ frappe.ui.form.on("Sales Invoice", {
         if (frm.doc.shipping_address_name == "") {
             frm.set_value("shipping_address_name", frm.doc.customer_address);
         }
-        frappe.db.get_value("Address", frm.doc.customer_address, 'country', function (r) {
-            if (r.country != "India") {
-                frappe.model.set_value(d.doctype, d.name, "fob_value", flt(d.base_amount - d.freight - d.insurance));
-            }
-        })
         frm.refresh_field('items');
         frappe.db.get_value("Company", frm.doc.company, 'abbr', function (r) {
             if (frm.doc.is_opening == "Yes") {
@@ -299,7 +301,7 @@ frappe.ui.form.on("Sales Invoice", {
         if (frm.doc.currency != "INR") {
             frm.doc.items.forEach(function (d) {
                 frappe.model.set_value(d.doctype, d.name, "duty_drawback_amount", flt(d.fob_value * d.duty_drawback_rate / 100));
-                frappe.model.set_value(d.doctype, d.name, "meis_value", flt(d.fob_value * d.meis_rate / 100.0));
+                //frappe.model.set_value(d.doctype, d.name, "meis_value", flt(d.fob_value * d.meis_rate / 100.0));
                 total_dt += flt(d.duty_drawback_amount);
                 total_meis += flt(d.meis_value)
             });
