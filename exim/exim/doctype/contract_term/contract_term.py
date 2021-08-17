@@ -10,18 +10,19 @@ from frappe.model.document import Document
 
 class ContractTerm(Document):
 	def autoname(self):
-		if self.terms_based_on == "Letter of Credit":
-			if not self.lc_no:
-				frappe.throw(_("Mandatory Field LC No"))
-			self.name = self.lc_no
+		pass
+		# if self.terms_based_on == "Letter of Credit":
+		# 	if not self.lc_no:
+		# 		frappe.throw(_("Mandatory Field LC No"))
+		# 	self.name = self.lc_no
 
-		else:
-			if not self.document_no:
-				frappe.throw(_("Mandatory Field Document No"))
-			self.name = self.document_no
+		# else:
+		# 	if not self.document_no:
+		# 		frappe.throw(_("Mandatory Field Document No"))
+		# 	self.name = self.document_no
 
 	def validate(self):
-		if self.contract_amount < self.total_net_amount:
+		if flt(self.contract_amount) < flt(self.total_net_amount):
 			frappe.throw(_("Contract Amount should not be less than Total Net Amount"))
 
 	def before_save(self):

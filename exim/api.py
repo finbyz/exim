@@ -4,6 +4,8 @@ from frappe.utils import flt, getdate
 from frappe.contacts.doctype.address.address import get_company_address
 from frappe.core.doctype.communication.email import make
 from frappe.email.smtp import get_outgoing_email_account
+from frappe.model.mapper import get_mapped_doc
+
 
 @frappe.whitelist()
 def si_validate(self, method):
@@ -79,7 +81,7 @@ def cancel_jv(self, method):
 	
 
 def duty_calculation(self):
-	total_duty_drawback = 0.0;
+	total_duty_drawback = 0.0
 	for row in self.items:
 		if row.duty_drawback_rate and row.fob_value:
 			duty_drawback_amount = flt(row.fob_value * row.duty_drawback_rate / 100.0)
@@ -93,7 +95,7 @@ def duty_calculation(self):
 			else:
 				row.duty_drawback_amount = duty_drawback_amount
 				
-		row.fob_value = flt(row.base_amount)
+		#row.fob_value = flt(row.base_amount)
 		row.igst_taxable_value = flt(row.amount)
 		total_duty_drawback += flt(row.duty_drawback_amount) or 0.0
 		
@@ -298,6 +300,7 @@ def make_lc(source_name, target_doc=None):
 
 	return doclist
 	
+@frappe.whitelist()
 def contract_and_lc_filter(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
 	so_list = filters.get("sales_order_item")
 
