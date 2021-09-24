@@ -25,7 +25,9 @@ frappe.ui.form.on("Delivery Note", {
 
         frappe.db.get_value("Address", frm.doc.customer_address, 'country', function (r) {
             if (r.country != "India") {
-                frappe.model.set_value(d.doctype, d.name, "fob_value", flt(d.base_amount - d.freight - d.insurance));
+                frm.doc.items.forEach(function(d){
+                    frappe.model.set_value(d.doctype, d.name, "fob_value", flt(d.base_amount - d.freight - d.insurance));
+                })
             }
         })
     },
@@ -97,7 +99,7 @@ frappe.ui.form.on("Delivery Note", {
         frm.doc.items.forEach(function (d, i) {
             if (i == 0) {
                 d.packages_from = 1;
-                d.packages_to = d.no_of_packages;
+                d.packages_to = flt(d.no_of_packages);
             }
             else {
                 d.packages_from = Math.round(frm.doc.items[i - 1].packages_to + 1);
@@ -123,6 +125,7 @@ frappe.ui.form.on("Delivery Note", {
     },
     cal_igst_amount: function (frm) {
         let total_igst = 0.0;
+       
         if (frm.doc.currency != "INR") {
             frm.doc.items.forEach(function (d) {
                 if (d.igst_rate) {
@@ -164,8 +167,12 @@ frappe.ui.form.on("Delivery Note Item", {
                 frappe.model.set_value(cdt, cdn, "fob_value", flt(d.base_amount - d.freight - d.insurance));
             }
         })
+        if(d.qty > 0 && d.packing_size > 0){
         frappe.model.set_value(cdt, cdn, "no_of_packages", flt(d.qty / d.packing_size));
+        }
+        if(d.qty > 0 && d.pallet_size > 0){
         frappe.model.set_value(cdt, cdn, "total_pallets", Math.round(d.qty / d.pallet_size));
+    }
     },
     // packaging_material: function (frm, cdt, cdn) {
     //     let d = locals[cdt][cdn];
@@ -182,7 +189,9 @@ frappe.ui.form.on("Delivery Note Item", {
     packing_size: function (frm, cdt, cdn) {
         // frm.events.cal_total(frm);
         let d = locals[cdt][cdn];
+        if(d.qty > 0 && d.packing_size > 0){
         frappe.model.set_value(cdt, cdn, "no_of_packages", flt(d.qty / d.packing_size));
+        }
     },
     pallet_size: function (frm, cdt, cdn) {
         frappe.run_serially([

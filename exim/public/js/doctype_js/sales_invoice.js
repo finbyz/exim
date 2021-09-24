@@ -386,8 +386,12 @@ frappe.ui.form.on("Sales Invoice Item", {
                 frappe.model.set_value(cdt, cdn, "fob_value", flt(d.base_amount - d.freight - d.insurance));
             }
         })
-        frappe.model.set_value(cdt, cdn, "no_of_packages", flt(d.qty / d.packing_size));
-        frappe.model.set_value(cdt, cdn, "total_pallets", Math.round(d.qty / d.pallet_size));
+        if(d.qty > 0 && d.packing_size > 0){
+            frappe.model.set_value(cdt, cdn, "no_of_packages", flt(d.qty / d.packing_size));
+        }
+        if(d.qty > 0 && d.pallet_size > 0){
+            frappe.model.set_value(cdt, cdn, "total_pallets", Math.round(d.qty / d.pallet_size));
+        }
     },
     // packaging_material: function (frm, cdt, cdn) {
     //     let d = locals[cdt][cdn];
