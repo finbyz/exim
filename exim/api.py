@@ -111,7 +111,7 @@ def cal_total_fob_value(self):
 	
 def export_lic(self):
 	for row in self.items:
-		if row.advance_authorisation_license:
+		if row.get('advance_authorisation_license'):
 			aal = frappe.get_doc("Advance Authorisation License", row.advance_authorisation_license)
 			aal.append("exports", {
 				"item_code": row.item_code,
@@ -311,10 +311,10 @@ def contract_and_lc_filter(doctype, txt, searchfield, start, page_len, filters, 
 
 		
 def validate_document_checks(self):
-	if not all([row.checked for row in self.get('sales_invoice_export_document_item')]):
+	if self.get('sales_invoice_export_document_item') and not all([row.checked for row in self.get('sales_invoice_export_document_item')]):
 		frappe.throw(_("Not all documents are checked for Export Documents"))
 
-	elif not all([row.checked for row in self.get('sales_invoice_contract_term_check')]):
+	elif self.get('sales_invoice_contract_term_check') and not all([row.checked for row in self.get('sales_invoice_contract_term_check')]):
 		frappe.throw(_("Not all documents are checked for Document Checks"))
 		
 @frappe.whitelist()
