@@ -72,12 +72,53 @@ def create_jv(self):
 					frappe.throw(str(e))
 				else:
 					self.db_set('duty_drawback_jv',jv.name)
-						
+
+		if self.get('total_meis'):
+			meis_receivable_account = frappe.db.get_value("Company", { "company_name": self.company}, "meis_receivable_account")
+			meis_income_account = frappe.db.get_value("Company", { "company_name": self.company}, "meis_income_account")
+			meis_cost_center = frappe.db.get_value("Company", { "company_name": self.company}, "meis_cost_center")
+			if not meis_receivable_account:
+				frappe.throw(_("Set RODTEP Receivable Account in Company"))
+			elif not meis_income_account:
+				frappe.throw(_("Set RODTEP Income Account in Company"))
+			elif not meis_cost_center:
+				frappe.throw(_("Set RODTEP Cost Center in Company"))
+			else:
+				meis_jv = frappe.new_doc("Journal Entry")
+				meis_jv.voucher_type = "RODTEP Entry"
+				meis_jv.posting_date = self.posting_date
+				meis_jv.company = self.company
+				meis_jv.cheque_no = self.name
+				meis_jv.cheque_date = self.posting_date
+				meis_jv.user_remark = "RODTEP against " + self.name + " for " + self.customer
+				meis_jv.append("accounts", {
+					"account": meis_receivable_account,
+					"cost_center": meis_cost_center,
+					"debit_in_account_currency": self.total_meis
+				})
+				meis_jv.append("accounts", {
+					"account": meis_income_account,
+					"cost_center": meis_cost_center,
+					"credit_in_account_currency": self.total_meis
+				})
+				
+				try:
+					meis_jv.save(ignore_permissions=True)
+					meis_jv.submit()
+				except Exception as e:
+					frappe.throw(str(e))
+				else:
+					self.db_set('meis_jv',meis_jv.name)
 def cancel_jv(self, method):
 	if self.duty_drawback_jv:
 		jv = frappe.get_doc("Journal Entry", self.duty_drawback_jv)
 		jv.cancel()
 		self.duty_drawback_jv = ''
+	if self.get('meis_jv'):
+		jv = frappe.get_doc("Journal Entry", self.meis_jv)
+		jv.cancel()
+		self.meis_jv = ''
+
 	
 
 def duty_calculation(self):
