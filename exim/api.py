@@ -116,7 +116,7 @@ def export_lic(self):
 			aal.append("exports", {
 				"item_code": row.item_code,
 				"item_name": row.item_name,
-				"quantity": row.qty,
+				"quantity": row.get("quantity") or row.qty,
 				"uom": row.uom,
 				"fob_value" : flt(row.fob_value),
 				"currency" : self.currency,
@@ -158,7 +158,7 @@ def import_lic(self):
 			aal.append("imports", {
 				"item_code": row.item_code,
 				"item_name": row.item_name,
-				"quantity": row.qty,
+				"quantity": row.get("quantity") or row.qty,
 				"uom": row.uom,
 				"cif_value" : flt(row.cif_value),
 				"currency" : self.currency,
