@@ -42,7 +42,7 @@ doctype_js = {
 	"Lead": "public/js/doctype_js/lead.js",
 
 }
-fixtures = ["Custom Field"]
+# fixtures = ["Custom Field"]
 # Home Pages
 # ----------
 
@@ -131,7 +131,7 @@ fixtures = ["Custom Field"]
 # override_whitelisted_methods = {
 # 	"frappe.desk.doctype.event.event.get_events": "exim.event.get_events"
 # }
-fixtures = ["Custom Field"]
+# fixtures = ["Custom Field"]
 
 # override_whitelisted_methods = {
 # 	"frappe.utils.print_format.download_pdf": "exim.print_format.download_pdf",
