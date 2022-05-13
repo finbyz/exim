@@ -1,0 +1,445 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "FWD.####",
+ "creation": "2022-03-28 18:08:20.285603",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+    "booking_ref",
+    "hedge",
+    "currency",
+    "amount",
+    "current_rate",
+    "margin",
+    "premium",
+    "booking_rate",
+    "column_break_1",
+    "status",
+    "booking_date",
+    "bank",
+    "maturity_from",
+    "maturity_to",
+    "days_for_premium",
+    "amount_outstanding",
+    "outstanding_inr",
+    "company",
+    "section_break_17",
+    "days_for_limit_blocked",
+    "margin_percentage",
+    "column_break_21",
+    "forward_limit_inr",
+    "forward_limit_usd",
+    "forward_limit_constant",
+    "forward_limit_inr_mtm",
+    "underlying",
+    "forward_booking_underlying",
+    "total_underlying",
+    "utilization",
+    "payment_entries",
+    "total_utilization",
+    "cancellation",
+    "cancellation_date",
+    "cancellation_rate",
+    "column_break_35",
+    "cancellation_amount",
+    "bank_account",
+    "add_cancellation_details",
+    "section_break_37",
+    "cancellation_details",
+    "total_cancelled",
+    "can_avg_rate",
+    "rate_diff",
+    "diff_amount",
+    "amended_from"
+ ],
+ "fields": [
+    {
+        "fieldname": "booking_ref",
+        "fieldtype": "Data",
+        "label": "Booking Ref"
+       },
+       {
+        "fieldname": "hedge",
+        "fieldtype": "Select",
+        "label": "Hedge",
+        "options": "Export\nImport"
+       },
+       {
+        "columns": 2,
+        "default": "USD",
+        "fieldname": "currency",
+        "fieldtype": "Link",
+        "label": "Currency",
+        "options": "Currency",
+        "reqd": 1
+       },
+       {
+        "columns": 2,
+        "fieldname": "amount",
+        "fieldtype": "Currency",
+        "in_list_view": 1,
+        "label": "Amount USD Book",
+        "options": "currency",
+        "reqd": 1
+       },
+       {
+        "fieldname": "current_rate",
+        "fieldtype": "Float",
+        "label": "Current Rate",
+        "precision": "2"
+       },
+       {
+        "default": "0.03",
+        "fieldname": "margin",
+        "fieldtype": "Float",
+        "label": "Margin",
+        "precision": "2"
+       },
+       {
+        "fieldname": "premium",
+        "fieldtype": "Float",
+        "label": "Premium",
+        "precision": "2"
+       },
+       {
+        "columns": 2,
+        "fieldname": "booking_rate",
+        "fieldtype": "Float",
+        "in_list_view": 1,
+        "in_standard_filter": 1,
+        "label": "Booking Rate",
+        "read_only": 1,
+        "reqd": 1
+       },
+       {
+        "fieldname": "column_break_1",
+        "fieldtype": "Column Break"
+       },
+       {
+        "allow_on_submit": 1,
+        "default": "Open",
+        "fieldname": "status",
+        "fieldtype": "Select",
+        "label": "Status",
+        "options": "Open\nClosed",
+        "read_only": 1
+       },
+       {
+        "default": "Today",
+        "fieldname": "booking_date",
+        "fieldtype": "Date",
+        "in_list_view": 1,
+        "label": "Booking Date",
+        "reqd": 1
+       },
+       {
+        "default": "HDFC Bank Ltd",
+        "fieldname": "bank",
+        "fieldtype": "Link",
+        "label": "Bank",
+        "options": "Bank"
+       },
+       {
+        "fieldname": "maturity_from",
+        "fieldtype": "Date",
+        "in_standard_filter": 1,
+        "label": "Maturity From"
+       },
+       {
+        "columns": 2,
+        "fieldname": "maturity_to",
+        "fieldtype": "Date",
+        "in_list_view": 1,
+        "in_standard_filter": 1,
+        "label": "Maturity To",
+        "reqd": 1
+       },
+       {
+        "fieldname": "days_for_premium",
+        "fieldtype": "Int",
+        "label": "Days for Premium",
+        "read_only": 1
+       },
+       {
+        "allow_on_submit": 1,
+        "fieldname": "amount_outstanding",
+        "fieldtype": "Currency",
+        "label": "Amount Outstanding",
+        "options": "currency",
+        "read_only": 1
+       },
+       {
+        "allow_on_submit": 1,
+        "fieldname": "outstanding_inr",
+        "fieldtype": "Currency",
+        "label": "Outstanding INR",
+        "read_only": 1
+       },
+       {
+        "fieldname": "company",
+        "fieldtype": "Link",
+        "label": "Company",
+        "options": "Company"
+       },
+       {
+        "fieldname": "section_break_17",
+        "fieldtype": "Section Break",
+        "label": "PSR Limit"
+       },
+       {
+        "fieldname": "days_for_limit_blocked",
+        "fieldtype": "Int",
+        "label": "Days for Limit Blocked",
+        "read_only": 1
+       },
+       {
+        "default": "0.03",
+        "fieldname": "margin_percentage",
+        "fieldtype": "Percent",
+        "label": "Margin %",
+        "read_only": 1
+       },
+       {
+        "fieldname": "column_break_21",
+        "fieldtype": "Column Break"
+       },
+       {
+        "fieldname": "forward_limit_inr",
+        "fieldtype": "Currency",
+        "label": "Forward Limit INR",
+        "read_only": 1
+       },
+       {
+        "fieldname": "forward_limit_usd",
+        "fieldtype": "Currency",
+        "label": "Forward Limit USD",
+        "options": "currency",
+        "read_only": 1
+       },
+       {
+        "fieldname": "forward_limit_constant",
+        "fieldtype": "Float",
+        "hidden": 1,
+        "label": "Forward Limit Constant"
+       },
+       {
+        "fieldname": "forward_limit_inr_mtm",
+        "fieldtype": "Float",
+        "hidden": 1,
+        "label": "Forward Limit INR MTM",
+        "read_only": 1
+       },
+       {
+        "fieldname": "underlying",
+        "fieldtype": "Section Break",
+        "label": "Underlying"
+       },
+       {
+        "fieldname": "forward_booking_underlying",
+        "fieldtype": "Table",
+        "label": "Forward Booking Underlying",
+        "options": "Forward Booking Underlying"
+       },
+       {
+        "allow_on_submit": 1,
+        "fieldname": "total_underlying",
+        "fieldtype": "Currency",
+        "label": "Total Underlying",
+        "options": "currency",
+        "read_only": 1
+       },
+       {
+        "fieldname": "utilization",
+        "fieldtype": "Section Break",
+        "label": "Utilization"
+       },
+       {
+        "allow_on_submit": 1,
+        "fieldname": "payment_entries",
+        "fieldtype": "Table",
+        "label": "Payment Entries",
+        "options": "Forward Booking Utilization",
+        "read_only": 1
+       },
+       {
+        "allow_on_submit": 1,
+        "fieldname": "total_utilization",
+        "fieldtype": "Currency",
+        "label": "Total Utilization",
+        "options": "currency",
+        "read_only": 1
+       },
+       {
+        "fieldname": "cancellation",
+        "fieldtype": "Section Break",
+        "label": "Cancellation"
+       },
+       {
+        "allow_on_submit": 1,
+        "default": "Today",
+        "fieldname": "cancellation_date",
+        "fieldtype": "Date",
+        "label": "Cancellation Date"
+       },
+       {
+        "allow_on_submit": 1,
+        "fieldname": "cancellation_rate",
+        "fieldtype": "Float",
+        "label": "Cancellation Rate"
+       },
+       {
+        "fieldname": "column_break_35",
+        "fieldtype": "Column Break"
+       },
+       {
+        "allow_on_submit": 1,
+        "fieldname": "cancellation_amount",
+        "fieldtype": "Currency",
+        "label": "Cancellation Amount",
+        "options": "currency"
+       },
+       {
+        "allow_on_submit": 1,
+        "fieldname": "bank_account",
+        "fieldtype": "Link",
+        "label": "Bank Account",
+        "options": "Account"
+       },
+       {
+        "allow_on_submit": 1,
+        "fieldname": "add_cancellation_details",
+        "fieldtype": "Button",
+        "label": "Add Cancellation Details",
+        "options": "add_cancellation_details"
+       },
+       {
+        "fieldname": "section_break_37",
+        "fieldtype": "Section Break"
+       },
+       {
+        "allow_on_submit": 1,
+        "fieldname": "cancellation_details",
+        "fieldtype": "Table",
+        "label": "Cancellation Details",
+        "options": "Forward Booking Cancellation",
+        "read_only": 1
+       },
+       {
+        "allow_on_submit": 1,
+        "fieldname": "total_cancelled",
+        "fieldtype": "Currency",
+        "label": "Total Cancelled",
+        "options": "currency",
+        "read_only": 1
+       },
+       {
+        "allow_on_submit": 1,
+        "depends_on": "eval: doc.total_cancelled",
+        "fieldname": "can_avg_rate",
+        "fieldtype": "Float",
+        "label": "Can Avg Rate",
+        "read_only": 1
+       },
+       {
+        "allow_on_submit": 1,
+        "depends_on": "eval: doc.total_cancelled",
+        "fieldname": "rate_diff",
+        "fieldtype": "Float",
+        "label": "Rate Diff",
+        "read_only": 1
+       },
+       {
+        "allow_on_submit": 1,
+        "depends_on": "eval: doc.total_cancelled",
+        "fieldname": "diff_amount",
+        "fieldtype": "Currency",
+        "label": "Cancellation Profit/Loss",
+        "read_only": 1
+       },
+       {
+        "fieldname": "amended_from",
+        "fieldtype": "Link",
+        "label": "Amended From",
+        "no_copy": 1,
+        "options": "Forward Booking",
+        "print_hide": 1,
+        "read_only": 1
+       }
+      ],
+      "icon": "fa fa-usd",
+      "is_submittable": 1,
+      "modified": "2020-05-27 12:20:41.573262",
+      "modified_by": "Administrator",
+      "module": "Exim",
+      "name": "Forward Booking",
+      "owner": "Administrator",
+      "permissions": [
+       {
+        "amend": 1,
+        "cancel": 1,
+        "create": 1,
+        "delete": 1,
+        "email": 1,
+        "export": 1,
+        "print": 1,
+        "read": 1,
+        "report": 1,
+        "role": "Administrator",
+        "share": 1,
+        "submit": 1,
+        "write": 1
+       },
+       {
+        "amend": 1,
+        "cancel": 1,
+        "create": 1,
+        "delete": 1,
+        "email": 1,
+        "export": 1,
+        "print": 1,
+        "read": 1,
+        "report": 1,
+        "role": "Analytics",
+        "share": 1,
+        "submit": 1,
+        "write": 1
+       },
+       {
+        "amend": 1,
+        "cancel": 1,
+        "create": 1,
+        "delete": 1,
+        "email": 1,
+        "export": 1,
+        "print": 1,
+        "read": 1,
+        "report": 1,
+        "role": "Accounts Manager",
+        "share": 1,
+        "submit": 1,
+        "write": 1
+       },
+       {
+        "amend": 1,
+        "cancel": 1,
+        "create": 1,
+        "delete": 1,
+        "email": 1,
+        "export": 1,
+        "print": 1,
+        "read": 1,
+        "report": 1,
+        "role": "Accounts User",
+        "share": 1,
+        "submit": 1,
+        "write": 1
+       }
+      ],
+      "search_fields": "currency, amount_outstanding",
+      "sort_field": "modified",
+      "sort_order": "DESC",
+      "title_field": "booking_ref",
+      "track_changes": 1
+     }

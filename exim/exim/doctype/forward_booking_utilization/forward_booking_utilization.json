@@ -1,0 +1,66 @@
+{
+    "creation": "2018-12-24 15:15:07.506248",
+    "doctype": "DocType",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+     "date",
+     "voucher_type",
+     "voucher_no",
+     "paid_amount",
+     "party_type",
+     "party"
+    ],
+    "fields": [
+     {
+      "fieldname": "date",
+      "fieldtype": "Date",
+      "in_list_view": 1,
+      "label": "Date"
+     },
+     {
+      "fieldname": "party_type",
+      "fieldtype": "Select",
+      "label": "Party Type",
+      "options": "Customer\nSupplier",
+      "read_only": 1
+     },
+     {
+      "fieldname": "party",
+      "fieldtype": "Dynamic Link",
+      "label": "Party",
+      "options": "party_type"
+     },
+     {
+      "fieldname": "paid_amount",
+      "fieldtype": "Currency",
+      "in_list_view": 1,
+      "label": "Paid Amount",
+      "options": "currency"
+     },
+     {
+      "fieldname": "voucher_type",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Voucher Type",
+      "options": "Payment Entry\nPre Shipment\nPost Shipment"
+     },
+     {
+      "fieldname": "voucher_no",
+      "fieldtype": "Dynamic Link",
+      "in_list_view": 1,
+      "label": "Voucher No",
+      "options": "voucher_type"
+     }
+    ],
+    "istable": 1,
+    "modified": "2020-01-11 11:12:29.067505",
+    "modified_by": "Administrator",
+    "module": "Exim",
+    "name": "Forward Booking Utilization",
+    "owner": "Administrator",
+    "permissions": [],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "track_changes": 1
+   }

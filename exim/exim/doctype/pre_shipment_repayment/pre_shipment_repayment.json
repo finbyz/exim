@@ -1,0 +1,54 @@
+{
+ "actions": [],
+ "creation": "2019-01-16 10:46:41.376897",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "voucher_type",
+  "voucher_no",
+  "amount",
+  "amount_inr"
+ ],
+ "fields": [
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Voucher Type",
+   "options": "Journal Entry\nPayment Entry\nPost Shipment"
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Voucher No",
+   "options": "voucher_type"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "options": "credit_currency"
+  },
+  {
+   "fieldname": "amount_inr",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount INR"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2022-04-08 12:29:10.300616",
+ "modified_by": "Administrator",
+ "module": "Exim",
+ "name": "Pre Shipment Repayment",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
