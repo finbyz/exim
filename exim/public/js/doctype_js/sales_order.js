@@ -151,6 +151,20 @@ frappe.ui.form.on("Sales Order Item", {
             }
         ]);
     },
+    qty: function (frm, cdt, cdn) {
+        //EXIM
+        let d = locals[cdt][cdn];
+        if(d.qty > 0 && d.packing_size > 0){
+            frappe.model.set_value(cdt, cdn, "no_of_packages", flt(d.qty / d.packing_size));
+        }
+    },
+    packing_size: function (frm, cdt, cdn) {
+        // frm.events.cal_total(frm);
+        let d = locals[cdt][cdn];
+        if (d.qty > 0 && d.packing_size > 0){
+            frappe.model.set_value(cdt, cdn, "no_of_packages", flt(d.qty / d.packing_size));
+        }
+    },
     no_of_packages: function (frm, cdt, cdn) {
         frm.events.box_cal(frm);
         frm.events.cal_total(frm);
