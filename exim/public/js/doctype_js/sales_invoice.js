@@ -310,9 +310,12 @@ frappe.ui.form.on("Sales Invoice", {
         let total_meis = 0.0;
         if (frm.doc.currency != "INR") {
             frm.doc.items.forEach(function (d) {
+                frappe.model.set_value(d.doctype, d.name, "duty_drawback_amount", (flt(d.fob_value) * flt(d.duty_drawback_rate) / 100));
                 frappe.model.set_value(d.doctype, d.name, "meis_value", flt(d.fob_value * d.meis_rate / 100.0));
+                total_dt += flt(d.duty_drawback_amount);
                 total_meis += flt(d.meis_value)
             });
+            frm.set_value("total_duty_drawback", total_dt);
             frm.set_value("total_meis", total_meis);
         }
     },
@@ -322,7 +325,7 @@ frappe.ui.form.on("Sales Invoice", {
             frm.doc.items.forEach(function (d) {
                 total_fob_value += flt(d.fob_value);
             });
-            frm.set_value("total_fob_value", flt(total_fob_value - (frm.doc.freight * frm.doc.conversion_rate) - (frm.doc.insurance * frm.doc.conversion_rate)));
+            frm.set_value("total_fob_value", flt(total_fob_value - flt(frm.doc.freight * frm.doc.conversion_rate) - flt(frm.doc.insurance * frm.doc.conversion_rate)));
         }
     },
     //EXIM END

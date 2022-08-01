@@ -1,0 +1,388 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "autoname": "PRE-.#####",
+ "creation": "2018-12-28 11:03:25.321338",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "against",
+  "document",
+  "running",
+  "underline_currency",
+  "credit_currency",
+  "total_amount",
+  "total_amount_inr",
+  "journal_entry",
+  "column_break_5",
+  "status",
+  "posting_date",
+  "loan_tenure",
+  "loan_due_date",
+  "funding_bank",
+  "has_lc",
+  "supplier_bank",
+  "company",
+  "accounts",
+  "loan_account",
+  "loan_credit_account",
+  "source_exchange_rate",
+  "bank_loan_reference",
+  "column_break_16",
+  "loan_amount",
+  "loan_amount_inr",
+  "loan_outstanding_amount",
+  "loan_outstanding_amount_inr",
+  "forward_utilization",
+  "forwards",
+  "forward_totals",
+  "average_forward_rate",
+  "total_amount_utilized",
+  "column_break_34",
+  "cash_rate",
+  "cash_amount",
+  "repayment_entries",
+  "repayments",
+  "total_repayment",
+  "total_repayment_inr",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "against",
+   "fieldtype": "Select",
+   "label": "Against",
+   "options": "Sales Order\nSales Invoice\nContract Term"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "document",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Document",
+   "options": "against"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "running",
+   "fieldtype": "Check",
+   "label": "Running"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "underline_currency",
+   "fieldtype": "Link",
+   "label": "Underline Currency",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "default": "USD",
+   "fieldname": "credit_currency",
+   "fieldtype": "Link",
+   "label": "Credit Currency",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "label": "Total Amount",
+   "options": "underline_currency",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "total_amount_inr",
+   "fieldtype": "Currency",
+   "label": "Total Amount (INR)",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "journal_entry",
+   "fieldtype": "Link",
+   "label": "Journal Entry",
+   "no_copy": 1,
+   "options": "Journal Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Status",
+   "options": "Draft\nOutstanding\nPartially Paid\nPaid\nCancelled",
+   "read_only": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "default": "90",
+   "fieldname": "loan_tenure",
+   "fieldtype": "Int",
+   "label": "Loan Tenure (In Days)"
+  },
+  {
+   "fieldname": "loan_due_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Loan Due Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "funding_bank",
+   "fieldtype": "Link",
+   "label": "Funding Bank",
+   "options": "Bank",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "has_lc",
+   "fieldtype": "Check",
+   "label": "Has LC"
+  },
+  {
+   "depends_on": "eval:doc.has_lc",
+   "fieldname": "supplier_bank",
+   "fieldtype": "Link",
+   "label": "Supplier Bank",
+   "options": "Bank"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "accounts",
+   "fieldtype": "Section Break",
+   "label": "Accounts"
+  },
+  {
+   "fieldname": "loan_account",
+   "fieldtype": "Link",
+   "label": "Loan Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "loan_credit_account",
+   "fieldtype": "Link",
+   "label": "Loan Credit Account",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval: doc.credit_currency != 'INR'",
+   "fieldname": "source_exchange_rate",
+   "fieldtype": "Float",
+   "label": "Exchange rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bank_loan_reference",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Bank Loan Reference"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: doc.credit_currency != 'INR'",
+   "fieldname": "loan_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Loan Amount",
+   "options": "credit_currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "loan_amount_inr",
+   "fieldtype": "Currency",
+   "label": "Loan Amount (INR)"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval: doc.credit_currency != 'INR'",
+   "fieldname": "loan_outstanding_amount",
+   "fieldtype": "Currency",
+   "label": "Loan Outstanding Amount",
+   "options": "credit_currency",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "loan_outstanding_amount_inr",
+   "fieldtype": "Currency",
+   "label": "Loan Outstanding Amount (INR)",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.credit_currency != 'INR'",
+   "fieldname": "forward_utilization",
+   "fieldtype": "Section Break",
+   "label": "Forward Utilization"
+  },
+  {
+   "fieldname": "forwards",
+   "fieldtype": "Table",
+   "label": "Forwards",
+   "options": "Forward Utilization"
+  },
+  {
+   "fieldname": "forward_totals",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "average_forward_rate",
+   "fieldtype": "Float",
+   "label": "Average Forward Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_amount_utilized",
+   "fieldtype": "Currency",
+   "label": "Total Amount Utilized",
+   "options": "credit_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_34",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cash_rate",
+   "fieldtype": "Float",
+   "label": "Cash Rate"
+  },
+  {
+   "fieldname": "cash_amount",
+   "fieldtype": "Currency",
+   "label": "Cash Amount",
+   "options": "credit_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "repayment_entries",
+   "fieldtype": "Section Break",
+   "label": "Repayment Entries"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "repayments",
+   "fieldtype": "Table",
+   "label": "Repayments",
+   "options": "Pre Shipment Repayment",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "total_repayment",
+   "fieldtype": "Currency",
+   "label": "Total Repayment",
+   "options": "credit_currency",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "total_repayment_inr",
+   "fieldtype": "Currency",
+   "label": "Total Repayment (INR)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Pre Shipment",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-04-08 12:28:59.284345",
+ "modified_by": "Administrator",
+ "module": "Exim",
+ "name": "Pre Shipment",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "document",
+ "track_changes": 1
+}
