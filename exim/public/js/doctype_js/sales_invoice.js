@@ -186,9 +186,10 @@ frappe.ui.form.on("Sales Invoice", {
         //         })
         //     }
         // })
-        frm.events.cal_igst_amount(frm);
+        // frm.events.cal_igst_amount(frm);
         frm.trigger('calculate_total_fob_value');
         frm.trigger("duty_drawback_cal");
+        frm.trigger("meis_cal");
 
         if (frm.doc.shipping_address_name == "") {
             frm.set_value("shipping_address_name", frm.doc.customer_address);
@@ -281,22 +282,31 @@ frappe.ui.form.on("Sales Invoice", {
             });
         }
     },
-    cal_igst_amount: function (frm) {
-        let total_igst = 0.0;
-        if (frm.doc.currency != "INR") {    
-            frm.doc.items.forEach(function (d) {
-                if (d.igst_rate) {
-                    frappe.model.set_value(d.doctype, d.name, 'igst_amount', d.base_amount * parseInt(d.igst_rate) / 100);
-                } else {
-                    frappe.model.set_value(d.doctype, d.name, 'igst_amount', 0.0);
-                }
-                total_igst += flt(d.igst_amount);
-            });
-            frm.set_value('total_igst_amount', total_igst);
-        }
-    },
+    // cal_igst_amount: function (frm) {
+    //     let total_igst = 0.0;
+    //     if (frm.doc.currency != "INR") {    
+    //         frm.doc.items.forEach(function (d) {
+    //             if (d.igst_rate) {
+    //                 frappe.model.set_value(d.doctype, d.name, 'igst_amount', d.base_amount * parseInt(d.igst_rate) / 100);
+    //             } else {
+    //                 frappe.model.set_value(d.doctype, d.name, 'igst_amount', 0.0);
+    //             }
+    //             total_igst += flt(d.igst_amount);
+    //         });
+    //         frm.set_value('total_igst_amount', total_igst);
+    //     }
+    // },
     duty_drawback_cal: function (frm) {
         let total_dt = 0;
+        if (frm.doc.currency != "INR") {
+            frm.doc.items.forEach(function (d) {
+                frappe.model.set_value(d.doctype, d.name, "duty_drawback_amount", flt(d.fob_value * d.duty_drawback_rate / 100));
+                total_dt += flt(d.duty_drawback_amount);
+            });
+            frm.set_value("total_duty_drawback", total_dt);
+        }
+    },
+    meis_cal: function(frm){
         let total_meis = 0.0;
         if (frm.doc.currency != "INR") {
             frm.doc.items.forEach(function (d) {
@@ -453,6 +463,9 @@ frappe.ui.form.on("Sales Invoice Item", {
     duty_drawback_rate: function (frm, cdt, cdn) {
         frm.events.duty_drawback_cal(frm);
     },
+    meis_rate: function (frm, cdt, cdn) {
+        frm.events.meis_cal(frm);
+    },
     capped_rate: function (frm, cdt, cdn) {
         let d = locals[cdt][cdn];
         frappe.model.set_value(cdt, cdn, "capped_amount", flt(d.qty * d.capped_rate));
@@ -473,7 +486,7 @@ frappe.ui.form.on("Sales Invoice Item", {
         let d = locals[cdt][cdn];
         frm.events.duty_drawback_cal(frm);
         frm.events.calculate_total_fob_value(frm);
-        frm.events.cal_igst_amount(frm);
+        // frm.events.cal_igst_amount(frm);
         //frappe.model.set_value(cdt, cdn, "igst_taxable_value", d.fob_value);
     },
 
@@ -481,7 +494,7 @@ frappe.ui.form.on("Sales Invoice Item", {
 		frm.events.cal_igst_amount(frm);
 	}, */
 
-    igst_rate: function (frm, cdt, cdn) {
-        frm.events.cal_igst_amount(frm);
-    },
+    // igst_rate: function (frm, cdt, cdn) {
+    //     frm.events.cal_igst_amount(frm);
+    // },
 });

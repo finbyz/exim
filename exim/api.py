@@ -118,7 +118,6 @@ def cancel_jv(self, method):
 		jv = frappe.get_doc("Journal Entry", self.meis_jv)
 		jv.cancel()
 		self.meis_jv = ''
-
 	
 
 def duty_calculation(self):

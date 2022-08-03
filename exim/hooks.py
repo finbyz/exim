@@ -40,6 +40,7 @@ doctype_js = {
 	"Purchase Invoice": "public/js/doctype_js/purchase_invoice.js",
 	"Purchase Order": "public/js/doctype_js/purchase_order.js",
 	"Lead": "public/js/doctype_js/lead.js",
+	"Payment Entry": "public/js/doctype_js/payment_entry.js",
 
 }
 # fixtures = ["Custom Field"]
