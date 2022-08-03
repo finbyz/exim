@@ -208,7 +208,7 @@
  ],
  "icon": "fa fa-id-card-o",
  "links": [],
- "modified": "2022-04-06 10:06:54.126859",
+ "modified": "2022-06-30 09:55:21.292743",
  "modified_by": "Administrator",
  "module": "Exim",
  "name": "Advance Authorisation License",
@@ -234,6 +234,18 @@
    "read": 1,
    "report": 1,
    "role": "Analytics",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
    "share": 1,
    "write": 1
   }
