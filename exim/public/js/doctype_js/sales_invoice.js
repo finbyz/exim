@@ -186,7 +186,7 @@ frappe.ui.form.on("Sales Invoice", {
         //         })
         //     }
         // })
-        // frm.events.cal_igst_amount(frm);
+        frm.events.cal_igst_amount(frm);
         frm.trigger('calculate_total_fob_value');
         frm.trigger("duty_drawback_cal");
         frm.trigger("meis_cal");
@@ -282,20 +282,20 @@ frappe.ui.form.on("Sales Invoice", {
             });
         }
     },
-    // cal_igst_amount: function (frm) {
-    //     let total_igst = 0.0;
-    //     if (frm.doc.currency != "INR") {    
-    //         frm.doc.items.forEach(function (d) {
-    //             if (d.igst_rate) {
-    //                 frappe.model.set_value(d.doctype, d.name, 'igst_amount', d.base_amount * parseInt(d.igst_rate) / 100);
-    //             } else {
-    //                 frappe.model.set_value(d.doctype, d.name, 'igst_amount', 0.0);
-    //             }
-    //             total_igst += flt(d.igst_amount);
-    //         });
-    //         frm.set_value('total_igst_amount', total_igst);
-    //     }
-    // },
+    cal_igst_amount: function (frm) {
+        let total_igst = 0.0;
+        if (frm.doc.currency != "INR") {    
+            frm.doc.items.forEach(function (d) {
+                if (d.igst_rate) {
+                    frappe.model.set_value(d.doctype, d.name, 'igst_amount', d.base_amount * parseInt(d.igst_rate) / 100);
+                } else {
+                    frappe.model.set_value(d.doctype, d.name, 'igst_amount', 0.0);
+                }
+                total_igst += flt(d.igst_amount);
+            });
+            frm.set_value('total_igst_amount', total_igst);
+        }
+    },
     duty_drawback_cal: function (frm) {
         let total_dt = 0;
         if (frm.doc.currency != "INR") {
@@ -494,7 +494,7 @@ frappe.ui.form.on("Sales Invoice Item", {
 		frm.events.cal_igst_amount(frm);
 	}, */
 
-    // igst_rate: function (frm, cdt, cdn) {
-    //     frm.events.cal_igst_amount(frm);
-    // },
+    igst_rate: function (frm, cdt, cdn) {
+        frm.events.cal_igst_amount(frm);
+    },
 });
