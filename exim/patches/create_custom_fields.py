@@ -5,6 +5,8 @@ def execute():
     create_bank_field()
 
 def create_bank_field():
+    if frappe.get_doc("Custom Field",{'fieldname':"bank_type",'dt':"Bank"}):
+        return
     doc = frappe.new_doc("Custom Field")
     doc.dt = "Bank"
     doc.label = "Bank Type"
