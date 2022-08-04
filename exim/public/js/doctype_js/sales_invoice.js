@@ -498,3 +498,24 @@ frappe.ui.form.on("Sales Invoice Item", {
         frm.events.cal_igst_amount(frm);
     },
 });
+
+frappe.ui.form.on('Notify Party Address', {
+	notify_party: function (frm, cdt, cdn) {
+        let d = locals[cdt][cdn];
+		if (d.notify_party) {
+			return frappe.call({
+				method: "frappe.contacts.doctype.address.address.get_address_display",
+				args: {
+					"address_dict": d.notify_party
+				},
+				callback: function (r) {
+					if (r.message)
+					frappe.model.set_value(cdt, cdn,"notify_address_display", r.message);
+				}
+			});
+		}else{
+			frappe.model.set_value(cdt, cdn,"notify_address_display", " ");
+		}
+		
+	}
+})
