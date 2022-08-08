@@ -1,0 +1,39 @@
+{
+ "actions": [],
+ "creation": "2022-04-14 13:05:02.543613",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "notify_party",
+  "notify_address_display"
+ ],
+ "fields": [
+  {
+   "fieldname": "notify_party",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Notify Party",
+   "options": "Address"
+  },
+  {
+   "fieldname": "notify_address_display",
+   "fieldtype": "Small Text",
+   "label": "Notify Address Display",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-04-14 13:05:02.543613",
+ "modified_by": "Administrator",
+ "module": "Exim",
+ "name": "Notify Party Address",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

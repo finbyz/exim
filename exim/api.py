@@ -25,6 +25,7 @@ def si_on_cancel(self, method):
 @frappe.whitelist()
 def si_before_save(self,method):
 	duty_calculation(self)
+	meis_calculation(self)
 	#cal_total_fob_value(self)
 	
 @frappe.whitelist()
@@ -36,7 +37,7 @@ def pi_on_cancel(self, method):
 	import_lic_cancel(self)
 
 def create_jv(self):
-	if self.currency != "INR":
+	if frappe.db.get_value('Address', self.customer_address, 'country') != "India":
 		if self.total_duty_drawback:
 			drawback_receivable_account = frappe.db.get_value("Company", { "company_name": self.company}, "duty_drawback_receivable_account")
 			drawback_income_account = frappe.db.get_value("Company", { "company_name": self.company}, "duty_drawback_income_account")
@@ -118,37 +119,49 @@ def cancel_jv(self, method):
 		jv = frappe.get_doc("Journal Entry", self.meis_jv)
 		jv.cancel()
 		self.meis_jv = ''
-
 	
 
 def duty_calculation(self):
 	total_duty_drawback = 0.0
-	for row in self.items:
-		if row.duty_drawback_rate and row.fob_value:
-			duty_drawback_amount = flt(row.fob_value * row.duty_drawback_rate / 100.0)
-			if row.maximum_cap == 1:
-				if row.capped_amount < duty_drawback_amount:
-					row.duty_drawback_amount = row.capped_amount
-					row.effective_rate = flt(row.capped_amount / row.fob_value * 100.0)
+	if frappe.db.get_value('Address', self.customer_address, 'country') != "India":
+		for row in self.items:
+			if row.duty_drawback_rate and row.fob_value:
+				duty_drawback_amount = flt(row.fob_value * row.duty_drawback_rate / 100.0)
+				if row.maximum_cap == 1:
+					if row.capped_amount < duty_drawback_amount:
+						row.duty_drawback_amount = row.capped_amount
+						row.effective_rate = flt(row.capped_amount / row.fob_value * 100.0)
+					else:
+						row.duty_drawback_amount = duty_drawback_amount
+						row.effective_rate = row.duty_drawback_rate
 				else:
 					row.duty_drawback_amount = duty_drawback_amount
-					row.effective_rate = row.duty_drawback_rate
-			else:
-				row.duty_drawback_amount = duty_drawback_amount
-				
-		#row.fob_value = flt(row.base_amount)
-		row.igst_taxable_value = flt(row.amount)
-		total_duty_drawback += flt(row.duty_drawback_amount) or 0.0
-		
-		
-	self.total_duty_drawback = total_duty_drawback
-	
+					
+			#row.fob_value = flt(row.base_amount)
+			row.igst_taxable_value = flt(row.amount)
+			total_duty_drawback += flt(row.duty_drawback_amount) or 0.0
+			
+			
+		self.total_duty_drawback = total_duty_drawback
+
 def cal_total_fob_value(self):
 	total_fob = 0.0
 	for row in self.items:
 		if row.fob_value:
 			total_fob += flt(row.fob_value)
 	self.total_fob_value = flt(flt(total_fob) - (flt(self.freight) * flt(self.conversion_rate)) -(flt(self.insurance) * flt(self.conversion_rate)))
+	
+	
+def meis_calculation(self):
+	total_meis = 0.0
+	if frappe.db.get_value('Address', self.customer_address, 'country') != "India":
+		for row in self.items:
+			if row.fob_value and row.meis_rate:
+				meis_value = flt(row.fob_value * row.meis_rate / 100.0)
+				row.meis_value = meis_value
+
+				total_meis += flt(row.meis_value)
+		self.total_meis = total_meis
 	
 def export_lic(self):
 	for row in self.items:
@@ -157,7 +170,7 @@ def export_lic(self):
 			aal.append("exports", {
 				"item_code": row.item_code,
 				"item_name": row.item_name,
-				"quantity": row.get("quantity") or row.qty,
+				"quantity": row.qty,
 				"uom": row.uom,
 				"fob_value" : flt(row.fob_value),
 				"currency" : self.currency,
@@ -199,7 +212,7 @@ def import_lic(self):
 			aal.append("imports", {
 				"item_code": row.item_code,
 				"item_name": row.item_name,
-				"quantity": row.get("quantity") or row.qty,
+				"quantity": row.qty,
 				"uom": row.uom,
 				"cif_value" : flt(row.cif_value),
 				"currency" : self.currency,
