@@ -12,6 +12,7 @@
   "status",
   "amended_from",
   "invoice_no",
+  "currency",
   "column_break_3",
   "customer",
   "base_rounded_total",
@@ -59,10 +60,11 @@
    "read_only": 1
   },
   {
-   "fetch_from": "invoice_no.base_rounded_total",
+   "fetch_from": "invoice_no.rounded_total",
    "fieldname": "base_rounded_total",
    "fieldtype": "Currency",
    "label": "Invoice Amount",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -80,6 +82,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Total Shipping Bill Amount ",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -98,6 +101,7 @@
    "fieldname": "total_payment_receipt",
    "fieldtype": "Currency",
    "label": "Total Payment Receipt",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -105,6 +109,7 @@
    "fieldname": "total_bank_charges",
    "fieldtype": "Currency",
    "label": "Total Bank Charges",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -121,6 +126,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Total BRC Amount",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -141,12 +147,20 @@
    "label": "naming_series",
    "options": "BRC-.YYYY.-",
    "reqd": 1
+  },
+  {
+   "fetch_from": "invoice_no.currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-08-08 15:47:33.771753",
+ "modified": "2022-08-09 18:26:40.229319",
  "modified_by": "Administrator",
  "module": "Exim",
  "name": "BRC Management",
@@ -161,6 +175,18 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
    "share": 1,
    "write": 1
   }

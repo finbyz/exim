@@ -12,7 +12,7 @@ class BRCManagement(Document):
 			frappe.throw("Total Shipping Bill Amount should not be greater than Invoice Amount")
 
 		for item in self.brc_payment:
-			if item.brc_amount > item.total_allocated_amount:
+			if item.brc_amount > item.paid_amount:
 				frappe.throw(f"""Row {item.idx}: BRC Amount should not be greater than Total Allocate Amount """)
 			
 		if self.total_payment_receipt > self.total_shipping_bill_amount:
@@ -31,7 +31,7 @@ class BRCManagement(Document):
 			frappe.throw(f"""Total Receipt Amount should not be greater than Total Shipping bill Amount """)
 			
 		for item in self.brc_payment:
-			if item.brc_amount > item.total_allocated_amount:
+			if item.brc_amount > item.paid_amount:
 				frappe.throw(f"""Row {item.idx}: BRC Amount should not be greater than Total Allocate Amount """)
 		
 		if not self.brc_payment:
@@ -49,8 +49,9 @@ class BRCManagement(Document):
 
 		for item in self.brc_payment:
 			total_brc_amount += flt(item.brc_amount)
-			total_payment_receipt += flt(item.total_allocated_amount)
-			item.bank_charges =  item.total_allocated_amount - item.brc_amount
+			total_payment_receipt += flt(item.paid_amount)
+			if item.brc_amount and item.paid_amount:
+				item.bank_charges =  item.paid_amount - item.brc_amount
 
 		self.total_shipping_bill_amount = total_shipping_bill_amount
 		self.total_brc_amount = total_brc_amount
@@ -71,3 +72,26 @@ class BRCManagement(Document):
 			status = "Completed"
 			
 		self.db_set('status', status)
+
+@frappe.whitelist()
+def get_payment_entry_amount(reference_name,reference_doctype):
+	if 	reference_doctype == "Payment Entry":
+		return frappe.db.sql(f"""
+					SELECT
+						SUM(per.allocated_amount) as allocated_amount,
+						pe.source_exchange_rate,
+						pe.name
+					FROM
+						`tabPayment Entry Reference` as per
+					LEFT JOIN
+						`tabPayment Entry` pe ON pe.name=per.parent
+					WHERE
+						per.reference_name = '{reference_name}'
+					AND
+						per.reference_doctype = 'Sales Invoice'
+					AND
+						pe.docstatus = 1
+					GROUP BY per.reference_name;
+				""",as_dict = 1)
+
+import frappe

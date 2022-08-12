@@ -11,3 +11,4 @@ frappe.listview_settings['BRC Management'] = {
         }
 	}
 }
+
