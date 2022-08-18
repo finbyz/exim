@@ -16,6 +16,7 @@ def si_validate(self, method):
 def si_on_submit(self, method):
 	export_lic(self)
 	create_jv(self)
+	create_brc(self)
 
 @frappe.whitelist()
 def si_on_cancel(self, method):
@@ -408,3 +409,19 @@ def send_lead_mail(recipients, person, email_template, doc_name):
 	)
 
 	return "Mail send successfully!"
+
+def create_brc(self):
+	if frappe.db.get_value('Address', self.customer_address, 'country') != "India":
+		if frappe.db.exists("DocType", "BRC Management"):
+			brc = frappe.new_doc("BRC Management")
+			brc.invoice_no = self.name
+			if self.shipping_bill_number and self.shipping_bill_date and self.rounded_total:
+				brc.append("shipping_bill_details", {
+						"shipping_bill": self.shipping_bill_number,
+						"shipping_date": self.shipping_bill_date,
+						"shipping_bill_amount": self.rounded_total
+					})
+			try:
+				brc.save(ignore_permissions=True)
+			except Exception as e:
+				frappe.throw(str(e))
