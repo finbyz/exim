@@ -107,10 +107,12 @@ frappe.ui.form.on('BRC Payment', {
 	voucher_no: function(frm,cdt,cdn){
 		let d = locals[cdt][cdn];
 		frm.events.cal_total_brc_amount(frm);
+
+		if(payment_entry_list.includes(d.voucher_no)){
+			frappe.throw("Payment Entry Number Must be Unique")
+		}
+
 		frm.events.add_unique_payment_entry(frm);
-		// if(payment_entry_list.includes(d.voucher_no)){
-		// 	frappe.throw("Payment Entry Number Must be Unique")
-		// }
 		
 		frappe.call({
 			method: 'exim.exim.doctype.brc_management.brc_management.get_payment_entry_amount',

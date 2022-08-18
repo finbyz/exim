@@ -299,19 +299,16 @@ frappe.ui.form.on("Sales Invoice", {
         })
     },
     duty_drawback_cal: function (frm) {
-        let total_dt = 0;
+        let total_dt = 0.0;
         frappe.model.get_value('Address', {"name":frm.doc.customer_address}, 'country',(res)=>{
             if(res.country != "India"){
-                console.log(res.country)
+                frm.doc.items.forEach(function (d) {
+                    frappe.model.set_value(d.doctype, d.name, "duty_drawback_amount", flt(d.fob_value * d.duty_drawback_rate / 100));
+                    total_dt += flt(d.duty_drawback_amount);
+                });
+                frm.set_value("total_duty_drawback", total_dt);
             } 
         })
-        if (frm.doc.currency != "INR") {
-            frm.doc.items.forEach(function (d) {
-                frappe.model.set_value(d.doctype, d.name, "duty_drawback_amount", flt(d.fob_value * d.duty_drawback_rate / 100));
-                total_dt += flt(d.duty_drawback_amount);
-            });
-            frm.set_value("total_duty_drawback", total_dt);
-        }
     },
     meis_cal: function(frm){
         let total_meis = 0.0;
@@ -326,8 +323,8 @@ frappe.ui.form.on("Sales Invoice", {
         })
     },
     calculate_total_fob_value: function (frm) {
-        let total_fob_value = 0;
-        frappe.model.get_value('Sales Invoce', {customer_address}, 'country',(res)=>{
+        let total_fob_value = 0.0;
+        frappe.model.get_value('Address', {"name":frm.doc.customer_address}, 'country',(res)=>{
             if(res.country != "India"){
                 frm.doc.items.forEach(function (d) {
                     total_fob_value += flt(d.fob_value);
@@ -402,7 +399,7 @@ frappe.ui.form.on("Sales Invoice Item", {
     qty: function (frm, cdt, cdn) {
         //EXIM
         let d = locals[cdt][cdn];
-        frappe.db.get_value("Address", frm.doc.customer_address, 'country', function (r) {
+        frappe.db.get_value("Address",  {"name":frm.doc.customer_address}, 'country', function (r) {
             if (r.country != "India") {
                 frappe.model.set_value(cdt, cdn, "fob_value", flt(d.base_amount - d.freight - d.insurance));
             }
@@ -448,7 +445,7 @@ frappe.ui.form.on("Sales Invoice Item", {
     //EXIM
     base_amount: function (frm, cdt, cdn) {
         let d = locals[cdt][cdn];
-        frappe.db.get_value("Address", frm.doc.customer_address, 'country', function (r) {
+        frappe.db.get_value("Address",  {"name":frm.doc.customer_address}, 'country', function (r) {
             if (r.country != "India") {
                 frappe.model.set_value(cdt, cdn, "fob_value", flt(d.base_amount - d.freight - d.insurance));
             }
@@ -456,7 +453,7 @@ frappe.ui.form.on("Sales Invoice Item", {
     },
     freight: function (frm, cdt, cdn) {
         let d = locals[cdt][cdn];
-        frappe.db.get_value("Address", frm.doc.customer_address, 'country', function (r) {
+        frappe.db.get_value("Address",  {"name":frm.doc.customer_address}, 'country', function (r) {
             if (r.country != "India") {
                 frappe.model.set_value(cdt, cdn, "fob_value", flt(d.base_amount - d.freight - d.insurance));
             }
@@ -464,7 +461,7 @@ frappe.ui.form.on("Sales Invoice Item", {
     },
     insurance: function (frm, cdt, cdn) {
         let d = locals[cdt][cdn];
-        frappe.db.get_value("Address", frm.doc.customer_address, 'country', function (r) {
+        frappe.db.get_value("Address",  {"name":frm.doc.customer_address}, 'country', function (r) {
             if (r.country != "India") {
                 frappe.model.set_value(cdt, cdn, "fob_value", flt(d.base_amount - d.freight - d.insurance));
             }
