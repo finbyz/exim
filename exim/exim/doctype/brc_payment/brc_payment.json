@@ -1,0 +1,96 @@
+{
+ "actions": [],
+ "creation": "2022-08-05 14:03:26.460579",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "voucher_type",
+  "voucher_no",
+  "paid_amount",
+  "total_allocated_amount",
+  "brc_no",
+  "brc_date",
+  "column_break_7",
+  "brc_amount",
+  "bank_charges"
+ ],
+ "fields": [
+  {
+   "allow_on_submit": 1,
+   "fieldname": "voucher_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Voucher Type",
+   "options": "Payment Entry\nJournal Entry"
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 1,
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Voucher No",
+   "mandatory_depends_on": "eval: doc.voucher_type",
+   "options": "voucher_type"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "brc_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "BRC No"
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 1,
+   "fieldname": "brc_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "BRC Date"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "paid_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "options": "currency"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "total_allocated_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount INR"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "brc_amount",
+   "fieldtype": "Currency",
+   "label": "BRC Amount"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "bank_charges",
+   "fieldtype": "Currency",
+   "label": "Bank Charges"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2022-08-10 14:54:20.421114",
+ "modified_by": "Administrator",
+ "module": "Exim",
+ "name": "BRC Payment",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

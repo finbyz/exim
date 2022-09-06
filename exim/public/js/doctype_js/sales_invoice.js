@@ -307,13 +307,11 @@ frappe.ui.form.on("Sales Invoice", {
         }
     },
     meis_cal: function(frm){
-        let total_meis = 0.0;
         if (frm.doc.currency != "INR") {
             frm.doc.items.forEach(function (d) {
                 frappe.model.set_value(d.doctype, d.name, "meis_value", flt(d.fob_value * d.meis_rate / 100.0));
                 total_meis += flt(d.meis_value)
             });
-          
             frm.set_value("total_meis", total_meis);
         }
     },

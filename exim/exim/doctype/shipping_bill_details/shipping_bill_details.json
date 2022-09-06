@@ -1,0 +1,53 @@
+{
+ "actions": [],
+ "creation": "2022-08-05 13:01:34.343579",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "shipping_bill",
+  "column_break_7",
+  "shipping_date",
+  "shipping_bill_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "shipping_bill",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Shipping Bill",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shipping_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Shipping Bill Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "shipping_bill_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Shipping Bill Amount",
+   "options": "currency",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2022-08-09 18:24:02.064783",
+ "modified_by": "Administrator",
+ "module": "Exim",
+ "name": "Shipping Bill Details",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
