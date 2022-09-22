@@ -26,7 +26,7 @@ def si_on_cancel(self, method):
 def si_before_save(self,method):
 	duty_calculation(self)
 	meis_calculation(self)
-	#cal_total_fob_value(self)
+	cal_total_fob_value(self)
 	
 @frappe.whitelist()
 def pi_on_submit(self, method):
@@ -147,6 +147,7 @@ def duty_calculation(self):
 def cal_total_fob_value(self):
 	total_fob = 0.0
 	for row in self.items:
+		row.fob_value = flt(row.base_amount - row.freight - row.insurance)
 		if row.fob_value:
 			total_fob += flt(row.fob_value)
 	self.total_fob_value = flt(flt(total_fob) - (flt(self.freight) * flt(self.conversion_rate)) -(flt(self.insurance) * flt(self.conversion_rate)))
