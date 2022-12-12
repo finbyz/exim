@@ -3,7 +3,8 @@ from frappe import _
 from frappe.utils import flt, getdate
 from frappe.contacts.doctype.address.address import get_company_address
 from frappe.core.doctype.communication.email import make
-from frappe.email.smtp import get_outgoing_email_account
+# from frappe.email.smtp import get_outgoing_email_account
+from frappe.email.doctype.email_account.email_account import EmailAccount
 from frappe.model.mapper import get_mapped_doc
 
 
@@ -396,7 +397,8 @@ def send_lead_mail(recipients, person, email_template, doc_name):
 	context = {"person": person}
 	message = frappe.render_template(doc.response, context)
 	subject = doc.subject
-	email_account = get_outgoing_email_account(True, append_to = "Lead")
+	# email_account = get_outgoing_email_account(True, append_to = "Lead")
+	email_account = EmailAccount.find_outgoing(match_by_doctype="Lead", match_by_email=None, _raise_error=True)
 	sender = email_account.default_sender
 
 	make(
