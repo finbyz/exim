@@ -67,9 +67,9 @@ frappe.ui.form.on("Delivery Note", {
     },
     cal_total: function (frm) {
         let total_qty = 0.0;
-        let total_packages = 0;
+        let total_packages = 0.0;
         let total_gr_wt = 0.0;
-        let total_tare_wt = 0.0;
+        // let total_tare_wt = 0.0;
         let total_pallets = 0;
         let total_freight = 0.0;
         let total_insurance = 0.0;
@@ -81,19 +81,19 @@ frappe.ui.form.on("Delivery Note", {
             total_packages += flt(d.no_of_packages);
             d.total_tare_weight = flt(d.tare_wt * d.no_of_packages);
             d.gross_wt = flt(d.total_tare_weight) + flt(d.qty);
-            total_tare_wt += flt(d.total_tare_weight);
+            // total_tare_wt += flt(d.total_tare_weight);
             total_gr_wt += flt(d.gross_wt);
             total_pallets += flt(d.total_pallets);
             total_freight += flt(d.freight);
             total_insurance += flt(d.insurance);
         });
         frm.set_value("total_qty", total_qty);
-        frm.set_value("total_packages", total_packages);
-        frm.set_value("total_gross_wt", total_gr_wt);
-        frm.set_value("total_tare_wt", total_tare_wt);
-        frm.set_value("total_pallets", total_pallets);
-        frm.set_value("freight", total_freight);
-        frm.set_value("insurance", total_insurance);
+        // frm.set_value("total_packages", total_packages);
+        // frm.set_value("total_gross_wt", total_gr_wt);
+        // frm.set_value("total_tare_wt", total_tare_wt);
+        // frm.set_value("total_pallets", total_pallets);
+        // frm.set_value("freight", total_freight);
+        // frm.set_value("insurance", total_insurance);
     },
     box_cal: function (frm) {
         frm.doc.items.forEach(function (d, i) {

@@ -70,29 +70,19 @@ frappe.ui.form.on("Payment Entry", {
 		if(frm.doc.__islocal && frm.doc.payment_type== "Pay"){
 			frm.set_value('print_heading', "Payment Advice");
 		}
-// 		frappe.call({
-// 			method:"elkins.api.get_party_details",
-// 			args:{
-// 				party: frm.doc.party,
-// 				party_type: frm.doc.party_type
-// 			},
-// 			callback: function(r){
-// 				if(r.message){
-// 					frm.set_value('contact_person', r.message.contact_person)
-// 					frm.set_value('email_id', r.message.contact_email)
-// 					frm.set_value ('party_name', frm.doc.party)
-// 				}
-// 			}
-// 		});
 
-		var df = frappe.meta.get_docfield("Forward Utilization","forward_amount", cur_frm.doc.name);
-		df.options="paid_from_account_currency";
-		
-		df = frappe.meta.get_docfield("Forward Utilization","amount_outstanding", cur_frm.doc.name);
-		df.options="paid_from_account_currency";
 
-		df = frappe.meta.get_docfield("Forward Utilization","amount_utilized", cur_frm.doc.name);
-		df.options="paid_from_account_currency";
+		var df = frappe.meta.get_docfield("Forward Utilization","amount", cur_frm.doc.name);
+		if (df){
+
+			df.options="paid_from_account_currency";
+			
+			df = frappe.meta.get_docfield("Forward Utilization","amount_outstanding", cur_frm.doc.name);
+			df.options="paid_from_account_currency";
+	
+			df = frappe.meta.get_docfield("Forward Utilization","amount_utilized", cur_frm.doc.name);
+			df.options="paid_from_account_currency";
+		}
 	},
 	
 	validate: function(frm){
