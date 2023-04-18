@@ -62,7 +62,7 @@ frappe.ui.form.on("Delivery Note", {
                         company: cur_frm.doc.company
                     }
                 })
-            }, __("Get items from"));
+            }, __("Get Items From"));
         }
     },
     cal_total: function (frm) {
