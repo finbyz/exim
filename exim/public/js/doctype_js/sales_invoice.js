@@ -511,7 +511,11 @@ frappe.ui.form.on("Sales Invoice Item", {
         let d = locals[cdt][cdn];
         frm.events.duty_drawback_cal(frm);
         frm.events.calculate_total_fob_value(frm);
-        frm.events.meis_cal(frm);
+        let meta = frappe.get_meta(frm.doc.doctype)
+        if(meta.has_field('status')){
+
+            frm.events.meis_cal(frm);
+        }
         // frm.events.cal_igst_amount(frm);
         //frappe.model.set_value(cdt, cdn, "igst_taxable_value", d.fob_value);
     },
