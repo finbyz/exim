@@ -512,7 +512,7 @@ frappe.ui.form.on("Sales Invoice Item", {
         frm.events.duty_drawback_cal(frm);
         frm.events.calculate_total_fob_value(frm);
         let meta = frappe.get_meta(frm.doc.doctype)
-        if(meta.has_field('status')){
+        if(meta.has_field('meis_cal')){
 
             frm.events.meis_cal(frm);
         }
