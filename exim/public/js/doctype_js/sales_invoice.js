@@ -316,7 +316,7 @@ frappe.ui.form.on("Sales Invoice", {
         frappe.model.get_value('Address', {"name":frm.doc.customer_address}, 'country',(res)=>{
             if(res.country != "India"){
                 frm.doc.items.forEach(function (d) {
-                    frappe.model.set_value(d.doctype, d.name, "meis_value", flt(d.fob_value * d.meis_rate / 100.0));
+                    // frappe.model.set_value(d.doctype, d.name, "meis_value", flt(d.fob_value * d.meis_rate / 100.0));
                     total_meis += flt(d.meis_value)
                 });
                 frm.set_value("total_meis", total_meis);
