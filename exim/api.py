@@ -209,7 +209,7 @@ def export_lic_cancel(self):
 
 def import_lic(self):
 	for row in self.items:
-		if row.advance_authorisation_license:
+		if row.get('advance_authorisation_license'):
 			aal = frappe.get_doc("Advance Authorisation License", row.advance_authorisation_license)
 			aal.append("imports", {
 				"item_code": row.item_code,
