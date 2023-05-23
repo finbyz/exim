@@ -319,7 +319,11 @@ frappe.ui.form.on("Sales Invoice", {
                     // frappe.model.set_value(d.doctype, d.name, "meis_value", flt(d.fob_value * d.meis_rate / 100.0));
                     total_meis += flt(d.meis_value)
                 });
-                frm.set_value("total_meis", total_meis);
+                let meta = frappe.get_meta('Sales Invoice')
+                if (meta.has_field('total_meis')){
+
+                    frm.set_value("total_meis", total_meis);
+                }
             } 
         })
     },
