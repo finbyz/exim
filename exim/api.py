@@ -112,14 +112,16 @@ def create_jv(self):
 				else:
 					self.db_set('meis_jv',meis_jv.name)
 def cancel_jv(self, method):
-	if self.duty_drawback_jv:
-		jv = frappe.get_doc("Journal Entry", self.duty_drawback_jv)
-		jv.cancel()
-		self.duty_drawback_jv = ''
-	if self.get('meis_jv'):
-		jv = frappe.get_doc("Journal Entry", self.meis_jv)
-		jv.cancel()
-		self.meis_jv = ''
+	meta = frappe.get_meta(self.doctype)
+	if meta.has_field('duty_drawback_jv'):
+		if self.duty_drawback_jv:
+			jv = frappe.get_doc("Journal Entry", self.duty_drawback_jv)
+			jv.cancel()
+			self.duty_drawback_jv = ''
+		if self.get('meis_jv'):
+			jv = frappe.get_doc("Journal Entry", self.meis_jv)
+			jv.cancel()
+			self.meis_jv = ''
 	
 
 def duty_calculation(self):
