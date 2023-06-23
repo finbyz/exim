@@ -348,7 +348,6 @@ frappe.ui.form.on("Sales Invoice", {
         let total_packages = 0;
         let total_gr_wt = 0.0;
         let total_tare_wt = 0.0;
-        let total_pallets = 0;
         let total_freight = 0.0;
         let total_insurance = 0.0;
 
