@@ -92,13 +92,12 @@ doctype_js = {
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-#	}
-# }
+doc_events = {
+	"Sales Invoice": {
+		"on_update": "exim.exim.doc_events.sales_invoice.cal_total",
+		
+	}
+}
 
 # Scheduled Tasks
 # ---------------

@@ -320,10 +320,10 @@ frappe.ui.form.on("Sales Invoice", {
                     total_meis += flt(d.meis_value)
                 });
                 let meta = frappe.get_meta('Sales Invoice')
-                if (meta.has_field('total_meis')){
+                // if (meta.has_field('total_meis')){
 
-                    frm.set_value("total_meis", total_meis);
-                }
+                //     frm.set_value("total_meis", total_meis);
+                // }
             } 
         })
     },
@@ -344,14 +344,16 @@ frappe.ui.form.on("Sales Invoice", {
     },
     //EXIM END
     cal_total: function (frm) {
-        let total_qty = 0.0;
+        let total_qty = 0;
         let total_packages = 0;
-        let total_gr_wt = 0.0;
-        let total_tare_wt = 0.0;
-        let total_freight = 0.0;
-        let total_insurance = 0.0;
+        let total_gr_wt = 0;
+        let total_tare_wt = 0;
+        let total_freight = 0;
+        let total_insurance = 0;
+        let total_pallets = 0;
 
         frm.doc.items.forEach(function (d) {
+            console.log("test")
             //frappe.model.set_value(d.doctype, d.name, 'gross_wt', (d.tare_wt + d.qty));
             total_qty += flt(d.qty);
             total_packages += flt(d.no_of_packages);
