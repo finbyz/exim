@@ -366,8 +366,8 @@ frappe.ui.form.on("Sales Invoice", {
         frm.set_value("total_packages", total_packages);
         frm.set_value("total_gr_wt", total_gr_wt);
         frm.set_value("total_tare_wt", total_tare_wt);
-        // frm.set_value("freight", total_freight);
-        // frm.set_value("insurance", total_insurance);
+        frm.set_value("freight", total_freight);
+        frm.set_value("insurance", total_insurance);
     },
     box_cal: function (frm) {
         frm.doc.items.forEach(function (d, i) {
