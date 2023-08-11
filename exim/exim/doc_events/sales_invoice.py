@@ -1,13 +1,14 @@
 import frappe
 from frappe.utils import flt, cint, nowdate, cstr, now_datetime
 
-def cal_total(self):
+def cal_total(self, method):
     total_qty = 0
     total_packages = 0
     total_gr_wt = 0
     total_tare_wt = 0
     total_freight = 0
     total_insurance = 0
+    total_meis = 0
 
     for d in self.items:
         total_qty += flt(d.qty)
@@ -19,6 +20,7 @@ def cal_total(self):
         total_gr_wt += flt(d.gross_wt)
         total_freight += flt(d.freight)
         total_insurance += flt(d.insurance)
+        total_meis += flt(d.meis_value)
         
     self.total_qty = total_qty
     self.total_packages = total_packages
@@ -26,3 +28,5 @@ def cal_total(self):
     self.total_tare_wt = total_tare_wt
     self.freight = total_freight
     self.insurance = total_insurance
+    self.total_fob = self.total_fob_value / self.conversion_rate
+    self.total_meis = total_meis
