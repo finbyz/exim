@@ -316,7 +316,7 @@ frappe.ui.form.on("Sales Invoice", {
         frappe.model.get_value('Address', {"name":frm.doc.customer_address}, 'country',(res)=>{
             if(res.country != "India"){
                 frm.doc.items.forEach(function (d) {
-                    // frappe.model.set_value(d.doctype, d.name, "meis_value", flt(d.fob_value * d.meis_rate / 100.0));
+                    frappe.model.set_value(d.doctype, d.name, "meis_value", flt(d.fob_value * d.meis_rate / 100.0));
                     total_meis += flt(d.meis_value)
                 });
                 let meta = frappe.get_meta('Sales Invoice')
@@ -332,7 +332,7 @@ frappe.ui.form.on("Sales Invoice", {
         frappe.model.get_value('Address', frm.doc.customer_address, 'country',(res)=>{
             if(res.country != "India"){
                 frm.doc.items.forEach(function (d) {
-                    frappe.model.set_value(d.doctype, d.name, "fob_value",flt(d.base_amount - d.freight - d.insurance));
+                    frappe.model.set_value(d.doctype, d.name, "fob_value",flt(d.base_amount - flt(d.freight * frm.doc.conversion_rate ) - flt(d.insurance * frm.doc.conversion_rate)));
                     total_fob_value += flt(d.fob_value);
                 });
                
@@ -405,8 +405,7 @@ frappe.ui.form.on("Sales Invoice Item", {
         let d = locals[cdt][cdn];
         frappe.db.get_value("Address", frm.doc.customer_address, 'country', function (r) {
             if (r.country != "India") {
-                
-                frappe.model.set_value(cdt, cdn, "fob_value", flt(d.base_amount - d.freight - d.insurance));
+                frappe.model.set_value(cdt, cdn, "fob_value",flt(d.base_amount - flt(d.freight * frm.doc.conversion_rate ) - flt(d.insurance * frm.doc.conversion_rate)));
             }
         })
         if(d.qty > 0 && d.packing_size > 0){
@@ -420,7 +419,8 @@ frappe.ui.form.on("Sales Invoice Item", {
         let d = locals[cdt][cdn];
         frappe.db.get_value("Address", frm.doc.customer_address, 'country', function (r) {
             if (r.country != "India") {
-                frappe.model.set_value(cdt, cdn, "fob_value", flt(d.base_amount - d.freight - d.insurance));
+                frappe.model.set_value(cdt, cdn, "fob_value",flt(d.base_amount - flt(d.freight * frm.doc.conversion_rate ) - flt(d.insurance * frm.doc.conversion_rate)));
+
             }
         })
     },
@@ -463,7 +463,8 @@ frappe.ui.form.on("Sales Invoice Item", {
                 console.log(flt(d.base_amount))
                 console.log(flt(d.freight))
                 console.log(flt(d.insurance))
-                frappe.model.set_value(cdt, cdn, "fob_value", flt(d.base_amount - d.freight - d.insurance));
+                frappe.model.set_value(cdt, cdn, "fob_value",flt(d.base_amount - flt(d.freight * frm.doc.conversion_rate ) - flt(d.insurance * frm.doc.conversion_rate)));
+
             }
         })
     },
@@ -471,7 +472,8 @@ frappe.ui.form.on("Sales Invoice Item", {
         let d = locals[cdt][cdn];
         frappe.db.get_value("Address", frm.doc.customer_address, 'country', function (r) {
             if (r.country != "India") {
-                frappe.model.set_value(cdt, cdn, "fob_value", flt(d.base_amount - d.freight - d.insurance));
+                frappe.model.set_value(cdt, cdn, "fob_value",flt(d.base_amount - flt(d.freight * frm.doc.conversion_rate ) - flt(d.insurance * frm.doc.conversion_rate)));
+
             }
         })
     },
@@ -479,7 +481,8 @@ frappe.ui.form.on("Sales Invoice Item", {
         let d = locals[cdt][cdn];
         frappe.db.get_value("Address", frm.doc.customer_address, 'country', function (r) {
             if (r.country != "India") {
-                frappe.model.set_value(cdt, cdn, "fob_value", flt(d.base_amount - d.freight - d.insurance));
+                frappe.model.set_value(cdt, cdn, "fob_value",flt(d.base_amount - flt(d.freight * frm.doc.conversion_rate ) - flt(d.insurance * frm.doc.conversion_rate)));
+
             }
         })
     },
@@ -513,10 +516,10 @@ frappe.ui.form.on("Sales Invoice Item", {
         frm.events.duty_drawback_cal(frm);
         frm.events.calculate_total_fob_value(frm);
         let meta = frappe.get_meta(frm.doc.doctype)
-        if(meta.has_field('meis_cal')){
+        // if(meta.has_field('meis_cal')){
 
-            frm.events.meis_cal(frm);
-        }
+        //     frm.events.meis_cal(frm);
+        // }
         // frm.events.cal_igst_amount(frm);
         //frappe.model.set_value(cdt, cdn, "igst_taxable_value", d.fob_value);
     },
