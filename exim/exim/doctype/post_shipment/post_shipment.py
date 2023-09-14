@@ -79,6 +79,8 @@ class PostShipment(Document):
 				
 		elif self.credit_currency and not self.source_exchange_rate:
 			self.source_exchange_rate = get_exchange_rate(self.credit_currency, "INR", self.posting_date)
+		if self.underline_currency == self.credit_currency:
+			self.source_exchange_rate = 1
 
 	def calculate_loan_amount(self):
 		self.loan_amount_inr = self.source_exchange_rate * self.loan_amount
