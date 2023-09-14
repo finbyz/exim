@@ -92,13 +92,6 @@ doctype_js = {
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-#	}
-# }
 
 # Scheduled Tasks
 # ---------------
@@ -143,7 +136,8 @@ doc_events = {
 		"on_submit": "exim.api.si_on_submit",
 		"on_cancel": "exim.api.si_on_cancel",
 		"before_save": "exim.api.si_before_save",
-		"validate": "exim.api.si_validate"
+		"validate": "exim.api.si_validate", 
+        "on_update": "exim.exim.doc_events.sales_invoice.cal_total",
 	},
 	"Purchase Invoice": {
 		"on_submit": "exim.api.pi_on_submit",

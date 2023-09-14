@@ -3,9 +3,10 @@ from frappe import _
 from frappe.utils import flt, getdate
 from frappe.contacts.doctype.address.address import get_company_address
 from frappe.core.doctype.communication.email import make
-from frappe.email.smtp import get_outgoing_email_account
+# from frappe.email.smtp import get_outgoing_email_account
 from frappe.model.mapper import get_mapped_doc
-
+# from frappe.email.doctype.email_queue.email_queue import QueueBuilder
+from frappe.email.doctype.email_account.email_account import EmailAccount
 
 @frappe.whitelist()
 def si_validate(self, method):
@@ -39,41 +40,45 @@ def pi_on_cancel(self, method):
 
 def create_jv(self):
 	if frappe.db.get_value('Address', self.customer_address, 'country') != "India":
-		if self.total_duty_drawback:
-			drawback_receivable_account = frappe.db.get_value("Company", { "company_name": self.company}, "duty_drawback_receivable_account")
-			drawback_income_account = frappe.db.get_value("Company", { "company_name": self.company}, "duty_drawback_income_account")
-			drawback_cost_center = frappe.db.get_value("Company", { "company_name": self.company}, "duty_drawback_cost_center")
-			if not drawback_receivable_account:
-				frappe.throw(_("Set Duty Drawback Receivable Account in Company"))
-			elif not drawback_income_account:
-				frappe.throw(_("Set Duty Drawback Income Account in Company"))
-			elif not drawback_cost_center:
-				frappe.throw(_("Set Duty Drawback Cost Center in Company"))
-			else:
-				jv = frappe.new_doc("Journal Entry")
-				jv.voucher_type = "Duty Drawback Entry"
-				jv.posting_date = self.posting_date
-				jv.company = self.company
-				jv.cheque_no = self.name
-				jv.cheque_date = self.posting_date
-				jv.user_remark = "Duty draw back against " + self.name + " for " + self.customer
-				jv.append("accounts", {
-					"account": drawback_receivable_account,
-					"cost_center": drawback_cost_center,
-					"debit_in_account_currency": self.total_duty_drawback
-				})
-				jv.append("accounts", {
-					"account": drawback_income_account,
-					"cost_center": drawback_cost_center,
-					"credit_in_account_currency": self.total_duty_drawback
-				})
-				try:
-					jv.save(ignore_permissions=True)
-					jv.submit()
-				except Exception as e:
-					frappe.throw(str(e))
+		meta = frappe.get_meta(self.doctype)
+		if meta.has_field('total_duty_drawback'):
+			if self.total_duty_drawback:
+				drawback_receivable_account = frappe.db.get_value("Company", { "company_name": self.company}, "duty_drawback_receivable_account")
+				drawback_income_account = frappe.db.get_value("Company", { "company_name": self.company}, "duty_drawback_income_account")
+				drawback_cost_center = frappe.db.get_value("Company", { "company_name": self.company}, "duty_drawback_cost_center")
+				if not drawback_receivable_account:
+					frappe.throw(_("Set Duty Drawback Receivable Account in Company"))
+				elif not drawback_income_account:
+					frappe.throw(_("Set Duty Drawback Income Account in Company"))
+				elif not drawback_cost_center:
+					frappe.throw(_("Set Duty Drawback Cost Center in Company"))
 				else:
-					self.db_set('duty_drawback_jv',jv.name)
+					jv = frappe.new_doc("Journal Entry")
+					jv.voucher_type = "Duty Drawback Entry"
+					jv.posting_date = self.posting_date
+					jv.company = self.company
+					jv.cheque_no = self.name
+					jv.cheque_date = self.posting_date
+					jv.user_remark = "Duty draw back against " + self.name + " for " + self.customer
+					jv.append("accounts", {
+						"account": drawback_receivable_account,
+						"cost_center": drawback_cost_center,
+						"debit_in_account_currency": self.total_duty_drawback
+					})
+					jv.append("accounts", {
+						"account": drawback_income_account,
+						"cost_center": drawback_cost_center,
+						"credit_in_account_currency": self.total_duty_drawback
+					})
+					try:
+						jv.save(ignore_permissions=True)
+						jv.submit()
+					except Exception as e:
+						frappe.throw(str(e))
+					else:
+						meta = frappe.get_meta(self.doctype)
+						if meta.has_field('duty_drawback_jv'):
+							self.db_set('duty_drawback_jv',jv.name)
 
 		if self.get('total_meis'):
 			meis_receivable_account = frappe.db.get_value("Company", { "company_name": self.company}, "meis_receivable_account")
@@ -112,38 +117,47 @@ def create_jv(self):
 				else:
 					self.db_set('meis_jv',meis_jv.name)
 def cancel_jv(self, method):
-	if self.duty_drawback_jv:
-		jv = frappe.get_doc("Journal Entry", self.duty_drawback_jv)
-		jv.cancel()
-		self.duty_drawback_jv = ''
-	if self.get('meis_jv'):
-		jv = frappe.get_doc("Journal Entry", self.meis_jv)
-		jv.cancel()
-		self.meis_jv = ''
+	meta = frappe.get_meta(self.doctype)
+	if meta.has_field('duty_drawback_jv'):
+		if self.duty_drawback_jv:
+			jv = frappe.get_doc("Journal Entry", self.duty_drawback_jv)
+			jv.cancel()
+			self.duty_drawback_jv = ''
+	if meta.has_field('meis_jv'):
+		if self.get('meis_jv'):
+			jv = frappe.get_doc("Journal Entry", self.meis_jv)
+			jv.cancel()
+			self.meis_jv = ''
 	
 
 def duty_calculation(self):
-	total_duty_drawback = 0.0
-	if frappe.db.get_value('Address', self.customer_address, 'country') != "India":
-		for row in self.items:
-			if row.duty_drawback_rate and row.fob_value:
-				duty_drawback_amount = flt(row.fob_value * row.duty_drawback_rate / 100.0)
-				if row.maximum_cap == 1:
-					if row.capped_amount < duty_drawback_amount:
-						row.duty_drawback_amount = row.capped_amount
-						row.effective_rate = flt(row.capped_amount / row.fob_value * 100.0)
-					else:
-						row.duty_drawback_amount = duty_drawback_amount
-						row.effective_rate = row.duty_drawback_rate
-				else:
-					row.duty_drawback_amount = duty_drawback_amount
-					
-			#row.fob_value = flt(row.base_amount)
-			row.igst_taxable_value = flt(row.amount)
-			total_duty_drawback += flt(row.duty_drawback_amount) or 0.0
-			
-			
-		self.total_duty_drawback = total_duty_drawback
+	meta = frappe.get_meta(self.doctype)
+	if meta.has_field('total_duty_drawback'):
+		total_duty_drawback = 0.0
+		if frappe.db.get_value('Address', self.customer_address, 'country') != "India":
+			for row in self.items:
+				meta = frappe.get_meta(row.doctype)
+				if meta.has_field('duty_drawback_rate'):
+					if row.duty_drawback_rate and row.fob_value:
+						duty_drawback_amount = flt(row.fob_value * row.duty_drawback_rate / 100.0)
+						if meta.has_field('duty_drawback_amount'):
+							if row.maximum_cap == 1:
+								if row.capped_amount < duty_drawback_amount:
+									row.duty_drawback_amount = row.capped_amount
+									row.effective_rate = flt(row.capped_amount / row.fob_value * 100.0)
+								else:
+									row.duty_drawback_amount = duty_drawback_amount
+									row.effective_rate = row.duty_drawback_rate
+							else:
+								row.duty_drawback_amount = duty_drawback_amount
+						
+				#row.fob_value = flt(row.base_amount)
+				row.igst_taxable_value = flt(row.amount)
+				if meta.has_field('duty_drawback_amount'):
+					total_duty_drawback += flt(row.duty_drawback_amount) or 0.0
+				
+				
+			self.total_duty_drawback = total_duty_drawback
 
 def cal_total_fob_value(self):
 	total_fob = 0.0
@@ -209,7 +223,7 @@ def export_lic_cancel(self):
 
 def import_lic(self):
 	for row in self.items:
-		if row.advance_authorisation_license:
+		if row.get('advance_authorisation_license'):
 			aal = frappe.get_doc("Advance Authorisation License", row.advance_authorisation_license)
 			aal.append("imports", {
 				"item_code": row.item_code,
@@ -396,7 +410,8 @@ def send_lead_mail(recipients, person, email_template, doc_name):
 	context = {"person": person}
 	message = frappe.render_template(doc.response, context)
 	subject = doc.subject
-	email_account = get_outgoing_email_account(True, append_to = "Lead")
+	# email_account = QueueBuilder.get_outgoing_email_account()
+	email_account = EmailAccount.find_outgoing(match_by_doctype="Lead", match_by_email=None, _raise_error=True)
 	sender = email_account.default_sender
 
 	make(
