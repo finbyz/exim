@@ -332,7 +332,9 @@ frappe.ui.form.on("Sales Invoice", {
         frappe.model.get_value('Address', frm.doc.customer_address, 'country',(res)=>{
             if(res.country != "India"){
                 frm.doc.items.forEach(function (d) {
+                    if(frm.doc.fob_calculation){
                     frappe.model.set_value(d.doctype, d.name, "fob_value",flt(d.base_amount - flt(d.freight * frm.doc.conversion_rate ) - flt(d.insurance * frm.doc.conversion_rate)));
+                    }
                     total_fob_value += flt(d.fob_value);
                 });
                

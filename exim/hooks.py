@@ -127,6 +127,12 @@ doctype_js = {
 # }
 # fixtures = ["Custom Field"]
 
+fixtures = [
+	{
+         "dt": "Custom Field", 
+         "filters":[["name", "in", ['Sales Invoice-fob_calculation']]]
+      },
+]
 # override_whitelisted_methods = {
 # 	"frappe.utils.print_format.download_pdf": "exim.print_format.download_pdf",
 # }
