@@ -1,0 +1,68 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-03-30 16:03:30.898127",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "je_no",
+  "account",
+  "debit_amount",
+  "cheque_no",
+  "cheque_date",
+  "shipping_bill_no"
+ ],
+ "fields": [
+  {
+   "fieldname": "je_no",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "JE No",
+   "options": "Journal Entry"
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "debit_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Debit Amount"
+  },
+  {
+   "fetch_from": "je_no.cheque_no",
+   "fieldname": "cheque_no",
+   "fieldtype": "Data",
+   "label": "Reference Number"
+  },
+  {
+   "fieldname": "cheque_date",
+   "fieldtype": "Date",
+   "label": "Reference Date"
+  },
+  {
+   "fieldname": "shipping_bill_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Shipping Bill No"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-03-30 16:03:30.898127",
+ "modified_by": "Administrator",
+ "module": "Rodtep Claim Management",
+ "name": "Rodtep Details",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

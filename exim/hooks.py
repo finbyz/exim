@@ -151,5 +151,11 @@ doc_events = {
 	},
 	("Sales Invoice", "Purchase Invoice", "Payment Request", "Payment Entry", "Journal Entry", "Material Request", "Purchase Order", "Work Order", "Production Plan", "Stock Entry", "Quotation", "Sales Order", "Delivery Note", "Purchase Receipt", "Packing Slip"): {
 		"before_naming": "exim.api.docs_before_naming",
-	}
+	},
+    "Rodtep Claim":{
+        "on_submit":"rodtep_claim_management.rodtep_claim_management.doctype.rodtep_claim.rodtep_claim.create_jv_on_submit"
+    },
+	"Duty DrawBack Claim":{
+        "on_submit":"rodtep_claim_management.rodtep_claim_management.doctype.duty_drawback_claim.duty_drawback_claim.create_jv_on_submit"
+    },
 }

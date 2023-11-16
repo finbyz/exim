@@ -9,6 +9,8 @@ def cal_total(self, method):
     total_freight = 0
     total_insurance = 0
     total_meis = 0
+    total_drawback=0
+    total_rodtep=0
 
     for d in self.items:
         total_qty += flt(d.qty)
@@ -22,6 +24,9 @@ def cal_total(self, method):
         total_freight += flt(d.freight)
         total_insurance += flt(d.insurance)
         total_meis += flt(d.meis_value)
+        total_drawback+=d.duty_drawback_amount
+        d.total_duty_drawback=total_drawback
+        total_rodtep+=d.meis_value
         
     self.total_qty = total_qty
     self.total_packages = total_packages
