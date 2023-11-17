@@ -152,3 +152,10 @@ frappe.ui.form.on("Forward Utilization", {
 		frm.events.cal_total_amount_utilized(frm);
 	},
 });
+
+frappe.ui.form.on("Payment Entry", {
+    onload: function(frm) {
+        // Ignore cancellation for all linked documents of respective DocTypes.
+        frm.ignore_doctypes_on_cancel_all = ["Forward Booking"];
+    }
+})

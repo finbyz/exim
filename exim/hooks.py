@@ -160,6 +160,6 @@ doc_events = {
     },
     "Payment Entry": {
 		"on_submit": "exim.api.pe_on_submit",
-		"on_cancel": "exim.api.pe_on_cancel",
+		"before_cancel": "exim.api.pe_on_cancel",
 	},
 }
