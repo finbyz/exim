@@ -153,9 +153,13 @@ doc_events = {
 		"before_naming": "exim.api.docs_before_naming",
 	},
     "Rodtep Claim":{
-        "on_submit":"rodtep_claim_management.rodtep_claim_management.doctype.rodtep_claim.rodtep_claim.create_jv_on_submit"
+        "on_submit":"exim.exim.doctype.rodtep_claim.rodtep_claim.create_jv_on_submit"
     },
 	"Duty DrawBack Claim":{
-        "on_submit":"rodtep_claim_management.rodtep_claim_management.doctype.duty_drawback_claim.duty_drawback_claim.create_jv_on_submit"
+        "on_submit":"exim.exim.doctype.duty_drawback_claim.duty_drawback_claim.create_jv_on_submit"
     },
+    "Payment Entry": {
+		"on_submit": "exim.api.pe_on_submit",
+		"on_cancel": "exim.api.pe_on_cancel",
+	},
 }
