@@ -38,32 +38,32 @@ this.frm.cscript.onload = function(frm) {
 frappe.ui.form.on("Payment Entry", {
     paid_to: function(frm){
         cur_frm.refresh();
-    if (frm.doc.paid_to_account_currency == 'INR'){
-		frm.set_query("forward_contract","forwards", function() {
-			return {
-				"filters": {
-					"hedge": "Export",
-					"status": "Open",
-					"docstatus": 1,
-					"amount_outstanding": ['>', '0'],
-					"currency": cur_frm.doc.paid_from_account_currency
-				}
-			};
-		});
-	}
-	else {
-		frm.set_query("forward_contract","forwards", function() {
-			return {
-				"filters": {
-					"hedge": "Import",
-					"status": "Open",
-					"docstatus": 1,
-					"amount_outstanding": ['>', '0'],
-					"currency": cur_frm.doc.paid_to_account_currency
-				}
-			};
-		});
-	}
+    // if (frm.doc.paid_to_account_currency == 'INR'){
+	// 	frm.set_query("forward_contract","forwards", function() {
+	// 		return {
+	// 			"filters": {
+	// 				"hedge": "Export",
+	// 				"status": "Open",
+	// 				"docstatus": 1,
+	// 				"amount_outstanding": ['>', '0'],
+	// 				"currency": cur_frm.doc.paid_from_account_currency
+	// 			}
+	// 		};
+	// 	});
+	// }
+	// else {
+	// 	frm.set_query("forward_contract","forwards", function() {
+	// 		return {
+	// 			"filters": {
+	// 				"hedge": "Import",
+	// 				"status": "Open",
+	// 				"docstatus": 1,
+	// 				"amount_outstanding": ['>', '0'],
+	// 				"currency": cur_frm.doc.paid_to_account_currency
+	// 			}
+	// 		};
+	// 	});
+	// }
         
     },
 	onload: function(frm){
