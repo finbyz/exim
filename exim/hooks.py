@@ -130,7 +130,7 @@ doctype_js = {
 fixtures = [
 	{
          "dt": "Custom Field", 
-         "filters":[["name", "in", ['Sales Invoice-fob_calculation']]]
+         "filters":[["module", "in", ['Exim']]]
       },
 ]
 # override_whitelisted_methods = {
