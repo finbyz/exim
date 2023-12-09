@@ -41,6 +41,7 @@ doctype_js = {
 	"Purchase Order": "public/js/doctype_js/purchase_order.js",
 	"Lead": "public/js/doctype_js/lead.js",
 	"Payment Entry": "public/js/doctype_js/payment_entry.js",
+    "Customize Form": "public/js/doctype_js/customize_form.js"
 
 }
 # fixtures = ["Custom Field"]
@@ -119,6 +120,10 @@ doctype_js = {
 
 # before_tests = "exim.install.before_tests"
 
+override_doctype_class = {
+	"Customize Form": "exim.exim.override.customize_form.CustomCustomizeForm",
+}
+
 # Overriding Whitelisted Methods
 # ------------------------------
 #
@@ -130,6 +135,10 @@ doctype_js = {
 fixtures = [
 	{
          "dt": "Custom Field", 
+         "filters":[["module", "in", ['Exim']]]
+      },
+    {
+         "dt": "Property Setter", 
          "filters":[["module", "in", ['Exim']]]
       },
 ]
