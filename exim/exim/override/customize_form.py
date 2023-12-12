@@ -50,7 +50,7 @@ class CustomCustomizeForm(CustomizeForm):
 					"property": "field_order",
 					"value": json.dumps(new_order),
 				},
-				is_system_generated=False,
+				is_system_generated=True,
 			)
 		else:
 			existing_order = getattr(meta, "field_order", None)
@@ -74,5 +74,5 @@ class CustomCustomizeForm(CustomizeForm):
 					"property": "field_order",
 					"value": json.dumps(new_order),
 				},
-				is_system_generated=False,
+				is_system_generated=True,
 			)

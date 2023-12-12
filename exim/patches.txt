@@ -1,1 +1,5 @@
+[pre_model_sync]
+exim.patches.fix_igst_rate
+
+[post_model_sync]
 exim.patches.create_custom_fields
