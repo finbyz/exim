@@ -33,6 +33,11 @@ class CustomCustomizeForm(CustomizeForm):
 			default_order = [
 				fieldname for fieldname, df in meta._fields.items() if not getattr(df, "is_custom_field", False)
 			]
+			field_seq = frappe.db.get_value('Field Sequence', {'doc_type': self.doc_type, 'module': default_module}, ['name'])
+			if field_seq:
+				set_field_seq = frappe.get_doc('Field Sequence', field_seq)
+				set_field_seq.field_order_list = json.dumps(new_order)
+				set_field_seq.save(ignore_permissions=True)
 
 			if new_order == default_order:
 				if existing_order:

@@ -12,8 +12,10 @@
   "add_fields_before_section",
   "column_break_kevml",
   "module",
+  "update_field_order",
   "field_sequence_section",
-  "field_sequence_table"
+  "field_sequence_table",
+  "field_order_list"
  ],
  "fields": [
   {
@@ -54,11 +56,24 @@
    "fieldname": "field_sequence_section",
    "fieldtype": "Section Break",
    "label": "Field Sequence"
+  },
+  {
+   "fieldname": "field_order_list",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "Field Order",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "update_field_order",
+   "fieldtype": "Check",
+   "label": "Update Field Order"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-12-11 09:38:06.095628",
+ "modified": "2023-12-12 18:06:50.102336",
  "modified_by": "Administrator",
  "module": "Exim",
  "name": "Field Sequence",
