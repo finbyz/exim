@@ -1,6 +1,6 @@
 import frappe
 from frappe import _
-from frappe.utils import flt, getdate
+from frappe.utils import flt, add_days, cint, nowdate, getdate,now_datetime, add_months, get_last_day, cstr
 from frappe.contacts.doctype.address.address import get_company_address
 from frappe.core.doctype.communication.email import make
 # from frappe.email.smtp import get_outgoing_email_account
@@ -470,3 +470,17 @@ def fwd_uti_cancel(self):
 		to_remove = [row for row in doc.payment_entries if row.voucher_no == self.name and row.voucher_type == "Payment Entry"]
 		[doc.remove(row) for row in to_remove]
 		doc.save()
+
+
+def get_due_date(term, posting_date=None, bill_date=None):
+	due_date = None
+	date = bill_date or posting_date
+	if term.due_date_based_on == "Day(s) after invoice date":
+		due_date = add_days(date, term.credit_days)
+	elif term.due_date_based_on == 'Day(s) after bl date':
+		due_date = add_days(date, term.credit_days)
+	elif term.due_date_based_on == "Day(s) after the end of the invoice month":
+		due_date = add_days(get_last_day(date), term.credit_days)
+	elif term.due_date_based_on == "Month(s) after the end of the invoice month":
+		due_date = add_months(get_last_day(date), term.credit_months)
+	return due_date

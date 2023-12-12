@@ -4,6 +4,8 @@
 
 frappe.ui.form.on('Field Sequence', {
 	refresh: function(frm) {
+		cur_frm.fields_dict.field_sequence_table.grid.grid_pagination.page_length = 500;
+		cur_frm.refresh_fields('field_sequence_table');
 		if (frm.doc.doc_type) {
 			// Fetch and set fields when the DocType is changed
 			fetchAndSetFields(frm);
@@ -101,7 +103,7 @@ function fetchAllAndSetFields(frm, cdt, cdn) {
 			} else if (field.fieldtype === 'Column Break') {
 				columnBreakFieldNames.push(field.fieldname);
 			} 
-			if (field.is_custom_field) {
+			if (field.is_custom_field && field.module == frm.doc.module) {
 				childTableFields.push({fieldname: field.fieldname, idx: field.idx});
 			}
 		});

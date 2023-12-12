@@ -21,7 +21,7 @@ frappe.ui.form.on("Delivery Note", {
         frm.trigger("cal_total");
         frm.trigger("box_cal");
         frm.trigger('calculate_total_fob_value');
-        frm.trigger('cal_igst_amount');
+        // frm.trigger('cal_igst_amount');
 
         frappe.db.get_value("Address", frm.doc.customer_address, 'country', function (r) {
             if (r.country != "India") {
@@ -123,6 +123,7 @@ frappe.ui.form.on("Delivery Note", {
         });
         frm.refresh_field('items');
     },
+    /*
     cal_igst_amount: function (frm) {
         let total_igst = 0.0;
        
@@ -138,6 +139,7 @@ frappe.ui.form.on("Delivery Note", {
             frm.set_value('total_igst_amount', total_igst);
         }
     },
+    */
     duty_drawback_cal: function (frm) {
         let total_dt = 0;
         if (frm.doc.currency != "INR") {
@@ -251,15 +253,16 @@ frappe.ui.form.on("Delivery Note Item", {
         let d = locals[cdt][cdn];
         frm.events.duty_drawback_cal(frm);
         frm.events.calculate_total_fob_value(frm);
-        frm.events.cal_igst_amount(frm);
+        // frm.events.cal_igst_amount(frm);
         //frappe.model.set_value(cdt, cdn, "igst_taxable_value", d.fob_value);
     },
 
 	/* igst_taxable_value: function(frm, cdt, cdn){
 		frm.events.cal_igst_amount(frm);
-	}, */
+	},
 
     igst_rate: function (frm, cdt, cdn) {
         frm.events.cal_igst_amount(frm);
     },
+    */
 });

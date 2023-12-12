@@ -12,20 +12,20 @@ cur_frm.set_query("notify_party", function () {
     };
 });
 
-cur_frm.set_query("custom_consignee_address", function () {
-    return {
-        query: "frappe.contacts.doctype.address.address.address_query",
-        filters: { link_doctype: "Customer", link_name: cur_frm.doc.customer }
-    };
-});
-cur_frm.fields_dict.custom_address.get_query = function (doc) {
-    return {
-        filters: [
-            ["address_type", "in", ["Consignee-Custom", "Custom"]],
-            ["link_name", "=", cur_frm.doc.customer]
-        ]
-    }
-};
+// cur_frm.set_query("custom_consignee_address", function () {
+//     return {
+//         query: "frappe.contacts.doctype.address.address.address_query",
+//         filters: { link_doctype: "Customer", link_name: cur_frm.doc.customer }
+//     };
+// });
+// cur_frm.fields_dict.custom_address.get_query = function (doc) {
+//     return {
+//         filters: [
+//             ["address_type", "in", ["Consignee-Custom", "Custom"]],
+//             ["link_name", "=", cur_frm.doc.customer]
+//         ]
+//     }
+// };
 // cur_frm.fields_dict.custom_buyer_address.get_query = function (doc) {
 //     return {
 //         filters: [
@@ -186,7 +186,7 @@ frappe.ui.form.on("Sales Invoice", {
         //         })
         //     }
         // })
-        frm.events.cal_igst_amount(frm);
+        // frm.events.cal_igst_amount(frm);
         frm.trigger('calculate_total_fob_value');
         frm.trigger("duty_drawback_cal");
         frm.trigger("meis_cal");
@@ -223,21 +223,21 @@ frappe.ui.form.on("Sales Invoice", {
         })*/
     },
     //EXIM
-    customer: function (frm) {
-        frappe.call({
-            method: "exim.api.get_custom_address",
-            args: {
-                party: frm.doc.customer,
-                party_type: "Customer"
-            },
-            callback: function (r) {
-                if (r.message) {
-                    frm.set_value("custom_address", r.message.customer_address);
-                    frm.set_value("custom_address_display", r.message.address_display);
-                }
-            }
-        });
-    },
+    // customer: function (frm) {
+    //     frappe.call({
+    //         method: "exim.api.get_custom_address",
+    //         args: {
+    //             party: frm.doc.customer,
+    //             party_type: "Customer"
+    //         },
+    //         callback: function (r) {
+    //             if (r.message) {
+    //                 frm.set_value("custom_address", r.message.customer_address);
+    //                 frm.set_value("custom_address_display", r.message.address_display);
+    //             }
+    //         }
+    //     });
+    // },
     notify_party: function (frm) {
         if (cur_frm.doc.notify_party) {
             return frappe.call({
@@ -282,6 +282,7 @@ frappe.ui.form.on("Sales Invoice", {
             });
         }
     },
+    /*
     cal_igst_amount: function (frm) {
         let total_igst = 0.0;
         frappe.model.get_value('Address', {"name":frm.doc.customer_address}, 'country',(res)=>{
@@ -298,6 +299,7 @@ frappe.ui.form.on("Sales Invoice", {
             }
         })
     },
+    */
     duty_drawback_cal: function (frm) {
         let total_dt = 0;
      
@@ -528,11 +530,12 @@ frappe.ui.form.on("Sales Invoice Item", {
 
 	/* igst_taxable_value: function(frm, cdt, cdn){
 		frm.events.cal_igst_amount(frm);
-	}, */
+	},
 
     igst_rate: function (frm, cdt, cdn) {
         frm.events.cal_igst_amount(frm);
     },
+    */
 });
 
 frappe.ui.form.on('Notify Party Address', {

@@ -124,6 +124,11 @@ override_doctype_class = {
 	"Customize Form": "exim.exim.override.customize_form.CustomCustomizeForm",
 }
 
+#payment term override
+from exim.api import get_due_date
+from erpnext.controllers import accounts_controller
+accounts_controller.get_due_date = get_due_date
+
 # Overriding Whitelisted Methods
 # ------------------------------
 #
@@ -141,6 +146,9 @@ fixtures = [
          "dt": "Property Setter", 
          "filters":[["module", "in", ['Exim']]]
       },
+      {
+          "dt": "Field Sequence"
+	  }
 ]
 # override_whitelisted_methods = {
 # 	"frappe.utils.print_format.download_pdf": "exim.print_format.download_pdf",

@@ -32,6 +32,7 @@
    "reqd": 1
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "field_sequence_table",
    "fieldtype": "Table",
    "label": "Field Sequence Table",
@@ -57,7 +58,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-12-09 13:55:21.128082",
+ "modified": "2023-12-11 09:38:06.095628",
  "modified_by": "Administrator",
  "module": "Exim",
  "name": "Field Sequence",

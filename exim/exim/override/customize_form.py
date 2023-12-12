@@ -13,7 +13,7 @@ class CustomCustomizeForm(CustomizeForm):
 			default_module = frappe.db.get_single_value("Field Sequence Settings", "module")
 			if not default_module:
 				frappe.throw("Please set the module in Field Sequence Settings.")
-			field_names = frappe.get_all("Field Sequence Table", filters={'parent': self.doc_type, 'module': default_module}, fields=['field_name', 'idx'])
+			field_names = frappe.db.get_list("Field Sequence Table", filters={'doc_type': self.doc_type, 'module': default_module}, fields=['field_name', 'idx'])			
 			sorted_fields = sorted(field_names, key=lambda x: x['idx'])
 
 			# Remove multiple fields
