@@ -166,7 +166,7 @@ doc_events = {
 		"on_submit": "exim.api.pi_on_submit",
 		"on_cancel": "exim.api.pi_on_cancel", 
 	},
-	("Sales Invoice", "Purchase Invoice", "Payment Request", "Payment Entry", "Journal Entry", "Material Request", "Purchase Order", "Work Order", "Production Plan", "Stock Entry", "Quotation", "Sales Order", "Delivery Note", "Purchase Receipt", "Packing Slip"): {
+	("Purchase Invoice", "Payment Request", "Payment Entry", "Journal Entry", "Material Request", "Purchase Order", "Work Order", "Production Plan", "Stock Entry", "Quotation", "Sales Order", "Delivery Note", "Purchase Receipt", "Packing Slip"): {
 		"before_naming": "exim.api.docs_before_naming",
 	},
     "Rodtep Claim":{
@@ -179,4 +179,7 @@ doc_events = {
 		"on_submit": "exim.api.pe_on_submit",
 		"before_cancel": "exim.api.pe_on_cancel",
 	},
+    ("Delivery Note", "Sales Invoice"): {
+        "validate": "exim.exim.doc_events.igst_calculation.cal_igst"
+	}
 }
