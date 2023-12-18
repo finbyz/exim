@@ -10,10 +10,7 @@ class CustomCustomizeForm(CustomizeForm):
 		doc_list = frappe.get_list("Field Sequence", pluck='doc_type')
 
 		if self.doc_type in doc_list:
-			default_module = frappe.db.get_single_value("Field Sequence Settings", "module")
-			if not default_module:
-				frappe.throw("Please set the module in Field Sequence Settings.")
-			field_names = frappe.db.get_list("Field Sequence Table", filters={'doc_type': self.doc_type, 'module': default_module}, fields=['field_name', 'idx'])			
+			field_names = frappe.db.get_list("Field Sequence Table", filters={'doc_type': self.doc_type}, fields=['field_name', 'idx'])
 			sorted_fields = sorted(field_names, key=lambda x: x['idx'])
 
 			# Remove multiple fields
@@ -33,15 +30,22 @@ class CustomCustomizeForm(CustomizeForm):
 			default_order = [
 				fieldname for fieldname, df in meta._fields.items() if not getattr(df, "is_custom_field", False)
 			]
-			field_seq = frappe.db.get_value('Field Sequence', {'doc_type': self.doc_type, 'module': default_module}, ['name'])
-			if field_seq:
-				set_field_seq = frappe.get_doc('Field Sequence', field_seq)
-				set_field_seq.field_order_list = json.dumps(new_order)
-				set_field_seq.save(ignore_permissions=True)
+
+			field_order_doc = frappe.db.get_value('Field Order', {'doc_type': self.doc_type}, ['name'])
+			if field_order_doc:
+				upd_field_order = frappe.get_doc('Field Order', field_order_doc)
+				upd_field_order.field_order_list = json.dumps(new_order)
+				upd_field_order.save(ignore_permissions=True)
+			else:
+				new_field_order = frappe.new_doc('Field Order')
+				new_field_order.doc_type = self.doc_type
+				new_field_order.field_order_list = json.dumps(new_order)
+				new_field_order.save(ignore_permissions=True)
 
 			if new_order == default_order:
 				if existing_order:
-					delete_property_setter(self.doc_type, "field_order")
+					pass
+					# delete_property_setter(self.doc_type, "field_order")
 
 				return
 

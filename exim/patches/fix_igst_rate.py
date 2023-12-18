@@ -11,3 +11,4 @@ def fix_igst_rate():
 		SET igst_rate = 0
 		WHERE CAST(igst_rate AS CHAR) = '' OR igst_rate IS NULL
 	""")
+	frappe.db.commit()

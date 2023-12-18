@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:{doc_type}-{module}",
+ "autoname": "field:doc_type",
  "creation": "2023-12-08 09:50:29.904245",
  "default_view": "List",
  "doctype": "DocType",
@@ -10,12 +10,8 @@
  "field_order": [
   "doc_type",
   "add_fields_before_section",
-  "column_break_kevml",
-  "module",
-  "update_field_order",
   "field_sequence_section",
-  "field_sequence_table",
-  "field_order_list"
+  "field_sequence_table"
  ],
  "fields": [
   {
@@ -24,7 +20,8 @@
    "in_list_view": 1,
    "label": "Doc Type",
    "options": "DocType",
-   "reqd": 1
+   "reqd": 1,
+   "unique": 1
   },
   {
    "fieldname": "add_fields_before_section",
@@ -41,43 +38,18 @@
    "options": "Field Sequence Table"
   },
   {
-   "fieldname": "column_break_kevml",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "module",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Module",
-   "options": "Module Def",
-   "reqd": 1
-  },
-  {
    "fieldname": "field_sequence_section",
    "fieldtype": "Section Break",
    "label": "Field Sequence"
-  },
-  {
-   "fieldname": "field_order_list",
-   "fieldtype": "Small Text",
-   "hidden": 1,
-   "label": "Field Order",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "update_field_order",
-   "fieldtype": "Check",
-   "label": "Update Field Order"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-12-12 18:06:50.102336",
+ "modified": "2023-12-15 10:55:44.930896",
  "modified_by": "Administrator",
  "module": "Exim",
  "name": "Field Sequence",
- "naming_rule": "Expression",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {

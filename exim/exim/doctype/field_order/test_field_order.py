@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestFieldSequenceSettings(FrappeTestCase):
+class TestFieldOrder(FrappeTestCase):
 	pass

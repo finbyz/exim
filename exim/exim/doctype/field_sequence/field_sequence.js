@@ -11,11 +11,11 @@ frappe.ui.form.on('Field Sequence', {
 			fetchAndSetFields(frm);
 		}
 		frm.add_custom_button(__('Fetch Custom Field'), function () {
-			if (frm.doc.doc_type && frm.doc.module) {
+			if (frm.doc.doc_type) {
 				frm.clear_table('field_sequence_table')
 				fetchAllAndSetFields(frm);
 			} else {
-				frappe.msgprint("Please select the DocType or Module.")
+				frappe.msgprint("Please select the DocType")
 			}
 		});
 	},
@@ -53,7 +53,7 @@ function fetchAndSetFields(frm, cdt, cdn) {
 			} else if (field.fieldtype === 'Column Break') {
 				columnBreakFieldNames.push(field.fieldname);
 			} 
-			if (field.is_custom_field && field.module == frm.doc.module) {
+			if (field.is_custom_field) {
 				childTableFields.push({fieldname: field.fieldname, idx: field.idx});
 			}
 		});
@@ -103,7 +103,7 @@ function fetchAllAndSetFields(frm, cdt, cdn) {
 			} else if (field.fieldtype === 'Column Break') {
 				columnBreakFieldNames.push(field.fieldname);
 			} 
-			if (field.is_custom_field && field.module == frm.doc.module) {
+			if (field.is_custom_field) {
 				childTableFields.push({fieldname: field.fieldname, idx: field.idx});
 			}
 		});
@@ -138,64 +138,3 @@ function fetchAllAndSetFields(frm, cdt, cdn) {
 
 	});
 }
-
-
-/*
-frappe.ui.form.on('Field Sequence', {
-	refresh: function(frm) {
-		if (frm.doc.doc_type) {
-			// Fetch and set fields when the DocType is changed
-			fetchAndSetFields(frm);
-		}
-	},
-	doc_type: function(frm) {
-		// Fetch and set fields when the DocType is changed
-		fetchAndSetFields(frm);
-	}
-});
-
-frappe.ui.form.on('Field Sequence Table', {
-	field_sequence_table_add: function(frm, cdt, cdn) {
-		// Fetch and set fields when a new row is added to the child table
-		fetchAndSetFields(frm, cdt, cdn);
-	}
-});
-
-function fetchAndSetFields(frm, cdt, cdn) {
-	// Get the selected DocType
-	let selectedDocType = frm.doc.doc_type;
-
-	// Fetch the fields of the selected DocType
-	frappe.model.with_doctype(selectedDocType, function() {
-		let fields = frappe.get_meta(selectedDocType).fields;
-
-		// Extract Section Break and Column Break field names
-		let sectionBreakFieldNames = [];
-		let columnBreakFieldNames = [];
-
-		// Extract other field names for child table
-		let childTableFieldNames = [];
-
-		fields.forEach(function(field) {
-			console.log("------------", field.idx)
-			if (field.fieldtype === 'Section Break') {
-				sectionBreakFieldNames.push(field.fieldname);
-			} else if (field.fieldtype === 'Column Break') {
-				columnBreakFieldNames.push(field.fieldname);
-			} else if (field.is_custom_field) {
-				childTableFieldNames.push(field.fieldname);
-			}
-		});
-
-		// Set the options for the Select field in the parent form
-		frm.set_df_property("add_fields_before_section", "options", [""].concat(sectionBreakFieldNames, columnBreakFieldNames));
-
-		// Set the options for the Select field in the child table
-		frm.fields_dict.field_sequence_table.grid.update_docfield_property(
-				"field_name",
-				"options",
-				[""].concat(sectionBreakFieldNames, columnBreakFieldNames, childTableFieldNames)
-			);
-	});
-}
-*/

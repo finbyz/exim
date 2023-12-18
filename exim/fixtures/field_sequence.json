@@ -4,13 +4,12 @@
   "doc_type": "Sales Order",
   "docstatus": 0,
   "doctype": "Field Sequence",
-  "field_order_list": null,
   "field_sequence_table": [
    {
     "doc_type": "Sales Order",
     "field_name": "shipping_details",
     "module": "Exim",
-    "parent": "Sales Order-Exim",
+    "parent": "Sales Order",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -18,7 +17,7 @@
     "doc_type": "Sales Order",
     "field_name": "shipping_terms",
     "module": "Exim",
-    "parent": "Sales Order-Exim",
+    "parent": "Sales Order",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -26,7 +25,7 @@
     "doc_type": "Sales Order",
     "field_name": "port_of_loading",
     "module": "Exim",
-    "parent": "Sales Order-Exim",
+    "parent": "Sales Order",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -34,7 +33,7 @@
     "doc_type": "Sales Order",
     "field_name": "port_of_discharge",
     "module": "Exim",
-    "parent": "Sales Order-Exim",
+    "parent": "Sales Order",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -42,7 +41,7 @@
     "doc_type": "Sales Order",
     "field_name": "freight",
     "module": "Exim",
-    "parent": "Sales Order-Exim",
+    "parent": "Sales Order",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -50,7 +49,7 @@
     "doc_type": "Sales Order",
     "field_name": "commission",
     "module": "Exim",
-    "parent": "Sales Order-Exim",
+    "parent": "Sales Order",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -58,7 +57,7 @@
     "doc_type": "Sales Order",
     "field_name": "marks_and_no",
     "module": "Exim",
-    "parent": "Sales Order-Exim",
+    "parent": "Sales Order",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -66,7 +65,7 @@
     "doc_type": "Sales Order",
     "field_name": "cb",
     "module": "Exim",
-    "parent": "Sales Order-Exim",
+    "parent": "Sales Order",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -74,7 +73,7 @@
     "doc_type": "Sales Order",
     "field_name": "country_of_origin",
     "module": "Exim",
-    "parent": "Sales Order-Exim",
+    "parent": "Sales Order",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -82,7 +81,7 @@
     "doc_type": "Sales Order",
     "field_name": "country_of_destination",
     "module": "Exim",
-    "parent": "Sales Order-Exim",
+    "parent": "Sales Order",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -90,7 +89,7 @@
     "doc_type": "Sales Order",
     "field_name": "pre_carriage_by",
     "module": "Exim",
-    "parent": "Sales Order-Exim",
+    "parent": "Sales Order",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -98,7 +97,7 @@
     "doc_type": "Sales Order",
     "field_name": "place_of_precarrier",
     "module": "Exim",
-    "parent": "Sales Order-Exim",
+    "parent": "Sales Order",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -106,7 +105,7 @@
     "doc_type": "Sales Order",
     "field_name": "shipping_instructions",
     "module": "Exim",
-    "parent": "Sales Order-Exim",
+    "parent": "Sales Order",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -114,7 +113,7 @@
     "doc_type": "Sales Order",
     "field_name": "requirement_of_sample_approval",
     "module": "Exim",
-    "parent": "Sales Order-Exim",
+    "parent": "Sales Order",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -122,7 +121,7 @@
     "doc_type": "Sales Order",
     "field_name": "my_bank_account",
     "module": "Exim",
-    "parent": "Sales Order-Exim",
+    "parent": "Sales Order",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -130,28 +129,25 @@
     "doc_type": "Sales Order",
     "field_name": "bank_account",
     "module": "Exim",
-    "parent": "Sales Order-Exim",
+    "parent": "Sales Order",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    }
   ],
   "modified": "2023-12-12 10:20:59.921650",
-  "module": "Exim",
-  "name": "Sales Order-Exim",
-  "update_field_order": 0
+  "name": "Sales Order"
  },
  {
   "add_fields_before_section": "drop_ship_section",
   "doc_type": "Sales Order Item",
   "docstatus": 0,
   "doctype": "Field Sequence",
-  "field_order_list": null,
   "field_sequence_table": [
    {
     "doc_type": "Sales Order Item",
     "field_name": "shipment_details",
     "module": "Exim",
-    "parent": "Sales Order Item-Exim",
+    "parent": "Sales Order Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -159,7 +155,7 @@
     "doc_type": "Sales Order Item",
     "field_name": "tare_wt",
     "module": "Exim",
-    "parent": "Sales Order Item-Exim",
+    "parent": "Sales Order Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -167,7 +163,7 @@
     "doc_type": "Sales Order Item",
     "field_name": "gross_wt",
     "module": "Exim",
-    "parent": "Sales Order Item-Exim",
+    "parent": "Sales Order Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -175,7 +171,7 @@
     "doc_type": "Sales Order Item",
     "field_name": "total_pallets",
     "module": "Exim",
-    "parent": "Sales Order Item-Exim",
+    "parent": "Sales Order Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -183,28 +179,25 @@
     "doc_type": "Sales Order Item",
     "field_name": "column_break_18",
     "module": "Exim",
-    "parent": "Sales Order Item-Exim",
+    "parent": "Sales Order Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    }
   ],
   "modified": "2023-12-12 10:41:28.287246",
-  "module": "Exim",
-  "name": "Sales Order Item-Exim",
-  "update_field_order": 0
+  "name": "Sales Order Item"
  },
  {
   "add_fields_before_section": "taxes_section",
   "doc_type": "Delivery Note",
   "docstatus": 0,
   "doctype": "Field Sequence",
-  "field_order_list": null,
   "field_sequence_table": [
    {
     "doc_type": "Delivery Note",
     "field_name": "duty_calculation",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -212,7 +205,7 @@
     "doc_type": "Delivery Note",
     "field_name": "total_fob_value",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -220,7 +213,7 @@
     "doc_type": "Delivery Note",
     "field_name": "total_duty_drawback",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -228,7 +221,7 @@
     "doc_type": "Delivery Note",
     "field_name": "column_break",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -236,7 +229,7 @@
     "doc_type": "Delivery Note",
     "field_name": "total_net_wt",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -244,7 +237,7 @@
     "doc_type": "Delivery Note",
     "field_name": "insurance",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -252,7 +245,7 @@
     "doc_type": "Delivery Note",
     "field_name": "freight",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -260,7 +253,7 @@
     "doc_type": "Delivery Note",
     "field_name": "exim_packing_details",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -268,7 +261,7 @@
     "doc_type": "Delivery Note",
     "field_name": "total_gross_wt",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -276,7 +269,7 @@
     "doc_type": "Delivery Note",
     "field_name": "total_tare_wt",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -284,7 +277,7 @@
     "doc_type": "Delivery Note",
     "field_name": "total_pallets",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -292,7 +285,7 @@
     "doc_type": "Delivery Note",
     "field_name": "exim_pack_details_col",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -300,7 +293,7 @@
     "doc_type": "Delivery Note",
     "field_name": "total_packages",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -308,7 +301,7 @@
     "doc_type": "Delivery Note",
     "field_name": "weight_after_palletization",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -316,7 +309,7 @@
     "doc_type": "Delivery Note",
     "field_name": "gross_weight_with_pallet",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -324,7 +317,7 @@
     "doc_type": "Delivery Note",
     "field_name": "shipping_details",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -332,7 +325,7 @@
     "doc_type": "Delivery Note",
     "field_name": "shipping_terms",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -340,7 +333,7 @@
     "doc_type": "Delivery Note",
     "field_name": "port_of_loading",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -348,7 +341,7 @@
     "doc_type": "Delivery Note",
     "field_name": "port_of_discharge",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -356,7 +349,7 @@
     "doc_type": "Delivery Note",
     "field_name": "final_destination",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -364,7 +357,7 @@
     "doc_type": "Delivery Note",
     "field_name": "pre_carriage_by",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -372,7 +365,7 @@
     "doc_type": "Delivery Note",
     "field_name": "place_of_precarrier",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -380,7 +373,7 @@
     "doc_type": "Delivery Note",
     "field_name": "bl_no",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -388,7 +381,7 @@
     "doc_type": "Delivery Note",
     "field_name": "cb",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -396,7 +389,7 @@
     "doc_type": "Delivery Note",
     "field_name": "vessel_no",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -404,7 +397,7 @@
     "doc_type": "Delivery Note",
     "field_name": "country_of_origin",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -412,7 +405,7 @@
     "doc_type": "Delivery Note",
     "field_name": "country_of_destination",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -420,7 +413,7 @@
     "doc_type": "Delivery Note",
     "field_name": "number_of_containers",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -428,7 +421,7 @@
     "doc_type": "Delivery Note",
     "field_name": "container_size",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -436,7 +429,7 @@
     "doc_type": "Delivery Note",
     "field_name": "movement",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -444,7 +437,7 @@
     "doc_type": "Delivery Note",
     "field_name": "bl_date",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -452,7 +445,7 @@
     "doc_type": "Delivery Note",
     "field_name": "column_break_142",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -460,7 +453,7 @@
     "doc_type": "Delivery Note",
     "field_name": "lut_no",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -468,7 +461,7 @@
     "doc_type": "Delivery Note",
     "field_name": "arn_no",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -476,7 +469,7 @@
     "doc_type": "Delivery Note",
     "field_name": "print_rex_declaration",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -484,7 +477,7 @@
     "doc_type": "Delivery Note",
     "field_name": "extra_text",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -492,7 +485,7 @@
     "doc_type": "Delivery Note",
     "field_name": "invoice_copy",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -500,7 +493,7 @@
     "doc_type": "Delivery Note",
     "field_name": "export_type",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -508,7 +501,7 @@
     "doc_type": "Delivery Note",
     "field_name": "container_details",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -516,7 +509,7 @@
     "doc_type": "Delivery Note",
     "field_name": "container_detail",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -524,7 +517,7 @@
     "doc_type": "Delivery Note",
     "field_name": "my_bank_account",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -532,28 +525,25 @@
     "doc_type": "Delivery Note",
     "field_name": "bank_account",
     "module": "Exim",
-    "parent": "Delivery Note-Exim",
+    "parent": "Delivery Note",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    }
   ],
   "modified": "2023-12-12 09:53:25.137797",
-  "module": "Exim",
-  "name": "Delivery Note-Exim",
-  "update_field_order": 0
+  "name": "Delivery Note"
  },
  {
   "add_fields_before_section": "quantity_and_rate",
   "doc_type": "Delivery Note Item",
   "docstatus": 0,
   "doctype": "Field Sequence",
-  "field_order_list": null,
   "field_sequence_table": [
    {
     "doc_type": "Delivery Note Item",
     "field_name": "duty_calculation",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -561,7 +551,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "effective_rate",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -569,7 +559,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "duty_drawback_rate",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -577,7 +567,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "insurance",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -585,7 +575,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "freight",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -593,7 +583,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "column_break_38",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -601,7 +591,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "maximum_cap",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -609,7 +599,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "capped_amount",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -617,7 +607,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "duty_drawback_amount",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -625,7 +615,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "fob_value",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -633,7 +623,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "igst_rate",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -641,7 +631,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "igst_amount",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -649,7 +639,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "advanced_authorization_details",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -657,7 +647,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "advance_authorisation_license",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -665,7 +655,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "license_qty",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -673,7 +663,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "license_remaining_qty",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -681,7 +671,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "column_break_15",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -689,7 +679,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "license_amount",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -697,7 +687,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "license_remaining_amount",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -705,7 +695,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "shipment_details_item",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -713,7 +703,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "no_of_packages",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -721,7 +711,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "packages_from",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -729,7 +719,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "packages_to",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -737,7 +727,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "tare_wt",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -745,7 +735,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "gross_wt",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -753,7 +743,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "column_break_22",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -761,7 +751,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "palleted",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -769,7 +759,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "pallet_size",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -777,7 +767,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "total_pallets",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -785,7 +775,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "pallet_no_from",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -793,7 +783,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "pallet_no_to",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -801,7 +791,7 @@
     "doc_type": "Delivery Note Item",
     "field_name": "total_tare_weight",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -809,28 +799,25 @@
     "doc_type": "Delivery Note Item",
     "field_name": "total_tare_wt",
     "module": "Exim",
-    "parent": "Delivery Note Item-Exim",
+    "parent": "Delivery Note Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    }
   ],
   "modified": "2023-12-12 11:26:16.722673",
-  "module": "Exim",
-  "name": "Delivery Note Item-Exim",
-  "update_field_order": 0
+  "name": "Delivery Note Item"
  },
  {
   "add_fields_before_section": "taxes_section",
   "doc_type": "Sales Invoice",
   "docstatus": 0,
   "doctype": "Field Sequence",
-  "field_order_list": "[\"customer_section\", \"title\", \"naming_series\", \"customer\", \"irn\", \"customer_name\", \"invoice_no\", \"ewaybill\", \"e_waybill_status\", \"tax_id\", \"company\", \"company_tax_id\", \"column_break1\", \"series_value\", \"posting_date\", \"posting_time\", \"set_posting_time\", \"due_date\", \"custom_order_no\", \"column_break_14\", \"is_pos\", \"pos_profile\", \"purchase_invoice\", \"is_consolidated\", \"is_return\", \"return_against\", \"reason_for_issuing_document\", \"update_billed_amount_in_sales_order\", \"update_billed_amount_in_delivery_note\", \"is_debit_note\", \"is_reverse_charge\", \"is_export_with_gst\", \"amended_from\", \"accounting_dimensions_section\", \"cost_center\", \"dimension_col_break\", \"project\", \"currency_and_price_list\", \"currency\", \"conversion_rate\", \"column_break2\", \"selling_price_list\", \"price_list_currency\", \"plc_conversion_rate\", \"ignore_pricing_rule\", \"items_section\", \"scan_barcode\", \"update_stock\", \"column_break_39\", \"set_warehouse\", \"set_target_warehouse\", \"section_break_42\", \"items\", \"section_break_30\", \"total_qty\", \"total_net_weight\", \"column_break_32\", \"base_total\", \"base_net_total\", \"column_break_52\", \"total\", \"net_total\", \"duty_calculation\", \"freight\", \"total_fob_value\", \"total_freight\", \"insurance\", \"column_break_skkyy\", \"total_duty_drawback\", \"total_meis\", \"fob_calculation\", \"drawback_received\", \"duty_drawback_jv\", \"meis_jv\", \"hedging_details\", \"natural_hedge\", \"column_break_95\", \"amount_unhedged\", \"column_break_gcgvm\", \"amount_hedged\", \"exim_packing_details\", \"total_gr_wt\", \"total_tare_wt\", \"total_pallets\", \"dbk_sr_no\", \"column_break_174\", \"total_packages\", \"weight_after_palletization\", \"gross_weight_with_pallet\", \"marks_and_no\", \"exim_shipping_details\", \"shipping_terms\", \"port_of_loading\", \"port_of_discharge\", \"final_destination\", \"pre_carriage_by\", \"place_of_precarrier\", \"bl_no\", \"bl_date\", \"column_break_vxlbn\", \"vessel_no\", \"country_of_origin\", \"country_of_destination\", \"number_of_containers\", \"container_size\", \"movement\", \"column_break_dnokv\", \"arn_no\", \"print_rex_declaration\", \"container_details\", \"container_detail\", \"export_documents\", \"sales_invoice_contract_term_check\", \"preferential_agreement_details\", \"my_bank_account\", \"bank_account\", \"shipping_details\", \"sales_invoice_export_document_item\", \"maturity_date\", \"taxes_section\", \"tax_category\", \"taxes_and_charges\", \"column_break_38\", \"shipping_rule\", \"column_break_55\", \"incoterm\", \"contract_and_lc\", \"named_place\", \"section_break_40\", \"taxes\", \"section_break_43\", \"base_total_taxes_and_charges\", \"column_break_47\", \"total_taxes_and_charges\", \"totals\", \"base_grand_total\", \"base_rounding_adjustment\", \"base_rounded_total\", \"base_in_words\", \"column_break5\", \"grand_total\", \"rounding_adjustment\", \"use_company_roundoff_cost_center\", \"rounded_total\", \"in_words\", \"total_advance\", \"outstanding_amount\", \"disable_rounded_total\", \"section_break_49\", \"apply_discount_on\", \"base_discount_amount\", \"is_cash_or_non_trade_discount\", \"additional_discount_account\", \"column_break_51\", \"additional_discount_percentage\", \"discount_amount\", \"sec_tax_breakup\", \"other_charges_calculation\", \"pricing_rule_details\", \"pricing_rules\", \"packing_list\", \"packed_items\", \"product_bundle_help\", \"time_sheet_list\", \"timesheets\", \"section_break_104\", \"total_billing_hours\", \"column_break_106\", \"total_billing_amount\", \"payments_tab\", \"payments_section\", \"cash_bank_account\", \"payments\", \"section_break_84\", \"base_paid_amount\", \"column_break_86\", \"paid_amount\", \"section_break_88\", \"base_change_amount\", \"column_break_90\", \"change_amount\", \"account_for_change_amount\", \"advances_section\", \"allocate_advances_automatically\", \"only_include_allocated_payments\", \"get_advances\", \"advances\", \"write_off_section\", \"write_off_amount\", \"base_write_off_amount\", \"write_off_outstanding_amount_automatically\", \"column_break_74\", \"write_off_account\", \"write_off_cost_center\", \"loyalty_points_redemption\", \"redeem_loyalty_points\", \"loyalty_points\", \"loyalty_amount\", \"column_break_77\", \"loyalty_program\", \"loyalty_redemption_account\", \"loyalty_redemption_cost_center\", \"contact_and_address_tab\", \"address_and_contact\", \"customer_address\", \"address_display\", \"billing_address_gstin\", \"gst_category\", \"gst_taxable_value\", \"place_of_supply\", \"col_break4\", \"contact_person\", \"contact_display\", \"contact_mobile\", \"contact_email\", \"territory\", \"shipping_address_section\", \"shipping_address_name\", \"shipping_address\", \"port_address\", \"shipping_addr_col_break\", \"dispatch_address_name\", \"dispatch_address\", \"company_address_section\", \"company_address\", \"company_gstin\", \"company_addr_col_break\", \"company_address_display\", \"terms_tab\", \"payment_schedule_section\", \"ignore_default_payment_terms_template\", \"payment_terms_template\", \"payment_schedule\", \"terms_section_break\", \"tc_name\", \"terms\", \"more_info_tab\", \"customer_po_details\", \"po_no\", \"column_break_23\", \"po_date\", \"more_info\", \"debit_to\", \"party_account_currency\", \"is_opening\", \"column_break8\", \"unrealized_profit_loss_account\", \"against_income_account\", \"sales_team_section_break\", \"sales_partner\", \"amount_eligible_for_commission\", \"column_break10\", \"commission_rate\", \"total_commission\", \"section_break2\", \"sales_team\", \"edit_printing_settings\", \"letter_head\", \"group_same_items\", \"column_break_84\", \"invoice_copy\", \"select_print_heading\", \"language\", \"transporter_info\", \"transporter\", \"gst_transporter_id\", \"driver\", \"lr_no\", \"vehicle_no\", \"distance\", \"transporter_col_break\", \"transporter_name\", \"mode_of_transport\", \"driver_name\", \"lr_date\", \"gst_vehicle_type\", \"gst_section\", \"ecommerce_gstin\", \"gst_col_break\", \"port_code\", \"shipping_bill_number\", \"shipping_bill_date\", \"subscription_section\", \"from_date\", \"auto_repeat\", \"column_break_140\", \"to_date\", \"update_auto_repeat_reference\", \"more_information\", \"status\", \"einvoice_status\", \"inter_company_invoice_reference\", \"campaign\", \"represents_company\", \"source\", \"customer_group\", \"col_break23\", \"is_internal_customer\", \"is_discounted\", \"remarks\", \"repost_required\", \"connections_tab\"]",
   "field_sequence_table": [
    {
     "doc_type": "Sales Invoice",
     "field_name": "duty_calculation",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -838,7 +825,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "freight",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -846,7 +833,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "total_fob_value",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -854,7 +841,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "total_freight",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -862,7 +849,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "insurance",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -870,7 +857,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "column_break_skkyy",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -878,7 +865,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "total_duty_drawback",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -886,7 +873,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "total_meis",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -894,7 +881,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "fob_calculation",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -902,7 +889,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "drawback_received",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -910,7 +897,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "duty_drawback_jv",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -918,7 +905,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "meis_jv",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -926,7 +913,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "hedging_details",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -934,7 +921,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "natural_hedge",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -942,7 +929,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "column_break_95",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -950,7 +937,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "amount_unhedged",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -958,7 +945,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "column_break_gcgvm",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -966,7 +953,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "amount_hedged",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -974,7 +961,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "exim_packing_details",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -982,7 +969,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "total_gr_wt",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -990,7 +977,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "total_tare_wt",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -998,7 +985,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "total_pallets",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1006,7 +993,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "dbk_sr_no",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1014,7 +1001,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "column_break_174",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1022,7 +1009,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "total_packages",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1030,7 +1017,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "pallet_weight",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1038,7 +1025,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "weight_after_palletization",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1046,7 +1033,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "gross_weight_with_pallet",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1054,7 +1041,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "marks_and_no",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1062,7 +1049,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "exim_shipping_details",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1070,7 +1057,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "shipping_terms",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1078,7 +1065,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "port_of_loading",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1086,7 +1073,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "port_of_discharge",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1094,7 +1081,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "final_destination",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1102,7 +1089,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "pre_carriage_by",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1110,7 +1097,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "place_of_precarrier",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1118,7 +1105,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "bl_no",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1126,7 +1113,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "bl_date",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1134,7 +1121,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "column_break_vxlbn",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1142,7 +1129,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "vessel_no",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1150,7 +1137,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "country_of_origin",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1158,7 +1145,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "country_of_destination",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1166,7 +1153,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "number_of_containers",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1174,7 +1161,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "container_size",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1182,7 +1169,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "movement",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1190,7 +1177,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "column_break_dnokv",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1198,7 +1185,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "arn_no",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1206,7 +1193,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "print_rex_declaration",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1214,7 +1201,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "container_details",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1222,7 +1209,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "container_detail",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1230,7 +1217,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "export_documents",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1238,7 +1225,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "sales_invoice_contract_term_check",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1246,7 +1233,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "preferential_agreement_details",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1254,7 +1241,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "my_bank_account",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1262,7 +1249,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "bank_account",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1270,7 +1257,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "shipping_details",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1278,7 +1265,7 @@
     "doc_type": "Sales Invoice",
     "field_name": "sales_invoice_export_document_item",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1286,28 +1273,25 @@
     "doc_type": "Sales Invoice",
     "field_name": "maturity_date",
     "module": "Exim",
-    "parent": "Sales Invoice-Exim",
+    "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    }
   ],
   "modified": "2023-12-14 10:50:16.250173",
-  "module": "Exim",
-  "name": "Sales Invoice-Exim",
-  "update_field_order": 0
+  "name": "Sales Invoice"
  },
  {
   "add_fields_before_section": "quantity_and_rate",
   "doc_type": "Sales Invoice Item",
   "docstatus": 0,
   "doctype": "Field Sequence",
-  "field_order_list": null,
   "field_sequence_table": [
    {
     "doc_type": "Sales Invoice Item",
     "field_name": "duty_calculation",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1315,7 +1299,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "effective_rate",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1323,7 +1307,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "duty_drawback_rate",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1331,7 +1315,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "meis_rate",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1339,7 +1323,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "insurance",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1347,7 +1331,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "freight",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1355,7 +1339,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "cb",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1363,7 +1347,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "maximum_cap",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1371,7 +1355,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "capped_rate",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1379,7 +1363,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "capped_amount",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1387,7 +1371,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "duty_drawback_amount",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1395,7 +1379,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "meis_value",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1403,7 +1387,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "fob_value",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1411,7 +1395,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "igst_rate",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1419,7 +1403,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "igst_amount",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1427,7 +1411,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "advanced_authorization_details",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1435,7 +1419,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "advance_authorisation_license",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1443,7 +1427,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "license_qty",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1451,7 +1435,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "license_remaining_qty",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1459,7 +1443,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "column_break_15",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1467,7 +1451,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "license_amount",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1475,7 +1459,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "license_remaining_amount",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1483,7 +1467,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "shipment_details_items",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1491,7 +1475,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "no_of_packages",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1499,7 +1483,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "packages_from",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1507,7 +1491,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "packages_to",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1515,7 +1499,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "tare_wt",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1523,7 +1507,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "total_tare_weight",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1531,7 +1515,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "gross_wt",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1539,7 +1523,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "total_tare_wt",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1547,7 +1531,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "column_break_1vwb7",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1555,7 +1539,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "palleted",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1563,7 +1547,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "pallet_size",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1571,7 +1555,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "total_pallets",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1579,7 +1563,7 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "pallet_no_from",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    },
@@ -1587,14 +1571,12 @@
     "doc_type": "Sales Invoice Item",
     "field_name": "pallet_no_to",
     "module": "Exim",
-    "parent": "Sales Invoice Item-Exim",
+    "parent": "Sales Invoice Item",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
    }
   ],
   "modified": "2023-12-12 11:30:09.610523",
-  "module": "Exim",
-  "name": "Sales Invoice Item-Exim",
-  "update_field_order": 0
+  "name": "Sales Invoice Item"
  }
 ]
