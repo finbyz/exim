@@ -13,6 +13,5 @@ class FieldSequence(Document):
 	def validate(self):
 		for row in self.get('field_sequence_table'):
 			row.doc_type = self.doc_type
-			row.module = self.module
 			if row.field_name == self.add_fields_before_section:
 				frappe.throw("You can't select the <b>" +row.field_name+"</b> in the Field Sequence Table.")

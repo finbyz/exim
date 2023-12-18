@@ -8,8 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "field_name",
-  "doc_type",
-  "module"
+  "doc_type"
  ],
  "fields": [
   {
@@ -25,19 +24,12 @@
    "label": "Doc Type",
    "options": "DocType",
    "read_only": 1
-  },
-  {
-   "fieldname": "module",
-   "fieldtype": "Link",
-   "label": "Module",
-   "options": "Module Def",
-   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-12-11 10:06:11.406630",
+ "modified": "2023-12-18 17:58:53.799357",
  "modified_by": "Administrator",
  "module": "Exim",
  "name": "Field Sequence Table",
