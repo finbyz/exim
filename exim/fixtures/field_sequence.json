@@ -782,6 +782,20 @@
    },
    {
     "doc_type": "Sales Invoice",
+    "field_name": "manually_enter_fob_value",
+    "parent": "Sales Invoice",
+    "parentfield": "field_sequence_table",
+    "parenttype": "Field Sequence"
+   },
+   {
+    "doc_type": "Sales Invoice",
+    "field_name": "freight_calculated",
+    "parent": "Sales Invoice",
+    "parentfield": "field_sequence_table",
+    "parenttype": "Field Sequence"
+   },
+   {
+    "doc_type": "Sales Invoice",
     "field_name": "drawback_received",
     "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
@@ -1124,7 +1138,7 @@
     "parenttype": "Field Sequence"
    }
   ],
-  "modified": "2023-12-23 13:07:56.573586",
+  "modified": "2024-01-01 16:40:58.055565",
   "name": "Sales Invoice"
  },
  {

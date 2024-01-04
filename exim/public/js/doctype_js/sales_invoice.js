@@ -175,7 +175,7 @@ frappe.ui.form.on("Sales Invoice", {
 		});
     }, */
     before_save: function (frm) {
-        frm.trigger("cal_total");
+        // frm.trigger("cal_total");
         // frm.trigger("box_cal");
 
         //EXIM
