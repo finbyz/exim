@@ -166,7 +166,7 @@ def cal_total_fob_value(self):
 			row.fob_value = flt(row.base_amount - row.freight - row.insurance)
 		if row.fob_value:
 			total_fob += flt(row.fob_value)
-	self.total_fob_value = flt(flt(total_fob) - (flt(self.freight) * flt(self.conversion_rate)) -(flt(self.insurance) * flt(self.conversion_rate)))
+	self.total_fob_value = flt(flt(total_fob) - (flt(self.total_freight) * flt(self.conversion_rate)) -(flt(self.insurance) * flt(self.conversion_rate)))
 	
 	
 def meis_calculation(self):
