@@ -122,9 +122,8 @@ after_migrate = ["exim.exim.doc_events.update_field_order.after_migrate"]
 
 # before_tests = "exim.install.before_tests"
 
-override_doctype_class = {
-    "Customize Form": "exim.exim.override.customize_form.CustomizeForm",
-}
+# override_doctype_class = {
+# }
 
 # payment term override
 from exim.api import get_due_date
