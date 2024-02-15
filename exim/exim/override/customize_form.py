@@ -1,9 +1,9 @@
 import frappe
-from frappe.custom.doctype.customize_form.customize_form import CustomizeForm
+from india_compliance.audit_trail.overrides.customize_form import CustomizeForm as _CustomizeForm
 from frappe.custom.doctype.property_setter.property_setter import delete_property_setter
 import json
 
-class CustomCustomizeForm(CustomizeForm):
+class CustomizeForm(_CustomizeForm):
 	def set_property_setter_for_field_order(self, meta):
 		new_order = [df.fieldname for df in self.fields]
 

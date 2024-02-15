@@ -10,6 +10,8 @@
  "field_order": [
   "doc_type",
   "add_fields_before_section",
+  "apply_changes",
+  "module",
   "field_sequence_section",
   "field_sequence_table"
  ],
@@ -41,11 +43,23 @@
    "fieldname": "field_sequence_section",
    "fieldtype": "Section Break",
    "label": "Field Sequence"
+  },
+  {
+   "default": "0",
+   "fieldname": "apply_changes",
+   "fieldtype": "Check",
+   "label": "Apply Changes"
+  },
+  {
+   "fieldname": "module",
+   "fieldtype": "Link",
+   "label": "Module (For Export)",
+   "options": "Module Def"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-12-15 10:55:44.930896",
+ "modified": "2024-02-15 12:29:20.291697",
  "modified_by": "Administrator",
  "module": "Exim",
  "name": "Field Sequence",

@@ -1,6 +1,7 @@
 [
  {
   "add_fields_before_section": "taxes_section",
+  "apply_changes": 1,
   "doc_type": "Sales Order",
   "docstatus": 0,
   "doctype": "Field Sequence",
@@ -118,11 +119,13 @@
     "parenttype": "Field Sequence"
    }
   ],
-  "modified": "2023-12-12 10:20:59.921650",
+  "modified": "2024-02-15 12:37:30.519824",
+  "module": "Exim",
   "name": "Sales Order"
  },
  {
   "add_fields_before_section": "drop_ship_section",
+  "apply_changes": 1,
   "doc_type": "Sales Order Item",
   "docstatus": 0,
   "doctype": "Field Sequence",
@@ -163,11 +166,13 @@
     "parenttype": "Field Sequence"
    }
   ],
-  "modified": "2023-12-12 10:41:28.287246",
+  "modified": "2024-02-15 12:37:31.056497",
+  "module": "Exim",
   "name": "Sales Order Item"
  },
  {
   "add_fields_before_section": "taxes_section",
+  "apply_changes": 1,
   "doc_type": "Delivery Note",
   "docstatus": 0,
   "doctype": "Field Sequence",
@@ -467,11 +472,13 @@
     "parenttype": "Field Sequence"
    }
   ],
-  "modified": "2023-12-12 09:53:25.137797",
+  "modified": "2024-02-15 12:37:30.740167",
+  "module": "Exim",
   "name": "Delivery Note"
  },
  {
   "add_fields_before_section": "quantity_and_rate",
+  "apply_changes": 1,
   "doc_type": "Delivery Note Item",
   "docstatus": 0,
   "doctype": "Field Sequence",
@@ -708,11 +715,13 @@
     "parenttype": "Field Sequence"
    }
   ],
-  "modified": "2023-12-12 11:26:16.722673",
+  "modified": "2024-02-15 12:37:30.257418",
+  "module": "Exim",
   "name": "Delivery Note Item"
  },
  {
   "add_fields_before_section": "taxes_section",
+  "apply_changes": 1,
   "doc_type": "Sales Invoice",
   "docstatus": 0,
   "doctype": "Field Sequence",
@@ -1138,11 +1147,13 @@
     "parenttype": "Field Sequence"
    }
   ],
-  "modified": "2024-01-01 16:40:58.055565",
+  "modified": "2024-02-15 12:37:29.613074",
+  "module": "Exim",
   "name": "Sales Invoice"
  },
  {
   "add_fields_before_section": "quantity_and_rate",
+  "apply_changes": 1,
   "doc_type": "Sales Invoice Item",
   "docstatus": 0,
   "doctype": "Field Sequence",
@@ -1400,7 +1411,8 @@
     "parenttype": "Field Sequence"
    }
   ],
-  "modified": "2023-12-12 11:30:09.610523",
+  "modified": "2024-02-15 12:37:30.041121",
+  "module": "Exim",
   "name": "Sales Invoice Item"
  }
 ]
