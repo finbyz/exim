@@ -119,7 +119,7 @@
     "parenttype": "Field Sequence"
    }
   ],
-  "modified": "2024-02-15 12:37:30.519824",
+  "modified": "2024-02-16 14:28:46.062244",
   "module": "Exim",
   "name": "Sales Order"
  },
@@ -166,7 +166,7 @@
     "parenttype": "Field Sequence"
    }
   ],
-  "modified": "2024-02-15 12:37:31.056497",
+  "modified": "2024-02-16 14:29:07.053234",
   "module": "Exim",
   "name": "Sales Order Item"
  },
@@ -472,7 +472,7 @@
     "parenttype": "Field Sequence"
    }
   ],
-  "modified": "2024-02-15 12:37:30.740167",
+  "modified": "2024-02-16 14:28:51.646728",
   "module": "Exim",
   "name": "Delivery Note"
  },
@@ -715,7 +715,7 @@
     "parenttype": "Field Sequence"
    }
   ],
-  "modified": "2024-02-15 12:37:30.257418",
+  "modified": "2024-02-16 14:28:39.890509",
   "module": "Exim",
   "name": "Delivery Note Item"
  },
@@ -1147,7 +1147,7 @@
     "parenttype": "Field Sequence"
    }
   ],
-  "modified": "2024-02-15 12:37:29.613074",
+  "modified": "2024-02-16 14:28:58.782048",
   "module": "Exim",
   "name": "Sales Invoice"
  },
@@ -1411,7 +1411,7 @@
     "parenttype": "Field Sequence"
    }
   ],
-  "modified": "2024-02-15 12:37:30.041121",
+  "modified": "2024-02-16 14:28:29.662379",
   "module": "Exim",
   "name": "Sales Invoice Item"
  }
