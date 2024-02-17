@@ -340,7 +340,7 @@ frappe.ui.form.on("Sales Invoice", {
                     total_fob_value += flt(d.fob_value);
                 });
                
-                frm.set_value("total_fob_value", flt(total_fob_value - flt(frm.doc.total_freight * frm.doc.conversion_rate) - flt(frm.doc.insurance * frm.doc.conversion_rate)));
+                frm.set_value("total_fob_value", flt(total_fob_value - flt(frm.doc.freight * frm.doc.conversion_rate) - flt(frm.doc.insurance * frm.doc.conversion_rate)));
           
             } 
         })
