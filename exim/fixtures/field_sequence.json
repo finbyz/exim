@@ -1,7 +1,7 @@
 [
  {
   "add_fields_before_section": "taxes_section",
-  "apply_changes": 1,
+  "apply_changes": 0,
   "doc_type": "Sales Order",
   "docstatus": 0,
   "doctype": "Field Sequence",
@@ -125,7 +125,7 @@
  },
  {
   "add_fields_before_section": "drop_ship_section",
-  "apply_changes": 1,
+  "apply_changes": 0,
   "doc_type": "Sales Order Item",
   "docstatus": 0,
   "doctype": "Field Sequence",
@@ -172,7 +172,7 @@
  },
  {
   "add_fields_before_section": "taxes_section",
-  "apply_changes": 1,
+  "apply_changes": 0,
   "doc_type": "Delivery Note",
   "docstatus": 0,
   "doctype": "Field Sequence",
@@ -478,7 +478,7 @@
  },
  {
   "add_fields_before_section": "quantity_and_rate",
-  "apply_changes": 1,
+  "apply_changes": 0,
   "doc_type": "Delivery Note Item",
   "docstatus": 0,
   "doctype": "Field Sequence",
@@ -721,7 +721,7 @@
  },
  {
   "add_fields_before_section": "taxes_section",
-  "apply_changes": 1,
+  "apply_changes": 0,
   "doc_type": "Sales Invoice",
   "docstatus": 0,
   "doctype": "Field Sequence",
@@ -735,13 +735,6 @@
    },
    {
     "doc_type": "Sales Invoice",
-    "field_name": "freight",
-    "parent": "Sales Invoice",
-    "parentfield": "field_sequence_table",
-    "parenttype": "Field Sequence"
-   },
-   {
-    "doc_type": "Sales Invoice",
     "field_name": "total_fob_value",
     "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
@@ -749,7 +742,7 @@
    },
    {
     "doc_type": "Sales Invoice",
-    "field_name": "total_freight",
+    "field_name": "freight",
     "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
@@ -1153,7 +1146,7 @@
  },
  {
   "add_fields_before_section": "quantity_and_rate",
-  "apply_changes": 1,
+  "apply_changes": 0,
   "doc_type": "Sales Invoice Item",
   "docstatus": 0,
   "doctype": "Field Sequence",
