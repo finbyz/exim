@@ -14,9 +14,9 @@ def cal_total(self, method):
 
     for d in self.items:
         if self.freight_calculated == "By Qty":
-            d.freight = (d.qty * self.total_freight) / self.total_qty
+            d.freight = (d.qty * self.freight) / self.total_qty
         elif self.freight_calculated == "By Amount":
-            d.freight = (d.base_amount * self.total_freight) / self.base_total
+            d.freight = (d.base_amount * self.freight) / self.base_total
         elif self.freight_calculated == "Manual":
             total_freight += flt(d.freight)
         total_qty += flt(d.qty)
@@ -43,7 +43,7 @@ def cal_total(self, method):
     self.total_gr_wt = total_gr_wt
     self.total_tare_wt = total_tare_wt
     if self.freight_calculated == "Manual":
-        self.total_freight = total_freight
+        self.freight = total_freight
     self.insurance = total_insurance
     self.total_fob = self.total_fob_value / self.conversion_rate
     self.total_meis = total_meis
