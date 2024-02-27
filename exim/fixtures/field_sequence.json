@@ -1,6 +1,7 @@
 [
  {
   "add_fields_before_section": "taxes_section",
+  "apply_changes": 0,
   "doc_type": "Sales Order",
   "docstatus": 0,
   "doctype": "Field Sequence",
@@ -118,11 +119,13 @@
     "parenttype": "Field Sequence"
    }
   ],
-  "modified": "2023-12-12 10:20:59.921650",
+  "modified": "2024-02-16 14:28:46.062244",
+  "module": "Exim",
   "name": "Sales Order"
  },
  {
   "add_fields_before_section": "drop_ship_section",
+  "apply_changes": 0,
   "doc_type": "Sales Order Item",
   "docstatus": 0,
   "doctype": "Field Sequence",
@@ -163,11 +166,13 @@
     "parenttype": "Field Sequence"
    }
   ],
-  "modified": "2023-12-12 10:41:28.287246",
+  "modified": "2024-02-16 14:29:07.053234",
+  "module": "Exim",
   "name": "Sales Order Item"
  },
  {
   "add_fields_before_section": "taxes_section",
+  "apply_changes": 0,
   "doc_type": "Delivery Note",
   "docstatus": 0,
   "doctype": "Field Sequence",
@@ -467,11 +472,13 @@
     "parenttype": "Field Sequence"
    }
   ],
-  "modified": "2023-12-12 09:53:25.137797",
+  "modified": "2024-02-16 14:28:51.646728",
+  "module": "Exim",
   "name": "Delivery Note"
  },
  {
   "add_fields_before_section": "quantity_and_rate",
+  "apply_changes": 0,
   "doc_type": "Delivery Note Item",
   "docstatus": 0,
   "doctype": "Field Sequence",
@@ -708,11 +715,13 @@
     "parenttype": "Field Sequence"
    }
   ],
-  "modified": "2023-12-12 11:26:16.722673",
+  "modified": "2024-02-16 14:28:39.890509",
+  "module": "Exim",
   "name": "Delivery Note Item"
  },
  {
   "add_fields_before_section": "taxes_section",
+  "apply_changes": 0,
   "doc_type": "Sales Invoice",
   "docstatus": 0,
   "doctype": "Field Sequence",
@@ -726,13 +735,6 @@
    },
    {
     "doc_type": "Sales Invoice",
-    "field_name": "freight",
-    "parent": "Sales Invoice",
-    "parentfield": "field_sequence_table",
-    "parenttype": "Field Sequence"
-   },
-   {
-    "doc_type": "Sales Invoice",
     "field_name": "total_fob_value",
     "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
@@ -740,7 +742,7 @@
    },
    {
     "doc_type": "Sales Invoice",
-    "field_name": "total_freight",
+    "field_name": "freight",
     "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
@@ -776,6 +778,20 @@
    {
     "doc_type": "Sales Invoice",
     "field_name": "fob_calculation",
+    "parent": "Sales Invoice",
+    "parentfield": "field_sequence_table",
+    "parenttype": "Field Sequence"
+   },
+   {
+    "doc_type": "Sales Invoice",
+    "field_name": "manually_enter_fob_value",
+    "parent": "Sales Invoice",
+    "parentfield": "field_sequence_table",
+    "parenttype": "Field Sequence"
+   },
+   {
+    "doc_type": "Sales Invoice",
+    "field_name": "freight_calculated",
     "parent": "Sales Invoice",
     "parentfield": "field_sequence_table",
     "parenttype": "Field Sequence"
@@ -1124,11 +1140,13 @@
     "parenttype": "Field Sequence"
    }
   ],
-  "modified": "2023-12-23 13:07:56.573586",
+  "modified": "2024-02-16 14:28:58.782048",
+  "module": "Exim",
   "name": "Sales Invoice"
  },
  {
   "add_fields_before_section": "quantity_and_rate",
+  "apply_changes": 0,
   "doc_type": "Sales Invoice Item",
   "docstatus": 0,
   "doctype": "Field Sequence",
@@ -1386,7 +1404,8 @@
     "parenttype": "Field Sequence"
    }
   ],
-  "modified": "2023-12-12 11:30:09.610523",
+  "modified": "2024-02-16 14:28:29.662379",
+  "module": "Exim",
   "name": "Sales Invoice Item"
  }
 ]

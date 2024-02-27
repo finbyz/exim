@@ -175,7 +175,7 @@ frappe.ui.form.on("Sales Invoice", {
 		});
     }, */
     before_save: function (frm) {
-        frm.trigger("cal_total");
+        // frm.trigger("cal_total");
         // frm.trigger("box_cal");
 
         //EXIM
@@ -322,10 +322,10 @@ frappe.ui.form.on("Sales Invoice", {
                     total_meis += flt(d.meis_value)
                 });
                 let meta = frappe.get_meta('Sales Invoice')
-                // if (meta.has_field('total_meis')){
+                if (meta.has_field('total_meis')){
 
-                //     frm.set_value("total_meis", total_meis);
-                // }
+                    frm.set_value("total_meis", total_meis);
+                }
             } 
         })
     },
