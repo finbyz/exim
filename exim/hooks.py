@@ -41,8 +41,12 @@ doctype_js = {
 	"Purchase Order": "public/js/doctype_js/purchase_order.js",
 	"Lead": "public/js/doctype_js/lead.js",
 	"Payment Entry": "public/js/doctype_js/payment_entry.js",
+    "Customize Form": "public/js/doctype_js/customize_form.js"
 
 }
+
+after_migrate = ["exim.exim.doc_events.update_field_order.after_migrate"]
+
 # fixtures = ["Custom Field"]
 # Home Pages
 # ----------
@@ -119,6 +123,15 @@ doctype_js = {
 
 # before_tests = "exim.install.before_tests"
 
+override_doctype_class = {
+	"Customize Form": "exim.exim.override.customize_form.CustomCustomizeForm",
+}
+
+#payment term override
+from exim.api import get_due_date
+from erpnext.controllers import accounts_controller
+accounts_controller.get_due_date = get_due_date
+
 # Overriding Whitelisted Methods
 # ------------------------------
 #
@@ -130,8 +143,15 @@ doctype_js = {
 fixtures = [
 	{
          "dt": "Custom Field", 
-         "filters":[["name", "in", ['Sales Invoice-fob_calculation']]]
+         "filters":[["module", "in", ['Exim']]]
       },
+    {
+         "dt": "Property Setter", 
+         "filters":[["module", "in", ['Exim']]]
+      },
+      {
+          "dt": "Field Sequence"
+	  }
 ]
 # override_whitelisted_methods = {
 # 	"frappe.utils.print_format.download_pdf": "exim.print_format.download_pdf",
@@ -149,7 +169,7 @@ doc_events = {
 		"on_submit": "exim.api.pi_on_submit",
 		"on_cancel": "exim.api.pi_on_cancel", 
 	},
-	("Sales Invoice", "Purchase Invoice", "Payment Request", "Payment Entry", "Journal Entry", "Material Request", "Purchase Order", "Work Order", "Production Plan", "Stock Entry", "Quotation", "Sales Order", "Delivery Note", "Purchase Receipt", "Packing Slip"): {
+	("Purchase Invoice", "Payment Request", "Payment Entry", "Journal Entry", "Material Request", "Purchase Order", "Work Order", "Production Plan", "Stock Entry", "Quotation", "Sales Order", "Delivery Note", "Purchase Receipt", "Packing Slip"): {
 		"before_naming": "exim.api.docs_before_naming",
 	},
     "Rodtep Claim":{
@@ -162,4 +182,7 @@ doc_events = {
 		"on_submit": "exim.api.pe_on_submit",
 		"before_cancel": "exim.api.pe_on_cancel",
 	},
+    ("Delivery Note", "Sales Invoice"): {
+        "validate": "exim.exim.doc_events.igst_calculation.cal_igst"
+	}
 }
