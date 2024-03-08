@@ -51,8 +51,6 @@ class AdvanceAuthorisationLicense(Document):
 
 	def validate_import_ratio(self):
 		for row in self.get('item_import_ratio'):
-			if flt(row.ratio) > 1:
-				frappe.throw(_("Ratio cannot be greater than 1"))
 
 			row.approved_qty = flt(self.approved_qty * row.ratio, 2)
 

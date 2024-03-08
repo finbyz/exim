@@ -1,8 +1,8 @@
-# Copyright (c) 2023, FinByz Tech Pvt Ltd and contributors
+# Copyright (c) 2024, FinByz Tech Pvt Ltd and contributors
 # For license information, please see license.txt
 
 # import frappe
 from frappe.model.document import Document
 
-class FieldOrder(Document):
+class LUTDetail(Document):
 	pass
