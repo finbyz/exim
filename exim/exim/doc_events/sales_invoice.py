@@ -43,7 +43,7 @@ def cal_total(self, method):
 
     self.total_qty = total_qty
     self.total_packages = total_packages
-    self.total_gr_wt = total_gr_wt
+    self.total_gr_wt = total_gr_wt 
     self.total_tare_wt = total_tare_wt
     self.freight = total_freight
     self.insurance = total_insurance
