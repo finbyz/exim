@@ -44,7 +44,7 @@ doctype_js = {
     "Customize Form": "public/js/doctype_js/customize_form.js",
 }
 
-after_migrate = ["exim.exim.doc_events.update_field_order.after_migrate"]
+# after_migrate = ["exim.exim.doc_events.update_field_order.after_migrate"]
 
 # fixtures = ["Custom Field"]
 # Home Pages
