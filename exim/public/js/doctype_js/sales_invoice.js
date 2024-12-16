@@ -510,6 +510,8 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 				callback: function(r) {
 					if(r.message && !r.exc) {
 						me.frm.set_value("payment_schedule", r.message);
+                        const dueDate = r.message[0].due_date;
+                        me.frm.set_value("due_date", dueDate)
 					}
 				}
 			})
