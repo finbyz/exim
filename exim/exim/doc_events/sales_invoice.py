@@ -207,6 +207,7 @@ def create_jv_with_gst(self):
     meta = frappe.get_meta(self.doctype)
     if meta.has_field("igst_refund_jv"):
         self.db_set("igst_refund_jv", jv.name)
+        
 
 
 def create_jv(self):
