@@ -198,7 +198,6 @@ def create_jv_with_gst(self):
     
     if not hasattr(self, "branch"):
         self.branch = None
-    
     taxes = self.get("taxes")[0]
     company_gst_payable_account = frappe.db.get_value(
         "Company", {"company_name": self.company}, "igst_export_refund_receivable"
@@ -291,12 +290,8 @@ def create_jv_with_gst(self):
                 ],
             }
         )
-    try:
         jv.save(ignore_permissions=True)
         jv.submit()
-    except Exception as e:
-        frappe.throw(str(e))
-    else:
         meta = frappe.get_meta(self.doctype)
         if meta.has_field("igst_refund_jv"):
             self.db_set("igst_refund_jv", jv.name)
