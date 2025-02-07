@@ -5923,7 +5923,7 @@
   "name": "Sales Order-shipping_terms",
   "no_copy": 0,
   "non_negative": 0,
-  "options": "Ex-Works\nFOB\nCFR\nCNF\nCPT\nCIF\nFOB AHMEDABAD\nFOB NHAVA SHEVA",
+  "options": "Ex-Works\nFOB\nCFR\nCNF\nCPT\nCIF",
   "permlevel": 1,
   "precision": "",
   "print_hide": 0,
