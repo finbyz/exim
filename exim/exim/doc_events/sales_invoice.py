@@ -372,15 +372,12 @@ def create_jv(self):
                                 "cost_center": self.cost_center
                             },
                         )
-                    try:
-                        jv.save(ignore_permissions=True)
-                        jv.submit()
-                    except Exception as e:
-                        frappe.throw(str(e))
-                    else:
-                        meta = frappe.get_meta(self.doctype)
-                        if meta.has_field("duty_drawback_jv"):
-                            self.db_set("duty_drawback_jv", jv.name)
+                
+                    jv.save(ignore_permissions=True)
+                    jv.submit()
+                    meta = frappe.get_meta(self.doctype)
+                    if meta.has_field("duty_drawback_jv"):
+                        self.db_set("duty_drawback_jv", jv.name)
 
         if self.get("total_meis"):
             meis_receivable_account = frappe.db.get_value(
