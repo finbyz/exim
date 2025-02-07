@@ -201,15 +201,12 @@ def create_jv_with_gst(self):
             ],
         }
     )
-    try:
-        jv.save(ignore_permissions=True)
-        jv.submit()
-    except Exception as e:
-        frappe.throw(str(e))
-    else:
-        meta = frappe.get_meta(self.doctype)
-        if meta.has_field("igst_refund_jv"):
-            self.db_set("igst_refund_jv", jv.name)
+    
+    jv.save(ignore_permissions=True)
+    jv.submit()
+    meta = frappe.get_meta(self.doctype)
+    if meta.has_field("igst_refund_jv"):
+        self.db_set("igst_refund_jv", jv.name)
 
 
 def create_jv(self):
