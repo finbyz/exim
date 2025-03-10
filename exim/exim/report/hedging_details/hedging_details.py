@@ -39,7 +39,7 @@ class HedgingDetailsReport(object):
 				base_grand_total as inr_amount, delivery_date, status 
 			from `tabSales Order`
 			where docstatus = 1 and status not in ('Closed', 'Completed')
-				and amount_hedged < grand_total and currency {conditions}
+				and custom_amount_hedged < grand_total and currency {conditions}
 			order by delivery_date """.format(conditions=conditions), currency, as_dict=1)
 
 		self.forward_data = frappe.get_list("Forward Booking",
