@@ -27,7 +27,8 @@
   {
    "fieldname": "valid_up_to",
    "fieldtype": "Date",
-   "label": "Valid up to"
+   "label": "Valid up to",
+   "reqd": 1
   }
  ],
  "links": [],
