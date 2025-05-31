@@ -56,8 +56,7 @@ cur_frm.set_query("customer_address", function () {
 // Shipping Address Filter
 cur_frm.set_query("shipping_address_name", function () {
     return {
-        query: "frappe.contacts.doctype.address.address.address_query",
-        filters: { link_doctype: "Customer", link_name: cur_frm.doc.customer }
+        query: "frappe.contacts.doctype.address.address.address_query"
     };
 });
 
