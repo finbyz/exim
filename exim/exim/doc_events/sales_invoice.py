@@ -473,7 +473,7 @@ def create_brc(self):
                     "shipping_bill_amount": self.rounded_total,
                 },
             )
-        brc.save(ignore_permissions=True)
+            brc.save(ignore_permissions=True)
 
 
 def cancel_export_lic(self):
