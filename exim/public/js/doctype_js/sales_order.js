@@ -8,12 +8,13 @@ this.frm.cscript.onload = function (frm) {
     });
 
     // Shipping Address Filter
-    this.frm.set_query("shipping_address_name", function () {
-        return {
-            query: "frappe.contacts.doctype.address.address.address_query",
-            filters: { link_doctype: "Customer", link_name: cur_frm.doc.customer }
-        };
-    });
+    // this.frm.set_query("shipping_address_name", function () {
+    //     frappe.throw("anubhav")
+    //     return {
+    //         query: "frappe.contacts.doctype.address.address.address_query",
+    //         filters: { link_doctype: "Customer", link_name: cur_frm.doc.customer }
+    //     };
+    // });
 
     // Supplier Contact Filter
     this.frm.set_query("contact_person", function () {
