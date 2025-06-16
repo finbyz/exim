@@ -50,7 +50,6 @@ cur_frm.set_query("customer_address", function () {
 cur_frm.set_query("shipping_address_name", function () {
     return {
         query: "frappe.contacts.doctype.address.address.address_query",
-        filters: { link_doctype: "Customer", link_name: cur_frm.doc.customer }
     };
 });
 
@@ -510,6 +509,8 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 				callback: function(r) {
 					if(r.message && !r.exc) {
 						me.frm.set_value("payment_schedule", r.message);
+                        const dueDate = r.message[0].due_date;
+                        me.frm.set_value("due_date", dueDate)
 					}
 				}
 			})

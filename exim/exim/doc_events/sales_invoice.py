@@ -198,7 +198,6 @@ def create_jv_with_gst(self):
     
     if not hasattr(self, "branch"):
         self.branch = None
-    
     taxes = self.get("taxes")[0]
     company_gst_payable_account = frappe.db.get_value(
         "Company", {"company_name": self.company}, "igst_export_refund_receivable"
@@ -212,7 +211,7 @@ def create_jv_with_gst(self):
     # frappe.throw(str(exim_settings.round_off_values))
     if exim_settings.round_off_values == 1:
         tax_amount = round(taxes.base_tax_amount, 3)
-        integer_part = math.floor(tax_amount) 
+        integer_part = round(tax_amount)
         decimal_part = round(tax_amount - integer_part,3) 
         jv = frappe.get_doc(
             {
@@ -253,7 +252,7 @@ def create_jv_with_gst(self):
             jv.append("accounts", {
                 "account": rounded_off_account,
                 "credit_in_account_currency": 0,
-                "debit_in_account_currency": abs(decimal_part),
+                "debit_in_account_currency": decimal_part,
                 "exchange_rate": 1,
                 "cost_center": self.cost_center
             })
@@ -291,12 +290,8 @@ def create_jv_with_gst(self):
                 ],
             }
         )
-    try:
         jv.save(ignore_permissions=True)
         jv.submit()
-    except Exception as e:
-        frappe.throw(str(e))
-    else:
         meta = frappe.get_meta(self.doctype)
         if meta.has_field("igst_refund_jv"):
             self.db_set("igst_refund_jv", jv.name)
@@ -377,15 +372,12 @@ def create_jv(self):
                                 "cost_center": self.cost_center
                             },
                         )
-                    try:
-                        jv.save(ignore_permissions=True)
-                        jv.submit()
-                    except Exception as e:
-                        frappe.throw(str(e))
-                    else:
-                        meta = frappe.get_meta(self.doctype)
-                        if meta.has_field("duty_drawback_jv"):
-                            self.db_set("duty_drawback_jv", jv.name)
+                
+                    jv.save(ignore_permissions=True)
+                    jv.submit()
+                    meta = frappe.get_meta(self.doctype)
+                    if meta.has_field("duty_drawback_jv"):
+                        self.db_set("duty_drawback_jv", jv.name)
 
         if self.get("total_meis"):
             meis_receivable_account = frappe.db.get_value(
@@ -465,14 +457,14 @@ def create_brc(self):
     if frappe.db.get_value(
         "Address", self.customer_address, "country"
     ) != "India" and frappe.db.exists("DocType", "BRC Management"):
-        brc = frappe.new_doc("BRC Management")
-        brc.invoice_no = self.name
         if (
             not self.is_return
             and self.shipping_bill_number
             and self.shipping_bill_date
             and self.rounded_total
         ):
+            brc = frappe.new_doc("BRC Management")
+            brc.invoice_no = self.name
             brc.append(
                 "shipping_bill_details",
                 {
@@ -481,7 +473,7 @@ def create_brc(self):
                     "shipping_bill_amount": self.rounded_total,
                 },
             )
-        brc.save(ignore_permissions=True)
+            brc.save(ignore_permissions=True)
 
 
 def cancel_export_lic(self):
@@ -511,6 +503,7 @@ def cancel_export_lic(self):
 
 def cancel_jv(self):
     meta = frappe.get_meta(self.doctype)
+    frappe.throw("test")
     if meta.has_field("duty_drawback_jv"):
         if self.duty_drawback_jv:
             jv = frappe.get_doc("Journal Entry", self.duty_drawback_jv)
