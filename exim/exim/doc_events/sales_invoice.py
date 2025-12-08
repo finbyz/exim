@@ -503,7 +503,6 @@ def cancel_export_lic(self):
 
 def cancel_jv(self):
     meta = frappe.get_meta(self.doctype)
-    frappe.throw("test")
     if meta.has_field("duty_drawback_jv"):
         if self.duty_drawback_jv:
             jv = frappe.get_doc("Journal Entry", self.duty_drawback_jv)
