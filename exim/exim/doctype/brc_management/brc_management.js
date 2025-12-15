@@ -32,10 +32,10 @@ frappe.ui.form.on('BRC Management', {
 	invoice_no: function(frm){
 		frm.clear_table("shipping_bill_details");
 		let row = frm.add_child("shipping_bill_details");
-		frappe.db.get_value("Sales Invoice",frm.doc.invoice_no,['rounded_total','shipping_bill_date','shipping_bill_number'],(res)=>{
+		frappe.db.get_value("Sales Invoice",frm.doc.invoice_no,['total','shipping_bill_date','shipping_bill_number'],(res)=>{
 			row.shipping_bill = res.shipping_bill_number;
 			row.shipping_date = res.shipping_bill_date;
-			row.shipping_bill_amount = res.rounded_total;
+			row.shipping_bill_amount = res.total;
 			frm.refresh_field("shipping_bill_details");
 			frm.trigger("cal_total");
 		})
