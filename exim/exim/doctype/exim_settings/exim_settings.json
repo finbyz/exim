@@ -7,7 +7,9 @@
  "field_order": [
   "exim_tab",
   "section_break_vuwi",
-  "use_advance_authorization_license_based_on_cas_no_of_item"
+  "use_advance_authorization_license_based_on_cas_no_of_item",
+  "column_break_0s4w",
+  "round_off_values"
  ],
  "fields": [
   {
@@ -26,12 +28,22 @@
    "fieldtype": "Check",
    "ignore_user_permissions": 1,
    "label": "Use Advance Authorization License based on CAS No of Item"
+  },
+  {
+   "fieldname": "column_break_0s4w",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "round_off_values",
+   "fieldtype": "Check",
+   "label": "Round off Values"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-09-18 16:06:19.817045",
+ "modified": "2025-12-15 16:32:49.553820",
  "modified_by": "Administrator",
  "module": "Exim",
  "name": "Exim Settings",
@@ -78,6 +90,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

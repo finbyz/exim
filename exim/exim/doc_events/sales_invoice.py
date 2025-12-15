@@ -160,64 +160,133 @@ def export_lic(self):
 			aal.save()
 
 def create_jv_with_gst(self):
-    if not (self.get("is_export_with_gst") and self.get("taxes")):
-        return
+	company_abbr = frappe.db.get_value("Company", {"company_name": self.company}, "abbr")
+	exim_settings = frappe.get_doc("Exim Settings")
+	if not (self.get("is_export_with_gst") and self.get("taxes")):
+		return
 
-    taxes = self.get("taxes")[0]
-    company_gst_payable_account = frappe.db.get_value(
-        "Company", {"company_name": self.company}, "igst_export_refund_receivable"
-    )
-    currency_precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
-    jv = frappe.get_doc(
-        {
-            "doctype": "Journal Entry",
-            "voucher_type": "Journal Entry",
-            "posting_date": self.posting_date,
-            "cheque_date": self.posting_date,
-            "multi_currency": 1,
-            "company": self.company,
-            "company_gstin": self.company_gstin,
-            "branch": self.branch,
-            "cheque_no": self.name,
-            "accounts": [
-                {
-                    "account": self.debit_to,
-                    "exchange_rate": flt(self.conversion_rate),
-                    "credit_in_account_currency": flt(taxes.tax_amount,currency_precision),
-                    "debit_in_account_currency": 0,
-                    "party_type": "Customer",
-                    "party": self.customer,
-                    "cost_center":self.cost_center,
-                    "reference_type": self.doctype,
-                    "reference_name": self.name,
-                },
-                {
-                    "account": company_gst_payable_account,
-                    "credit_in_account_currency": 0,
-                    "debit_in_account_currency": flt(taxes.tax_amount,currency_precision) * self.conversion_rate,
-                    "exchange_rate": 1,
-                    "cost_center":self.cost_center
-                },
-            ],
-        }
-    )
-    
-    jv.save(ignore_permissions=True)
-    jv.submit()
-    meta = frappe.get_meta(self.doctype)
-    if meta.has_field("igst_refund_jv"):
-        self.db_set("igst_refund_jv", jv.name)
-        
+	taxes = self.get("taxes")[0]
+	company_gst_payable_account = frappe.db.get_value(
+		"Company", {"company_name": self.company}, "igst_export_refund_receivable"
+	)
+	currency_precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
+	if exim_settings.round_off_values == 1:
+		tax_amount = round(taxes.base_tax_amount, 3)
+		integer_part = round(tax_amount)
+		decimal_part = round(tax_amount - integer_part,3) 
+		jv = frappe.get_doc(
+			{
+				"doctype": "Journal Entry",
+				"voucher_type": "Journal Entry",
+				"posting_date": self.posting_date,
+				"cheque_date": self.posting_date,
+				"multi_currency": 1,
+				"company": self.company,
+				"company_gstin": self.company_gstin,
+				"branch": self.branch,
+				"cheque_no": self.name,
+				"accounts": [
+					{
+						"account": self.debit_to,
+						"exchange_rate": flt(self.conversion_rate),
+						"credit_in_account_currency": flt(taxes.tax_amount,currency_precision),
+						"debit_in_account_currency": 0,
+						"party_type": "Customer",
+						"party": self.customer,
+						"cost_center": self.cost_center,
+						"reference_type": self.doctype,
+						"reference_name": self.name,
+					},
+					{
+						"account": company_gst_payable_account,
+						"credit_in_account_currency": 0,
+						"debit_in_account_currency": integer_part,
+						"exchange_rate": 1,
+						"cost_center": self.cost_center
+					},
+				],
+			}
+		)
+
+		if decimal_part:
+			rounded_off_account = f"Rounded Off - {company_abbr}"  
+			jv.append("accounts", {
+				"account": rounded_off_account,
+				"credit_in_account_currency": 0,
+				"debit_in_account_currency": decimal_part,
+				"exchange_rate": 1,
+				"cost_center": self.cost_center
+			})
+	else:
+		jv = frappe.get_doc(
+			{
+				"doctype": "Journal Entry",
+				"voucher_type": "Journal Entry",
+				"posting_date": self.posting_date,
+				"cheque_date": self.posting_date,
+				"multi_currency": 1,
+				"company": self.company,
+				"company_gstin": self.company_gstin,
+				"branch": self.branch,
+				"cheque_no": self.name,
+				"accounts": [
+					{
+						"account": self.debit_to,
+						"exchange_rate": flt(self.conversion_rate),
+						"credit_in_account_currency": flt(taxes.tax_amount,currency_precision),
+						"debit_in_account_currency": 0,
+						"party_type": "Customer",
+						"party": self.customer,
+						"cost_center":self.cost_center,
+						"reference_type": self.doctype,
+						"reference_name": self.name,
+					},
+					{
+						"account": company_gst_payable_account,
+						"credit_in_account_currency": 0,
+						"debit_in_account_currency": flt(taxes.tax_amount,currency_precision) * self.conversion_rate,
+						"exchange_rate": 1,
+						"cost_center":self.cost_center
+					},
+				],
+			}
+		)
+		jv.save(ignore_permissions=True)
+		# jv.submit()
+		meta = frappe.get_meta(self.doctype)
+		if meta.has_field("igst_refund_jv"):
+			self.db_set("igst_refund_jv", jv.name)
+
+
+	jv.save(ignore_permissions=True)
+	jv.submit()
+	meta = frappe.get_meta(self.doctype)
+	if meta.has_field("igst_refund_jv"):
+		self.db_set("igst_refund_jv", jv.name)
+		
 
 
 def create_jv(self):
-	if frappe.db.get_value('Address', self.customer_address, 'country') != "India":
+	exim_settings = frappe.get_doc("Exim Settings")
+	if frappe.db.get_value("Address", self.customer_address, "country") != "India":
 		meta = frappe.get_meta(self.doctype)
-		if meta.has_field('total_duty_drawback'):
+		if meta.has_field("total_duty_drawback"):
 			if self.total_duty_drawback:
-				drawback_receivable_account = frappe.db.get_value("Company", { "company_name": self.company}, "duty_drawback_receivable_account")
-				drawback_income_account = frappe.db.get_value("Company", { "company_name": self.company}, "duty_drawback_income_account")
-				drawback_cost_center = frappe.db.get_value("Company", { "company_name": self.company}, "duty_drawback_cost_center")
+				drawback_receivable_account = frappe.db.get_value(
+					"Company",
+					{"company_name": self.company},
+					"duty_drawback_receivable_account",
+				)
+				drawback_income_account = frappe.db.get_value(
+					"Company",
+					{"company_name": self.company},
+					"duty_drawback_income_account",
+				)
+				drawback_cost_center = frappe.db.get_value(
+					"Company",
+					{"company_name": self.company},
+					"duty_drawback_cost_center",
+				)
 				if not drawback_receivable_account:
 					frappe.throw(_("Set Duty Drawback Receivable Account in Company"))
 				elif not drawback_income_account:
@@ -231,31 +300,64 @@ def create_jv(self):
 					jv.company = self.company
 					jv.cheque_no = self.name
 					jv.cheque_date = self.posting_date
-					jv.user_remark = "Duty draw back against " + self.name + " for " + self.customer
-					jv.append("accounts", {
-						"account": drawback_receivable_account,
-						"cost_center": drawback_cost_center,
-						"debit_in_account_currency": self.total_duty_drawback
-					})
-					jv.append("accounts", {
-						"account": drawback_income_account,
-						"cost_center": drawback_cost_center,
-						"credit_in_account_currency": self.total_duty_drawback
-					})
-					try:
-						jv.save(ignore_permissions=True)
-						jv.submit()
-					except Exception as e:
-						frappe.throw(str(e))
+					jv.user_remark = (
+						"Duty draw back against " + self.name + " for " + self.customer
+					)
+					if exim_settings.round_off_values == 1:
+						jv.append(
+							"accounts",
+							{
+								"account": drawback_receivable_account,
+								"cost_center": drawback_cost_center,
+								"debit_in_account_currency": round(self.total_duty_drawback),
+								"cost_center": self.cost_center
+							},
+						)
+						jv.append(
+							"accounts",
+							{
+								"account": drawback_income_account,
+								"cost_center": drawback_cost_center,
+								"credit_in_account_currency": round(self.total_duty_drawback),
+								"cost_center": self.cost_center
+							},
+						)
 					else:
-						meta = frappe.get_meta(self.doctype)
-						if meta.has_field('duty_drawback_jv'):
-							self.db_set('duty_drawback_jv',jv.name)
+						jv.append(
+							"accounts",
+							{
+								"account": drawback_receivable_account,
+								"cost_center": drawback_cost_center,
+								"debit_in_account_currency": self.total_duty_drawback,
+								"cost_center": self.cost_center
+							},
+						)
+						jv.append(
+							"accounts",
+							{
+								"account": drawback_income_account,
+								"cost_center": drawback_cost_center,
+								"credit_in_account_currency":self.total_duty_drawback,
+								"cost_center": self.cost_center
+							},
+						)
+				
+					jv.save(ignore_permissions=True)
+					jv.submit()
+					meta = frappe.get_meta(self.doctype)
+					if meta.has_field("duty_drawback_jv"):
+						self.db_set("duty_drawback_jv", jv.name)
 
-		if self.get('total_meis'):
-			meis_receivable_account = frappe.db.get_value("Company", { "company_name": self.company}, "meis_receivable_account")
-			meis_income_account = frappe.db.get_value("Company", { "company_name": self.company}, "meis_income_account")
-			meis_cost_center = frappe.db.get_value("Company", { "company_name": self.company}, "meis_cost_center")
+		if self.get("total_meis"):
+			meis_receivable_account = frappe.db.get_value(
+				"Company", {"company_name": self.company}, "meis_receivable_account"
+			)
+			meis_income_account = frappe.db.get_value(
+				"Company", {"company_name": self.company}, "meis_income_account"
+			)
+			meis_cost_center = frappe.db.get_value(
+				"Company", {"company_name": self.company}, "meis_cost_center"
+			)
 			if not meis_receivable_account:
 				frappe.throw(_("Set RODTEP Receivable Account in Company"))
 			elif not meis_income_account:
@@ -269,25 +371,55 @@ def create_jv(self):
 				meis_jv.company = self.company
 				meis_jv.cheque_no = self.name
 				meis_jv.cheque_date = self.posting_date
-				meis_jv.user_remark = "RODTEP against " + self.name + " for " + self.customer
-				meis_jv.append("accounts", {
-					"account": meis_receivable_account,
-					"cost_center": meis_cost_center,
-					"debit_in_account_currency": self.total_meis
-				})
-				meis_jv.append("accounts", {
-					"account": meis_income_account,
-					"cost_center": meis_cost_center,
-					"credit_in_account_currency": self.total_meis
-				})
-				
+				meis_jv.user_remark = (
+					"RODTEP against " + self.name + " for " + self.customer
+				)
+				if exim_settings.round_off_values == 1:
+					# frappe.throw("hello")
+					meis_jv.append(
+						"accounts",
+						{
+							"account": meis_receivable_account,
+							"cost_center": meis_cost_center,
+							"debit_in_account_currency": round(self.total_meis),
+							"cost_center": self.cost_center
+						},
+					)
+					meis_jv.append(
+						"accounts",
+						{
+							"account": meis_income_account,
+							"cost_center": meis_cost_center,
+							"credit_in_account_currency": round(self.total_meis),
+							"cost_center": self.cost_center
+						},
+					)
+				else:
+					meis_jv.append(
+						"accounts",
+						{
+							"account": meis_receivable_account,
+							"cost_center": meis_cost_center,
+							"debit_in_account_currency": self.total_meis,
+							"cost_center": self.cost_center
+						},
+					)
+					meis_jv.append(
+						"accounts",
+						{
+							"account": meis_income_account,
+							"cost_center": meis_cost_center,
+							"credit_in_account_currency": self.total_meis,
+							"cost_center": self.cost_center
+						},
+					)
 				try:
 					meis_jv.save(ignore_permissions=True)
 					meis_jv.submit()
 				except Exception as e:
 					frappe.throw(str(e))
 				else:
-					self.db_set('meis_jv',meis_jv.name)
+					self.db_set("meis_jv", meis_jv.name)
 
 
 def create_brc(self):
