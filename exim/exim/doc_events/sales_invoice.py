@@ -267,6 +267,8 @@ def create_jv_with_gst(self):
 
 
 def create_jv(self):
+	if self.is_opening == "Yes":
+		return
 	exim_settings = frappe.get_doc("Exim Settings")
 	if frappe.db.get_value("Address", self.customer_address, "country") != "India":
 		meta = frappe.get_meta(self.doctype)
