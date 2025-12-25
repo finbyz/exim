@@ -1,6 +1,9 @@
 import frappe
 from frappe import _
 from frappe.utils import flt
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+    get_accounting_dimensions
+)
 
 
 def before_save(self, method):
@@ -185,38 +188,53 @@ def create_jv_with_gst(self):
 				"company_gstin": self.company_gstin,
 				"branch": self.branch,
 				"cheque_no": self.name,
-				"accounts": [
-					{
-						"account": self.debit_to,
-						"exchange_rate": flt(self.conversion_rate),
-						"credit_in_account_currency": flt(taxes.tax_amount,currency_precision),
-						"debit_in_account_currency": 0,
-						"party_type": "Customer",
-						"party": self.customer,
-						"cost_center": self.cost_center,
-						"reference_type": self.doctype,
-						"reference_name": self.name,
-					},
-					{
-						"account": company_gst_payable_account,
-						"credit_in_account_currency": 0,
-						"debit_in_account_currency": integer_part,
-						"exchange_rate": 1,
-						"cost_center": self.cost_center
-					},
-				],
-			}
-		)
+				"accounts": []
+			})
+
+		row1 = {
+			"account": self.debit_to,
+			"exchange_rate": flt(self.conversion_rate),
+			"credit_in_account_currency": flt(taxes.tax_amount,currency_precision),
+			"debit_in_account_currency": 0,
+			"party_type": "Customer",
+			"party": self.customer,
+			"cost_center": self.cost_center,
+			"reference_type": self.doctype,
+			"reference_name": self.name,
+
+		}
+
+		apply_accounting_dimensions(self, row1)
+		jv.append("accounts", row1)
+	
+		row2 = {
+			"account": company_gst_payable_account,
+			"credit_in_account_currency": 0,
+			"debit_in_account_currency": flt(taxes.tax_amount,currency_precision),
+			"exchange_rate": 1,
+			"cost_center": self.cost_center
+			
+		}
+
+		apply_accounting_dimensions(self, row2)
+		jv.append("accounts", row2)
+
+		apply_accounting_dimensions(self, row2)
+		
 
 		if decimal_part:
 			rounded_off_account = f"Rounded Off - {company_abbr}"  
-			jv.append("accounts", {
+			row3 = {
 				"account": rounded_off_account,
 				"credit_in_account_currency": 0,
 				"debit_in_account_currency": decimal_part,
 				"exchange_rate": 1,
-				"cost_center": self.cost_center
-			})
+				"cost_center": self.cost_center,
+				"party_type": "Customer",
+   				"party": self.customer
+			}
+			apply_accounting_dimensions(self, row3)
+			jv.append("accounts", row3)
 	else:
 		jv = frappe.get_doc(
 			{
@@ -229,30 +247,36 @@ def create_jv_with_gst(self):
 				"company_gstin": self.company_gstin,
 				"branch": self.branch,
 				"cheque_no": self.name,
-				"accounts": [
-					{
-						"account": self.debit_to,
-						"exchange_rate": flt(self.conversion_rate),
-						"credit_in_account_currency": flt(taxes.tax_amount,currency_precision),
-						"debit_in_account_currency": 0,
-						"party_type": "Customer",
-						"party": self.customer,
-						"cost_center":self.cost_center,
-						"reference_type": self.doctype,
-						"reference_name": self.name,
-					},
-					{
-						"account": company_gst_payable_account,
-						"credit_in_account_currency": 0,
-						"debit_in_account_currency": flt(taxes.tax_amount,currency_precision) * self.conversion_rate,
-						"exchange_rate": 1,
-						"cost_center":self.cost_center
-					},
-				],
-			}
-		)
+				"accounts": []
+			})
+		
+		row1 = {
+			"account": self.debit_to,
+			"exchange_rate": flt(self.conversion_rate),
+			"credit_in_account_currency": flt(taxes.tax_amount,currency_precision),
+			"debit_in_account_currency": 0,
+			"party_type": "Customer",
+			"party": self.customer,
+			"cost_center":self.cost_center,
+			"reference_type": self.doctype,
+			"reference_name": self.name,
+		}
+		apply_accounting_dimensions(self, row1)
+		jv.append("accounts", row1)
+
+		row2 = {
+			"account": company_gst_payable_account,
+			"credit_in_account_currency": 0,
+			"debit_in_account_currency": flt(taxes.tax_amount,currency_precision) * self.conversion_rate,
+			"exchange_rate": 1,
+			"cost_center":self.cost_center,
+		
+		}
+		apply_accounting_dimensions(self, row2)
+		jv.append("accounts", row2)
+		
 		jv.save(ignore_permissions=True)
-		# jv.submit()
+		jv.submit()
 		meta = frappe.get_meta(self.doctype)
 		if meta.has_field("igst_refund_jv"):
 			self.db_set("igst_refund_jv", jv.name)
@@ -267,8 +291,6 @@ def create_jv_with_gst(self):
 
 
 def create_jv(self):
-	if self.is_opening == "Yes":
-		return
 	exim_settings = frappe.get_doc("Exim Settings")
 	if frappe.db.get_value("Address", self.customer_address, "country") != "India":
 		meta = frappe.get_meta(self.doctype)
@@ -306,43 +328,41 @@ def create_jv(self):
 						"Duty draw back against " + self.name + " for " + self.customer
 					)
 					if exim_settings.round_off_values == 1:
-						jv.append(
-							"accounts",
-							{
-								"account": drawback_receivable_account,
-								"cost_center": drawback_cost_center,
-								"debit_in_account_currency": round(self.total_duty_drawback),
-								"cost_center": self.cost_center
-							},
-						)
-						jv.append(
-							"accounts",
-							{
-								"account": drawback_income_account,
-								"cost_center": drawback_cost_center,
-								"credit_in_account_currency": round(self.total_duty_drawback),
-								"cost_center": self.cost_center
-							},
-						)
+						row1 = {
+							"account": drawback_receivable_account,
+							"cost_center": drawback_cost_center,
+							"debit_in_account_currency": round(self.total_duty_drawback),
+							"cost_center": self.cost_center
+						}
+						apply_accounting_dimensions(self, row1)
+						jv.append("accounts", row1)
+						row2 = {
+							"account": drawback_income_account,
+							"cost_center": drawback_cost_center,
+							"credit_in_account_currency": round(self.total_duty_drawback),
+							"cost_center": self.cost_center
+						}
+						apply_accounting_dimensions(self, row2)
+						jv.append("accounts", row2)
+
 					else:
-						jv.append(
-							"accounts",
-							{
-								"account": drawback_receivable_account,
-								"cost_center": drawback_cost_center,
-								"debit_in_account_currency": self.total_duty_drawback,
-								"cost_center": self.cost_center
-							},
-						)
-						jv.append(
-							"accounts",
-							{
-								"account": drawback_income_account,
-								"cost_center": drawback_cost_center,
-								"credit_in_account_currency":self.total_duty_drawback,
-								"cost_center": self.cost_center
-							},
-						)
+						row1 = {
+							"account": drawback_receivable_account,
+							"cost_center": drawback_cost_center,
+							"debit_in_account_currency": self.total_duty_drawback,
+							"cost_center": self.cost_center
+						}
+						apply_accounting_dimensions(self, row1)
+						jv.append("accounts", row1)
+						row2 = {
+							"account": drawback_income_account,
+							"cost_center": drawback_cost_center,
+							"credit_in_account_currency":self.total_duty_drawback,
+							"cost_center": self.cost_center
+						}
+						apply_accounting_dimensions(self, row2)
+						jv.append("accounts", row2)
+						
 				
 					jv.save(ignore_permissions=True)
 					jv.submit()
@@ -377,7 +397,6 @@ def create_jv(self):
 					"RODTEP against " + self.name + " for " + self.customer
 				)
 				if exim_settings.round_off_values == 1:
-					# frappe.throw("hello")
 					meis_jv.append(
 						"accounts",
 						{
@@ -466,3 +485,9 @@ def cancel_jv(self):
 			jv = frappe.get_doc("Journal Entry", self.meis_jv)
 			jv.cancel()
 			self.db_set('meis_jv','')
+
+
+def apply_accounting_dimensions(source_doc, target_row):
+    for dim in get_accounting_dimensions():
+        if source_doc.get(dim):
+            target_row[dim] = source_doc.get(dim)
