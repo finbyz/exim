@@ -9,7 +9,9 @@
   "section_break_vuwi",
   "use_advance_authorization_license_based_on_cas_no_of_item",
   "column_break_0s4w",
-  "round_off_values"
+  "round_off_values",
+  "section_break_ebjo",
+  "manage_rodtep_claim_and_duty_drawback_claim"
  ],
  "fields": [
   {
@@ -38,12 +40,22 @@
    "fieldname": "round_off_values",
    "fieldtype": "Check",
    "label": "Round off Values"
+  },
+  {
+   "fieldname": "section_break_ebjo",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "manage_rodtep_claim_and_duty_drawback_claim",
+   "fieldtype": "Check",
+   "label": "Manage Rodtep claim and Duty Drawback claim"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-12-15 16:32:49.553820",
+ "modified": "2026-01-06 10:58:01.921797",
  "modified_by": "Administrator",
  "module": "Exim",
  "name": "Exim Settings",

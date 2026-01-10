@@ -5,6 +5,11 @@ from frappe.model.document import Document
 # import datetime
 from frappe import _
 from frappe.utils import flt
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+    get_accounting_dimensions
+)
+
+
 class DutyDrawBackClaim(Document):
 	def validate(self):
 		total = 0.0
@@ -17,7 +22,29 @@ class DutyDrawBackClaim(Document):
 		self.round_off_amount=flt(total)-flt(total1)
 		if self.round_off_amount >= round(flt(20,2)):
 			frappe.throw("round of ammount should be less than 20")
-	
+
+		dimensions = get_accounting_dimensions()
+
+		for row in self.rodtep_details:
+
+			if not row.cheque_no:
+				continue
+
+			si = frappe.get_doc("Sales Invoice", row.cheque_no)
+
+			for dim in dimensions:
+				row_val = row.get(dim)
+				si_val = si.get(dim)
+
+				if row_val and row_val != si_val:
+					frappe.throw(
+						f"""
+						<b>Row {row.idx}</b>
+						Invalid value for Accounting Dimencian<b>{row_val}</b><br>
+						Allowed: <b>{si_val}</b>
+						"""
+					)
+		
 	def on_submit(self):
 		self.total_debit_amount=flt(self.total_debit_amount)-flt(self.round_off_amount)
 		if(round(flt(self.total_debit_amount),4) != round(flt(self.script_amount),4)):
@@ -98,27 +125,36 @@ def create_jv_on_submit(self,method):
 			meis_jv.cheque_date = self.posting_date
 			meis_jv.user_remark = "Duty Drawback against " + self.name 
 			for row in self.rodtep_details:
-				meis_jv.append("accounts", {
+				acc_row = {
 					"account": row.account,
 					"reference_type": "Journal Entry",
 					"reference_name": row.je_no,
-					"credit_in_account_currency":row.debit_amount,
-				})
-			meis_jv.append("accounts", {
+					"credit_in_account_currency": row.debit_amount,
+				}
+				apply_accounting_dimensions(row, acc_row)
+				meis_jv.append("accounts", acc_row)
+
+			debit_row = {
 				"account": self.credit_account,
 				"debit_in_account_currency":self.total_debit_amount,
-			})
+			}
+			apply_accounting_dimensions(row, debit_row)
+			meis_jv.append("accounts", debit_row)
+
 			if self.round_off_amount < 0.0:
-				meis_jv.append("accounts", {
+				round_row = {
 					"account": self.round_off_account,
 					"credit_in_account_currency":-flt(self.round_off_amount),
-				})
+				}
+				apply_accounting_dimensions(row, round_row)
+				meis_jv.append("accounts", round_row)
 			elif self.round_off_amount > 0.0:
-				meis_jv.append("accounts", {
+				round_grater_row = {
 					"account": self.round_off_account,
 					"debit_in_account_currency":flt(self.round_off_amount),
-				})
-			
+				}
+				apply_accounting_dimensions(row, round_grater_row)
+				meis_jv.append("accounts", round_grater_row)
 			try:
 				meis_jv.save(ignore_permissions=True)
 				meis_jv.submit()
@@ -127,4 +163,6 @@ def create_jv_on_submit(self,method):
 					frappe.msgprint("Journal Entry Created Successfully {}".format(frappe.bold(meis_jv.name)))
 			except Exception as e:
 				frappe.throw(str(e))
-				
+	
+	
+

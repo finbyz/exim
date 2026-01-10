@@ -140,6 +140,8 @@ accounts_controller.get_due_date = get_due_date
 # }
 # fixtures = ["Custom Field"]
 
+accounting_dimension_doctypes = ["Drawback Details", "Rodtep Details"]
+
 fixtures = [
     {"dt": "Custom Field", "filters": [["module", "in", ["Exim"]]]},
     # {"dt": "Property Setter", "filters": [["module", "in", ["Exim"]]]},

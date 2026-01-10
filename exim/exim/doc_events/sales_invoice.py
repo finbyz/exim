@@ -369,7 +369,6 @@ def create_jv(self):
 					meta = frappe.get_meta(self.doctype)
 					if meta.has_field("duty_drawback_jv"):
 						self.db_set("duty_drawback_jv", jv.name)
-
 		if self.get("total_meis"):
 			meis_receivable_account = frappe.db.get_value(
 				"Company", {"company_name": self.company}, "meis_receivable_account"
@@ -397,51 +396,49 @@ def create_jv(self):
 					"RODTEP against " + self.name + " for " + self.customer
 				)
 				if exim_settings.round_off_values == 1:
-					meis_jv.append(
-						"accounts",
-						{
+					row1 = {
 							"account": meis_receivable_account,
 							"cost_center": meis_cost_center,
 							"debit_in_account_currency": round(self.total_meis),
 							"cost_center": self.cost_center
-						},
-					)
-					meis_jv.append(
-						"accounts",
-						{
+						}
+					apply_accounting_dimensions(self, row1)
+					meis_jv.append("accounts", row1)
+				
+					row2 = {
 							"account": meis_income_account,
 							"cost_center": meis_cost_center,
 							"credit_in_account_currency": round(self.total_meis),
 							"cost_center": self.cost_center
-						},
-					)
+						}
+					apply_accounting_dimensions(self, row2)
+					meis_jv.append("accounts", row2)
 				else:
-					meis_jv.append(
-						"accounts",
-						{
+					row1 = {
 							"account": meis_receivable_account,
 							"cost_center": meis_cost_center,
 							"debit_in_account_currency": self.total_meis,
 							"cost_center": self.cost_center
-						},
-					)
-					meis_jv.append(
-						"accounts",
-						{
+						}
+					apply_accounting_dimensions(self, row1)
+					meis_jv.append("accounts", row1)
+					
+					row2 = {
 							"account": meis_income_account,
 							"cost_center": meis_cost_center,
 							"credit_in_account_currency": self.total_meis,
 							"cost_center": self.cost_center
-						},
-					)
-				try:
-					meis_jv.save(ignore_permissions=True)
-					meis_jv.submit()
-				except Exception as e:
-					frappe.throw(str(e))
-				else:
-					self.db_set("meis_jv", meis_jv.name)
-
+						}
+					apply_accounting_dimensions(self, row2)
+					meis_jv.append("accounts", row2)
+				
+			try:
+				meis_jv.save(ignore_permissions=True)
+				meis_jv.submit()
+			except Exception as e:
+				frappe.throw(str(e))
+			else:
+				self.db_set("meis_jv", meis_jv.name)
 
 def create_brc(self):
 	if frappe.db.get_value('Address', self.customer_address, 'country') != "India" and frappe.db.exists("DocType", "BRC Management"):
