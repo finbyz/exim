@@ -144,7 +144,7 @@ accounting_dimension_doctypes = ["Drawback Details", "Rodtep Details"]
 
 fixtures = [
     {"dt": "Custom Field", "filters": [["module", "in", ["Exim"]]]},
-    # {"dt": "Property Setter", "filters": [["module", "in", ["Exim"]]]},
+    {"dt": "Property Setter", "filters": [["module", "in", ["Exim"]]]},
 ]
 # override_whitelisted_methods = {
 # 	"frappe.utils.print_format.download_pdf": "exim.print_format.download_pdf",

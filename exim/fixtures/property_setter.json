@@ -14,5 +14,37 @@
   "property_type": "Text",
   "row_name": null,
   "value": "Day(s) after invoice date\nDay(s) after bl date\nDay(s) after the end of the invoice month\nMonth(s) after the end of the invoice month"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Sales Invoice",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "shipping_bill_number",
+  "is_system_generated": 0,
+  "modified": "2026-01-10 12:41:21.144399",
+  "module": "Exim",
+  "name": "Sales Invoice-shipping_bill_number-allow_on_submit",
+  "property": "allow_on_submit",
+  "property_type": "Check",
+  "row_name": null,
+  "value": "1"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Sales Invoice",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "shipping_bill_date",
+  "is_system_generated": 0,
+  "modified": "2026-01-10 12:41:56.332872",
+  "module": "Exim",
+  "name": "Sales Invoice-shipping_bill_date-allow_on_submit",
+  "property": "allow_on_submit",
+  "property_type": "Check",
+  "row_name": null,
+  "value": "1"
  }
 ]

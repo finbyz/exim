@@ -9,6 +9,11 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
     get_accounting_dimensions
 )
 
+def apply_accounting_dimensions(source_doc, target_row):
+		for dim in get_accounting_dimensions():
+			if source_doc.get(dim):
+				target_row[dim] = source_doc.get(dim)
+
 
 class DutyDrawBackClaim(Document):
 	def validate(self):
