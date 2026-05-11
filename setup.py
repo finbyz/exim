@@ -18,6 +18,7 @@ setup(
 	description='custom app for exim module',
 	author='FinByz Tech Pvt Ltd',
 	author_email='info@finbyz.com',
+	license="GPLv3",
 	packages=find_packages(),
 	zip_safe=False,
 	include_package_data=True,
