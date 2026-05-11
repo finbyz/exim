@@ -49,17 +49,21 @@ jobs:
       - name: Find tests
         run: |
           echo "Finding tests"
-          grep -rn "def test" > /dev/null
+          grep -rn "def test" . > /dev/null
 
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.12"
+          python-version: "3.14"
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "24"
+
+      - name: Install Yarn
+        run: |
+          npm install -g yarn
 
       - name: Cache pip
         uses: actions/cache@v3
@@ -69,8 +73,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Install Yarn
-        run: npm install -g yarn
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: |
+          echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache yarn
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
 
       - name: Install MariaDB Client
         run: |
@@ -84,17 +98,23 @@ jobs:
           bench init \
             --skip-redis-config-generation \
             --skip-assets \
-            --python "$(which python3)" \
+            --python "$(which python3.14)" \
             --frappe-branch version-16 \
             ~/frappe-bench
 
-          mariadb --host 127.0.0.1 --port 3306 -u root -proot -e "SET GLOBAL character_set_server = 'utf8mb4'"
-          mariadb --host 127.0.0.1 --port 3306 -u root -proot -e "SET GLOBAL collation_server = 'utf8mb4_unicode_ci'"
+          mariadb --host 127.0.0.1 --port 3306 -u root -proot \
+          -e "SET GLOBAL character_set_server = 'utf8mb4'"
+
+          mariadb --host 127.0.0.1 --port 3306 -u root -proot \
+          -e "SET GLOBAL collation_server = 'utf8mb4_unicode_ci'"
 
       - name: Install Apps
         working-directory: /home/runner/frappe-bench
+        env:
+          CI: "Yes"
         run: |
           bench get-app erpnext --branch version-16
+
           bench get-app exim $GITHUB_WORKSPACE
 
           bench setup requirements --dev
@@ -106,18 +126,20 @@ jobs:
             --mariadb-root-password root
 
           bench --site test_site install-app erpnext
+
           bench --site test_site install-app exim
 
           bench --site test_site migrate
-          bench build
 
-        env:
-          CI: "Yes"
+          bench build
 
       - name: Run Tests
         working-directory: /home/runner/frappe-bench
+        env:
+          TYPE: server
         run: |
           bench --site test_site set-config allow_tests true
-          bench --site test_site run-tests --app exim --skip-test-records
+
+          bench --site test_site run-tests \--app exim \--skip-test-records
         env:
           TYPE: server
