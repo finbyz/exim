@@ -46,7 +46,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
+          python-version: '3.14'   # ← changed from 3.12
 
       - name: Setup Node
         uses: actions/setup-node@v3
@@ -83,7 +83,7 @@ jobs:
       - name: Setup
         run: |
           pip install frappe-bench
-          bench init --skip-redis-config-generation --skip-assets --python "$(which python3.12)" --frappe-branch version-16 ~/frappe-bench
+          bench init --skip-redis-config-generation --skip-assets --python "$(which python3.14)" --frappe-branch version-16 ~/frappe-bench
           mariadb --host 127.0.0.1 --port 3306 -u root -proot -e "SET GLOBAL character_set_server = 'utf8mb4'"
           mariadb --host 127.0.0.1 --port 3306 -u root -proot -e "SET GLOBAL collation_server = 'utf8mb4_unicode_ci'"
 
