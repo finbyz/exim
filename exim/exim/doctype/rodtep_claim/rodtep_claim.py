@@ -59,50 +59,89 @@ class RodtepClaim(Document):
 			self.journal_entry_ref = ''
 
 def exp_je_data(company):
-	list_of_je = frappe.db.sql(f"""
-		SELECT rcm.je_no , rd.journal_entry_ref
-		From `tabRodtep Details` as rcm
-		Join `tabRodtep Claim` as rd
-		Where rd.company='{company}' and rd.docstatus !=2 
-	""",as_list=True)
+
+	list_of_je = frappe.db.sql(
+		"""
+		SELECT
+			rcm.je_no,
+			rd.journal_entry_ref
+
+		FROM `tabRodtep Details` AS rcm
+
+		JOIN `tabRodtep Claim` AS rd
+
+		WHERE
+			rd.company = %s
+			AND rd.docstatus != 2
+		""",
+		(company,),
+		as_list=True
+	)
+
 	je = []
+
 	for row in list_of_je:
 		for d in row:
 			je.append(str(d))
+
 	return je
 
 
 @frappe.whitelist()
-def journal_entry_list(start_date,end_date,company):
+def journal_entry_list(start_date, end_date, company):
+
 	list_of_je = exp_je_data(company)
+
+	args = [
+		start_date,
+		end_date,
+		company
+	]
+
 	conditions = ""
+
 	if list_of_je:
-		conditions = " and je.name NOT IN {} ".format(
-				"(" + ", ".join([f'"{l}"' for l in list_of_je]) + ")")
-	r_start_date = start_date
-	r_end_date = end_date
+		placeholders = ", ".join(["%s"] * len(list_of_je))
+		conditions = f" AND je.name NOT IN ({placeholders})"
+		args.extend(list_of_je)
 
-	args = {
-		'r_start_date':r_start_date,
-		'r_end_date': r_end_date,
-		
-	}
-	
-	je_data = frappe.db.sql(f""" 
-		select je.name as je_no, jea.debit_in_account_currency as debit_amount , je.cheque_date, je.cheque_no, si.shipping_bill_number as shipping_bill_no, c.meis_receivable_account as account,je.company
+	query = f"""
+		SELECT
+			je.name AS je_no,
+			jea.debit_in_account_currency AS debit_amount,
+			je.cheque_date,
+			je.cheque_no,
+			si.shipping_bill_number AS shipping_bill_no,
+			c.meis_receivable_account AS account,
+			je.company
 
-		from `tabJournal Entry` as je
-		LEFT JOIN `tabJournal Entry Account` as jea ON jea.parent = je.name
-		Left JOIN `tabSales Invoice` as si ON si.name = je.cheque_no
-		LEFT JOIN `tabCompany` as c ON c.name = je.company
+		FROM `tabJournal Entry` AS je
 
-		where je.voucher_type = "RODTEP Entry" 
-		and je.posting_date >= %(r_start_date)s 
-		and je.posting_date <= %(r_end_date)s
-		and jea.debit_in_account_currency > 0
-		and je.docstatus < 2 and je.company='{company}'
-		{conditions}
-	""",args,as_dict=1)
+		LEFT JOIN `tabJournal Entry Account` AS jea
+			ON jea.parent = je.name
+
+		LEFT JOIN `tabSales Invoice` AS si
+			ON si.name = je.cheque_no
+
+		LEFT JOIN `tabCompany` AS c
+			ON c.name = je.company
+
+		WHERE
+			je.voucher_type = 'RODTEP Entry'
+			AND je.posting_date >= %s
+			AND je.posting_date <= %s
+			AND jea.debit_in_account_currency > 0
+			AND je.docstatus < 2
+			AND je.company = %s
+			{conditions}
+	"""
+
+	je_data = frappe.db.sql(
+		query,
+		tuple(args),
+		as_dict=1
+	)
+
 	return je_data
 
 def create_jv_on_submit(self,method):

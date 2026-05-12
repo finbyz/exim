@@ -311,9 +311,12 @@ def get_custom_address_display(address_dict):
 		return ""
 
 	try:
-		# nosemgrep: frappe-ssti
-		# Address template is fetched from trusted system configuration
-		return frappe.render_template(template, address_dict)
+		message = frappe.render_template(  # nosemgrep: frappe-ssti
+			template,
+			address_dict
+		)
+
+		return message
 
 	except TemplateSyntaxError:
 		frappe.throw(
