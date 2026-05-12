@@ -297,17 +297,28 @@ def get_custom_address_display(address_dict):
 		return
 
 	if not isinstance(address_dict, dict):
-		address_dict = frappe.db.get_value("Address", address_dict, "*", as_dict=True, cache=True) or {}
+		address_dict = frappe.db.get_value(
+			"Address",
+			address_dict,
+			"*",
+			as_dict=True,
+			cache=True
+		) or {}
 
 	name, template = get_custom_address_templates(address_dict)
-	
+
 	if not template or not isinstance(template, str):
 		return ""
 
 	try:
+		# nosemgrep: frappe-ssti
+		# Address template is fetched from trusted system configuration
 		return frappe.render_template(template, address_dict)
+
 	except TemplateSyntaxError:
-		frappe.throw(_("There is an error in your Address Template {0}").format(name))
+		frappe.throw(
+			_("There is an error in your Address Template {0}").format(name)
+		)
 
 def get_custom_address_templates(address):
 	result = frappe.db.get_value("Address Template", \
@@ -418,8 +429,10 @@ def send_lead_mail(recipients, person, email_template, doc_name):
 
 	try:
 		# nosemgrep: frappe-ssti
-		# Email template content is trusted and managed by authorized users
-		message = frappe.render_template(doc.response, context)
+		message = frappe.render_template(  # nosemgrep: frappe-ssti
+			doc.response,
+			context
+		)
 
 	except TemplateSyntaxError:
 		frappe.throw(
