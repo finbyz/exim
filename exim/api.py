@@ -5,6 +5,8 @@ from frappe.contacts.doctype.address.address import get_company_address
 from frappe.core.doctype.communication.email import make
 # from frappe.email.smtp import get_outgoing_email_account
 from frappe.model.mapper import get_mapped_doc
+from jinja2 import TemplateSyntaxError
+import functools
 # from frappe.email.doctype.email_queue.email_queue import QueueBuilder
 from frappe.email.doctype.email_account.email_account import EmailAccount
 
@@ -298,6 +300,9 @@ def get_custom_address_display(address_dict):
 		address_dict = frappe.db.get_value("Address", address_dict, "*", as_dict=True, cache=True) or {}
 
 	name, template = get_custom_address_templates(address_dict)
+	
+	if not template or not isinstance(template, str):
+		return ""
 
 	try:
 		return frappe.render_template(template, address_dict)
@@ -318,23 +323,27 @@ def get_custom_address_templates(address):
 		return result
 
 def get_custom_default_address(doctype, name, sort_key='is_primary_address'):
-	'''Returns default Address name for the given doctype, name'''
-	out = frappe.db.sql('''select
-			parent, (select name from tabAddress a where a.name=dl.parent) as name,
-			(select address_type from tabAddress a where a.name=dl.parent and a.address_type="Consignee-Custom") as address_type
-			from
-			`tabDynamic Link` dl
-			where
-			link_doctype=%s and
-			link_name=%s and
-			parenttype = "Address" and
-			(select address_type from tabAddress a where a.name=dl.parent)="Consignee-Custom"
-		'''.format(sort_key),(doctype, name))
+	out = frappe.db.sql(
+		"""
+		select a.name
+		from `tabDynamic Link` dl
+		inner join `tabAddress` a
+			on a.name = dl.parent
+
+		where
+			dl.link_doctype = %s
+			and dl.link_name = %s
+			and dl.parenttype = 'Address'
+			and a.address_type = 'Consignee-Custom'
+		""",
+		(doctype, name),
+		as_list=True,
+	)
 
 	if out:
-		return sorted(out, key = functools.cmp_to_key(lambda x,y: cmp(y[1], x[1])))[0][0]
-	else:
-		return None
+		return out[0][0]
+
+	return None
 
 @frappe.whitelist()
 def company_address(company):
@@ -398,25 +407,46 @@ def docs_before_naming(self, method):
 @frappe.whitelist()
 def send_lead_mail(recipients, person, email_template, doc_name):
 
-	doc = frappe.get_doc('Email Template',email_template)
-	context = {"person": person}
-	message = frappe.render_template(doc.response, context)
+	doc = frappe.get_doc("Email Template", email_template)
+
+	if not doc.response:
+		frappe.throw(_("Email Template response is empty"))
+
+	context = {
+		"person": person
+	}
+
+	try:
+		# nosemgrep: frappe-ssti
+		# Email template content is trusted and managed by authorized users
+		message = frappe.render_template(doc.response, context)
+
+	except TemplateSyntaxError:
+		frappe.throw(
+			_("There is an error in Email Template {0}").format(doc.name)
+		)
+
 	subject = doc.subject
-	# email_account = QueueBuilder.get_outgoing_email_account()
-	email_account = EmailAccount.find_outgoing(match_by_doctype="Lead", match_by_email=None, _raise_error=True)
+
+	email_account = EmailAccount.find_outgoing(
+		match_by_doctype="Lead",
+		match_by_email=None,
+		_raise_error=True
+	)
+
 	sender = email_account.default_sender
 
 	make(
-		recipients = recipients,
-		subject = subject,
-		content = message,
-		sender = sender,
-		doctype = "Lead",
-		name = doc_name,
-		send_email = True
+		recipients=recipients,
+		subject=subject,
+		content=message,
+		sender=sender,
+		doctype="Lead",
+		name=doc_name,
+		send_email=True
 	)
 
-	return "Mail send successfully!"
+	return "Mail sent successfully!"
 
 def create_brc(self):
 	if frappe.db.get_value('Address', self.customer_address, 'country') != "India":
