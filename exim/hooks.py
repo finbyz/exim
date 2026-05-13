@@ -126,6 +126,10 @@ doctype_js = {
 # }
 
 # payment term override
+# Override ERPNext due date calculation globally because
+# framework does not provide a hook/override for get_due_date.
+# nosemgrep: frappe-monkey-patching-not-allowed
+
 from exim.exim.monkey_patch.accounts_controller import get_due_date
 from erpnext.controllers import accounts_controller
 

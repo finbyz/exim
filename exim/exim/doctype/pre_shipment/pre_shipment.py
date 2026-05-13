@@ -169,8 +169,7 @@ class PreShipment(Document):
 		except Exception as e:
 			frappe.throw(_(e))
 
-		self.journal_entry = jv.name
-		self.db_update()
+		self.db_set("journal_entry", jv.name)
 
 		url = get_url_to_form("Journal Entry", jv.name)
 		frappe.msgprint(_("Journal Entry - <a href='{url}'>{doc}</a> has been created.".format(url=url, doc=frappe.bold(jv.name))))
@@ -179,8 +178,7 @@ class PreShipment(Document):
 		if self.journal_entry:
 			jv = frappe.get_doc("Journal Entry", self.journal_entry)
 			jv.cancel()
-			self.journal_entry = ''
-			self.db_update()
+			self.db_set("journal_entry", "")
 			url = get_url_to_form("Journal Entry", jv.name)
 			frappe.msgprint(_("Journal Entry - <a href='{url}'>{doc}</a> has been cancelled.".format(url=url, doc=frappe.bold(jv.name))))
 
@@ -220,7 +218,13 @@ class PreShipment(Document):
 	def on_update_after_submit(self):
 		self.calculate_repayments()
 		self.update_status()
-		self.db_update()
+
+		self.db_set({
+			"total_repayment": self.total_repayment,
+			"total_repayment_inr": self.total_repayment_inr,
+			"loan_outstanding_amount": self.loan_outstanding_amount,
+			"loan_outstanding_amount_inr": self.loan_outstanding_amount_inr,
+		})
 
 	def calculate_repayments(self):
 		self.total_repayment = sum([row.amount for row in self.get('repayments')])

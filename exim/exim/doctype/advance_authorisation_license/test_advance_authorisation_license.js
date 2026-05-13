@@ -4,20 +4,25 @@
 
 QUnit.test("test: Advance Authorisation License", function (assert) {
 	let done = assert.async();
+	let frm;
 
 	// number of asserts
 	assert.expect(1);
 
 	frappe.run_serially([
 		// insert a new Advance Authorisation License
-		() => frappe.tests.make('Advance Authorisation License', [
-			// values to be set
-			{key: 'value'}
-		]),
+		() =>
+			frappe.tests.make("Advance Authorisation License", [
+				{ key: "value" },
+			]).then((r) => {
+				frm = r;
+			}),
+
 		() => {
-			assert.equal(cur_frm.doc.key, 'value');
+			assert.equal(frm.doc.key, "value");
 		},
-		() => done()
+
+		() => done(),
 	]);
 
 });

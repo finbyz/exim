@@ -51,18 +51,23 @@ class DutyDrawBackClaim(Document):
 					)
 		
 	def on_submit(self):
-		self.total_debit_amount=flt(self.total_debit_amount)-flt(self.round_off_amount)
-		if(round(flt(self.total_debit_amount),4) != round(flt(self.script_amount),4)):
-			frappe.throw(f"""Total Script Amount and Total Debit Amount should be equal """)
-		
+		total_debit_amount = (
+			flt(self.total_debit_amount) - flt(self.round_off_amount)
+		)
+
+		self.db_set("total_debit_amount", total_debit_amount)
+
+		if round(flt(total_debit_amount), 4) != round(flt(self.script_amount), 4):
+			frappe.throw("""Total Script Amount and Total Debit Amount should be equal """)
+
 		if not self.credit_account:
-			frappe.throw(f"""Set credit account first""")
+			frappe.throw("""Set credit account first""")
 
 	def on_cancel(self):
 		if self.journal_entry_ref:
 			jv = frappe.get_doc("Journal Entry", self.journal_entry_ref)
 			jv.cancel()
-			self.journal_entry_ref = ''
+			self.db_set("journal_entry_ref", "")
 
 def exp_je_data(company):
 

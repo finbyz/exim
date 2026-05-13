@@ -214,7 +214,16 @@ class ForwardBooking(Document):
 		self.calculate_total_utilization()
 		self.calculate_cancellation()
 		self.set_status()
-		self.db_update()
+
+		self.db_set({
+			"total_utilization": self.total_utilization,
+			"total_cancelled": self.total_cancelled,
+			"can_avg_rate": self.can_avg_rate,
+			"rate_diff": self.rate_diff,
+			"diff_amount": self.diff_amount,
+			"amount_outstanding": self.amount_outstanding,
+			"status": self.status,
+		})
 
 	def calculate_total_utilization(self):
 		self.total_utilization = sum([flt(row.paid_amount) for row in self.get('payment_entries')])
@@ -223,8 +232,12 @@ class ForwardBooking(Document):
 		total_inr_amount = sum([flt(d.inr_amount) for d in self.cancellation_details])
 		total_cancel_amount = sum([flt(d.cancel_amount) for d in self.cancellation_details])
 
+		self.total_cancelled = total_cancel_amount
+		self.can_avg_rate = 0.0
+		self.rate_diff = 0.0
+		self.diff_amount = 0.0
+
 		if total_cancel_amount:
-			self.total_cancelled = total_cancel_amount
 			self.can_avg_rate = flt(total_inr_amount) / flt(total_cancel_amount)
 
 			if self.hedge == "Export":
@@ -233,7 +246,6 @@ class ForwardBooking(Document):
 				self.rate_diff = flt(self.can_avg_rate) - flt(self.booking_rate)
 
 			self.diff_amount = flt(self.rate_diff) * flt(self.total_cancelled)
-	
 	def set_status(self):
 		self.amount_outstanding = flt(self.amount) - flt(self.total_utilization) - flt(self.total_cancelled)
 		

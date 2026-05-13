@@ -1,8 +1,10 @@
-cur_frm.add_fetch("item_code", "license_name", "license_name");
 
 let set_currency = 0;
 
 frappe.ui.form.on("Advance Authorisation License",{
+	setup(frm) {
+		frm.add_fetch("item_code", "license_name", "license_name");
+	},
 	approved_qty:function(frm) {
 		var remaining_exp_qty = flt(frm.doc.approved_qty) - flt(frm.doc.total_export_qty);
 		frm.set_value("remaining_export_qty", remaining_exp_qty);

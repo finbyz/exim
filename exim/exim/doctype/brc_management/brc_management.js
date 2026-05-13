@@ -1,29 +1,34 @@
 // Copyright (c) 2022, FinByz Tech Pvt Ltd and contributors
 // For license information, please see license.txt
 let payment_entry_list = [];
-cur_frm.fields_dict.invoice_no.get_query = function(doc) {
-	return {
-		query: "exim.query.get_invoce_no_based_on_customer"
-	}
-};
 
-cur_frm.set_query("voucher_no", "brc_payment", function(doc,cdt,cdn) {
-	var row = frappe.get_doc(cdt, cdn);
-	if(row.voucher_type == "Payment Entry")	{
-		return {
-			query: "exim.query.get_invoce_no",
-			filters: {
-				'invoice_no': doc.invoice_no
+frappe.ui.form.on("BRC Management", {
+	setup(frm) {
+		frm.set_query("invoice_no", function () {
+			return {
+				query: "exim.query.get_invoce_no_based_on_customer",
+			};
+		});
+
+		frm.set_query("voucher_no", "brc_payment", function (doc, cdt, cdn) {
+			var row = frappe.get_doc(cdt, cdn);
+
+			if (row.voucher_type == "Payment Entry") {
+				return {
+					query: "exim.query.get_invoce_no",
+					filters: {
+						invoice_no: doc.invoice_no,
+					},
+				};
 			}
-			}
-	}
-});
-frappe.ui.form.on('BRC Management', {
-	onload: function (frm) {
-        frm.trigger("add_unique_payment_entry");
+		});
 	},
 
-	before_save: function (frm) {
+	onload(frm) {
+		frm.trigger("add_unique_payment_entry");
+	},
+
+	before_save(frm) {
 		frm.trigger("cal_total");
 		frm.trigger("cal_bank_difference");
 		frm.trigger("cal_bank_total_charges");

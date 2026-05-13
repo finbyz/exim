@@ -56,7 +56,7 @@ class RodtepClaim(Document):
 		if self.journal_entry_ref:
 			jv = frappe.get_doc("Journal Entry", self.journal_entry_ref)
 			jv.cancel()
-			self.journal_entry_ref = ''
+			self.db_set("journal_entry_ref", "")
 
 def exp_je_data(company):
 

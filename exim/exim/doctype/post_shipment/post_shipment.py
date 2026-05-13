@@ -191,8 +191,7 @@ class PostShipment(Document):
 		jv.save()
 		jv.submit()
 
-		self.journal_entry = jv.name
-		self.db_update()
+		self.db_set("journal_entry", jv.name)
 		
 
 		url = get_url_to_form("Journal Entry", jv.name)
@@ -202,7 +201,7 @@ class PostShipment(Document):
 		if self.journal_entry:
 			jv = frappe.get_doc("Journal Entry", self.journal_entry)
 			jv.cancel()
-			self.journal_entry = ''
+			self.db_set("journal_entry", "")
 			self.db_update()
 			url = get_url_to_form("Journal Entry", jv.name)
 			frappe.msgprint(_("Journal Entry - <a href='{url}'>{doc}</a> has been cancelled.".format(url=url, doc=frappe.bold(jv.name))))

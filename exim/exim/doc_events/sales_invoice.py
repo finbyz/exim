@@ -332,7 +332,7 @@ def create_jv(self):
 							"account": drawback_receivable_account,
 							"cost_center": drawback_cost_center,
 							"debit_in_account_currency": round(self.total_duty_drawback),
-							"cost_center": self.cost_center
+							# "cost_center": self.cost_center
 						}
 						apply_accounting_dimensions(self, row1)
 						jv.append("accounts", row1)
@@ -340,7 +340,7 @@ def create_jv(self):
 							"account": drawback_income_account,
 							"cost_center": drawback_cost_center,
 							"credit_in_account_currency": round(self.total_duty_drawback),
-							"cost_center": self.cost_center
+							# "cost_center": self.cost_center
 						}
 						apply_accounting_dimensions(self, row2)
 						jv.append("accounts", row2)
@@ -350,7 +350,7 @@ def create_jv(self):
 							"account": drawback_receivable_account,
 							"cost_center": drawback_cost_center,
 							"debit_in_account_currency": self.total_duty_drawback,
-							"cost_center": self.cost_center
+							# "cost_center": self.cost_center
 						}
 						apply_accounting_dimensions(self, row1)
 						jv.append("accounts", row1)
@@ -358,7 +358,7 @@ def create_jv(self):
 							"account": drawback_income_account,
 							"cost_center": drawback_cost_center,
 							"credit_in_account_currency":self.total_duty_drawback,
-							"cost_center": self.cost_center
+							# "cost_center": self.cost_center
 						}
 						apply_accounting_dimensions(self, row2)
 						jv.append("accounts", row2)
@@ -400,7 +400,7 @@ def create_jv(self):
 							"account": meis_receivable_account,
 							"cost_center": meis_cost_center,
 							"debit_in_account_currency": round(self.total_meis),
-							"cost_center": self.cost_center
+							# "cost_center": self.cost_center
 						}
 					apply_accounting_dimensions(self, row1)
 					meis_jv.append("accounts", row1)
@@ -409,7 +409,7 @@ def create_jv(self):
 							"account": meis_income_account,
 							"cost_center": meis_cost_center,
 							"credit_in_account_currency": round(self.total_meis),
-							"cost_center": self.cost_center
+							# "cost_center": self.cost_center
 						}
 					apply_accounting_dimensions(self, row2)
 					meis_jv.append("accounts", row2)
@@ -418,7 +418,7 @@ def create_jv(self):
 							"account": meis_receivable_account,
 							"cost_center": meis_cost_center,
 							"debit_in_account_currency": self.total_meis,
-							"cost_center": self.cost_center
+							# "cost_center": self.cost_center
 						}
 					apply_accounting_dimensions(self, row1)
 					meis_jv.append("accounts", row1)
@@ -427,7 +427,7 @@ def create_jv(self):
 							"account": meis_income_account,
 							"cost_center": meis_cost_center,
 							"credit_in_account_currency": self.total_meis,
-							"cost_center": self.cost_center
+							# "cost_center": self.cost_center
 						}
 					apply_accounting_dimensions(self, row2)
 					meis_jv.append("accounts", row2)
