@@ -35,8 +35,10 @@ class BRCManagement(Document):
 				frappe.throw(f"""Row {item.idx}: BRC Amount should not be greater than Total Allocate Amount """)
 		
 		if not self.brc_payment:
-			self.total_brc_amount = 0
-			self.total_payment_receipt = 0
+			self.db_set({
+				"total_brc_amount": 0,
+				"total_payment_receipt": 0
+			}, update_modified=False)
 
 	def cal_total(self):
 		total_shipping_bill_amount = 0.0

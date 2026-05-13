@@ -227,13 +227,25 @@ class PreShipment(Document):
 		})
 
 	def calculate_repayments(self):
-		self.total_repayment = sum([row.amount for row in self.get('repayments')])
-		self.total_repayment_inr = sum([row.amount_inr for row in self.get('repayments')])
+		total_repayment = sum([row.amount for row in self.get('repayments')])
+		total_repayment_inr = sum([row.amount_inr for row in self.get('repayments')])
 
-		loan_outstanding_amount	= flt(self.loan_amount) - flt(self.total_repayment)
+		loan_outstanding_amount = flt(self.loan_amount) - flt(total_repayment)
 
 		if loan_outstanding_amount < 0:
-			frappe.throw(_("Loan Outstanding Amount is becoming negaive with value {}".format(loan_outstanding_amount)))
+			frappe.throw(
+				_("Loan Outstanding Amount is becoming negative with value {}".format(
+					loan_outstanding_amount
+				))
+			)
 
-		self.loan_outstanding_amount = loan_outstanding_amount
-		self.loan_outstanding_amount_inr = flt(self.loan_amount_inr) - flt(self.total_repayment_inr)
+		loan_outstanding_amount_inr = (
+			flt(self.loan_amount_inr) - flt(total_repayment_inr)
+		)
+
+		return {
+			"total_repayment": total_repayment,
+			"total_repayment_inr": total_repayment_inr,
+			"loan_outstanding_amount": loan_outstanding_amount,
+			"loan_outstanding_amount_inr": loan_outstanding_amount_inr,
+		}

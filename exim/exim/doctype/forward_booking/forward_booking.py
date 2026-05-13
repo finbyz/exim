@@ -211,49 +211,65 @@ class ForwardBooking(Document):
 			frappe.msgprint(_("Journal Entry - <a href='{url}'>{doc}</a> has been created.".format(url=url, doc=frappe.bold(jv.name))))
 
 	def on_update_after_submit(self):
-		self.calculate_total_utilization()
-		self.calculate_cancellation()
-		self.set_status()
+		total_utilization = self.calculate_total_utilization()
+		cancellation_data = self.calculate_cancellation()
+		status_data = self.set_status(
+			total_utilization,
+			cancellation_data["total_cancelled"]
+		)
 
 		self.db_set({
-			"total_utilization": self.total_utilization,
-			"total_cancelled": self.total_cancelled,
-			"can_avg_rate": self.can_avg_rate,
-			"rate_diff": self.rate_diff,
-			"diff_amount": self.diff_amount,
-			"amount_outstanding": self.amount_outstanding,
-			"status": self.status,
-		})
+			"total_utilization": total_utilization,
+			"total_cancelled": cancellation_data["total_cancelled"],
+			"can_avg_rate": cancellation_data["can_avg_rate"],
+			"rate_diff": cancellation_data["rate_diff"],
+			"diff_amount": cancellation_data["diff_amount"],
+			"amount_outstanding": status_data["amount_outstanding"],
+			"status": status_data["status"],
+		}, update_modified=False)
 
 	def calculate_total_utilization(self):
-		self.total_utilization = sum([flt(row.paid_amount) for row in self.get('payment_entries')])
+		return sum([flt(row.paid_amount) for row in self.get('payment_entries')])
 
 	def calculate_cancellation(self):
 		total_inr_amount = sum([flt(d.inr_amount) for d in self.cancellation_details])
 		total_cancel_amount = sum([flt(d.cancel_amount) for d in self.cancellation_details])
 
-		self.total_cancelled = total_cancel_amount
-		self.can_avg_rate = 0.0
-		self.rate_diff = 0.0
-		self.diff_amount = 0.0
+		can_avg_rate = 0.0
+		rate_diff = 0.0
+		diff_amount = 0.0
 
 		if total_cancel_amount:
-			self.can_avg_rate = flt(total_inr_amount) / flt(total_cancel_amount)
+			can_avg_rate = flt(total_inr_amount) / flt(total_cancel_amount)
 
 			if self.hedge == "Export":
-				self.rate_diff = flt(self.booking_rate) - flt(self.can_avg_rate)
+				rate_diff = flt(self.booking_rate) - flt(can_avg_rate)
 			else:
-				self.rate_diff = flt(self.can_avg_rate) - flt(self.booking_rate)
+				rate_diff = flt(can_avg_rate) - flt(self.booking_rate)
 
-			self.diff_amount = flt(self.rate_diff) * flt(self.total_cancelled)
-	def set_status(self):
-		self.amount_outstanding = flt(self.amount) - flt(self.total_utilization) - flt(self.total_cancelled)
-		
-		if self.amount_outstanding < 0.0:
-			frappe.throw(_("Amount Outstanding is becoming negative for forward contract %s." % self.name))
-			validated = False
+			diff_amount = flt(rate_diff) * flt(total_cancel_amount)
 
-		if self.amount_outstanding == 0.0:
-			self.status = "Closed"
-		else:
-			self.status = "Open"
+		return {
+			"total_cancelled": total_cancel_amount,
+			"can_avg_rate": can_avg_rate,
+			"rate_diff": rate_diff,
+			"diff_amount": diff_amount,
+		}
+	def set_status(self, total_utilization, total_cancelled):
+		amount_outstanding = (
+			flt(self.amount)
+			- flt(total_utilization)
+			- flt(total_cancelled)
+		)
+
+		if amount_outstanding < 0.0:
+			frappe.throw(
+				_("Amount Outstanding is becoming negative for forward contract %s." % self.name)
+			)
+
+		status = "Closed" if amount_outstanding == 0.0 else "Open"
+
+		return {
+			"amount_outstanding": amount_outstanding,
+			"status": status,
+		}
