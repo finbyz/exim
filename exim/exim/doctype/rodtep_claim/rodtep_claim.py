@@ -92,20 +92,7 @@ def journal_entry_list(start_date, end_date, company):
 
 	list_of_je = exp_je_data(company)
 
-	args = [
-		start_date,
-		end_date,
-		company
-	]
-
-	conditions = ""
-
-	if list_of_je:
-		placeholders = ", ".join(["%s"] * len(list_of_je))
-		conditions = f" AND je.name NOT IN ({placeholders})"
-		args.extend(list_of_je)
-
-	query = f"""
+	query = """
 		SELECT
 			je.name AS je_no,
 			jea.debit_in_account_currency AS debit_amount,
@@ -128,17 +115,28 @@ def journal_entry_list(start_date, end_date, company):
 
 		WHERE
 			je.voucher_type = 'RODTEP Entry'
-			AND je.posting_date >= %s
-			AND je.posting_date <= %s
+			AND je.posting_date >= %(start_date)s
+			AND je.posting_date <= %(end_date)s
 			AND jea.debit_in_account_currency > 0
 			AND je.docstatus < 2
-			AND je.company = %s
-			{conditions}
+			AND je.company = %(company)s
 	"""
+
+	values = {
+		"start_date": start_date,
+		"end_date": end_date,
+		"company": company
+	}
+
+	if list_of_je:
+		query += """
+			AND je.name NOT IN %(excluded_jv)s
+		"""
+		values["excluded_jv"] = tuple(list_of_je)
 
 	je_data = frappe.db.sql(
 		query,
-		tuple(args),
+		values,
 		as_dict=1
 	)
 

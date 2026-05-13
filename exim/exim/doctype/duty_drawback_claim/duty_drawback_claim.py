@@ -103,19 +103,13 @@ def journal_entry_list(start_date, end_date, company):
 
 	list_of_je = exp_je_data(company)
 
-	args = {
+	values = {
 		"r_start_date": start_date,
 		"r_end_date": end_date,
-		"company": company
+		"company": company,
 	}
 
-	conditions = ""
-
-	if list_of_je:
-		placeholders = ", ".join(["%s"] * len(list_of_je))
-		conditions = f" AND je.name NOT IN ({placeholders})"
-
-	query = f"""
+	query = """
 		SELECT
 			je.name AS je_no,
 			jea.debit_in_account_currency AS debit_amount,
@@ -142,13 +136,11 @@ def journal_entry_list(start_date, end_date, company):
 			AND jea.debit_in_account_currency > 0
 			AND je.docstatus < 2
 			AND je.company = %(company)s
-			{conditions}
 	"""
 
-	values = args
-
 	if list_of_je:
-		values = tuple(args.values()) + tuple(list_of_je)
+		query += " AND je.name NOT IN %(excluded_jv)s"
+		values["excluded_jv"] = tuple(list_of_je)
 
 	je_data = frappe.db.sql(
 		query,
@@ -157,7 +149,6 @@ def journal_entry_list(start_date, end_date, company):
 	)
 
 	return je_data
-
 def create_jv_on_submit(self,method):
 	if(round(flt(self.total_debit_amount),4) == round(flt(self.script_amount),4)):
 		meis_receivable_account = frappe.db.get_value("Company", { "company_name": self.company}, "duty_drawback_receivable_account")
