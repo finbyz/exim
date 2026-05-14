@@ -1,37 +1,32 @@
-cur_frm.add_fetch("sales_order", "currency", "currency");
-cur_frm.add_fetch("sales_order", "port_of_loading", "port_of_loading");
-cur_frm.add_fetch("sales_order", "port_of_discharge", "port_of_discharge");
-cur_frm.add_fetch("sales_order", "grand_total", "contract_amount");
-cur_frm.add_fetch("sales_order", "transaction_date", "contract_date");
-
-cur_frm.add_fetch("sales_order", "grand_total", "grand_total");
-cur_frm.add_fetch("sales_order", "net_total", "net_total");
-
-cur_frm.fields_dict.lc_opening_bank.get_query = function(doc) {
-	return {
-		filters: {
-			'bank_type': 'Foreign Bank'
-		}
-	}
-};
-
-cur_frm.fields_dict.contract_term_order.grid.get_field("sales_order").get_query = function(doc,cdt,cdn) {
-	let d = locals[cdt][cdn];
-	return {
-		filters: {
-			"currency": doc.currency,
-			"docstatus": 1
-		}
-	}
-};
-
 frappe.ui.form.on('Contract Term', {
-	// validate: function(frm){
-	// 	if(frm.doc.contract_amount <= frm.doc.total_net_amount){
-	// 		frappe.msgprint(__("Contract Amount should not be less than Total Net Amount"));
-	// 		frappe.validated = false
-	// 	}
-	// },
+	setup(frm) {
+		frm.add_fetch("sales_order", "currency", "currency");
+		frm.add_fetch("sales_order", "port_of_loading", "port_of_loading");
+		frm.add_fetch("sales_order", "port_of_discharge", "port_of_discharge");
+		frm.add_fetch("sales_order", "grand_total", "contract_amount");
+		frm.add_fetch("sales_order", "transaction_date", "contract_date");
+
+		frm.add_fetch("sales_order", "grand_total", "grand_total");
+		frm.add_fetch("sales_order", "net_total", "net_total");
+
+		frm.set_query("lc_opening_bank", function () {
+			return {
+				filters: {
+					bank_type: "Foreign Bank",
+				},
+			};
+		});
+
+		frm.fields_dict.contract_term_order.grid.get_field("sales_order").get_query =
+			function (doc, cdt, cdn) {
+				return {
+					filters: {
+						currency: doc.currency,
+						docstatus: 1,
+					},
+				};
+			};
+	},
 	before_save: function(frm){
 		/*frm.trigger("cal_contract_orders")*/
 		if(frm.doc.terms_based_on == "CAD"){

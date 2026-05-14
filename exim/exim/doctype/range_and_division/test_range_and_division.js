@@ -10,14 +10,16 @@ QUnit.test("test: Range and Division", function (assert) {
 
 	frappe.run_serially([
 		// insert a new Range and Division
-		() => frappe.tests.make('Range and Division', [
-			// values to be set
-			{key: 'value'}
-		]),
-		() => {
-			assert.equal(cur_frm.doc.key, 'value');
-		},
-		() => done()
-	]);
+		() =>
+			frappe.tests.make("Range and Division", [
+				// values to be set
+				{ key: "value" },
+			]),
 
+		(frm) => {
+			assert.equal(frm.doc.key, "value");
+		},
+
+		() => done(),
+	]);
 });

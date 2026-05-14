@@ -10,14 +10,16 @@ QUnit.test("test: Port Details", function (assert) {
 
 	frappe.run_serially([
 		// insert a new Port Details
-		() => frappe.tests.make('Port Details', [
-			// values to be set
-			{key: 'value'}
-		]),
-		() => {
-			assert.equal(cur_frm.doc.key, 'value');
-		},
-		() => done()
-	]);
+		() =>
+			frappe.tests.make("Port Details", [
+				// values to be set
+				{ key: "value" },
+			]),
 
+		(frm) => {
+			assert.equal(frm.doc.key, "value");
+		},
+
+		() => done(),
+	]);
 });

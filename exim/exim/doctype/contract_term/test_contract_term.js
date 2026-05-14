@@ -10,14 +10,16 @@ QUnit.test("test: Contract Term", function (assert) {
 
 	frappe.run_serially([
 		// insert a new Contract
-		() => frappe.tests.make('Contract Term', [
-			// values to be set
-			{key: 'value'}
-		]),
-		() => {
-			assert.equal(cur_frm.doc.key, 'value');
-		},
-		() => done()
-	]);
+		() =>
+			frappe.tests.make("Contract Term", [
+				// values to be set
+				{ key: "value" },
+			]),
 
+		(frm) => {
+			assert.equal(frm.doc.key, "value");
+		},
+
+		() => done(),
+	]);
 });

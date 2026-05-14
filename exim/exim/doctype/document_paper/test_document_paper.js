@@ -10,14 +10,16 @@ QUnit.test("test: Document Paper", function (assert) {
 
 	frappe.run_serially([
 		// insert a new Document Paper
-		() => frappe.tests.make('Document Paper', [
-			// values to be set
-			{key: 'value'}
-		]),
-		() => {
-			assert.equal(cur_frm.doc.key, 'value');
-		},
-		() => done()
-	]);
+		() =>
+			frappe.tests.make("Document Paper", [
+				// values to be set
+				{ key: "value" },
+			]),
 
+		(frm) => {
+			assert.equal(frm.doc.key, "value");
+		},
+
+		() => done(),
+	]);
 });

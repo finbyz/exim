@@ -3,76 +3,112 @@
 
 let set_currency = 0;
 
-cur_frm.add_fetch('forward_contract', 'booking_rate', 'forward_rate');
-cur_frm.add_fetch('forward_contract', 'amount', 'forward_amount');
-cur_frm.add_fetch('forward_contract', 'maturity_from', 'maturity_from');
-cur_frm.add_fetch('forward_contract', 'maturity_to', 'maturity_to');
-cur_frm.add_fetch('forward_contract', 'amount_outstanding', 'amount_outstanding');
-cur_frm.add_fetch('forward_contract', 'amount_outstanding', 'amount_utilized');
-
-cur_frm.add_fetch('pre_shipment', 'loan_outstanding_amount', 'outstanding_amount');
-cur_frm.add_fetch('pre_shipment', 'loan_outstanding_amount', 'repayment_amount');
-cur_frm.add_fetch('pre_shipment', 'loan_outstanding_amount_inr', 'outstanding_amount_inr');
-cur_frm.add_fetch('pre_shipment', 'loan_outstanding_amount_inr', 'repayment_amount_inr');
-cur_frm.add_fetch('pre_shipment', 'source_exchange_rate', 'exchange_rate');
-cur_frm.add_fetch('pre_shipment', 'credit_currency', 'currency');
-cur_frm.add_fetch('pre_shipment', 'loan_account', 'loan_account');
-
-cur_frm.fields_dict.funding_bank.get_query = function(doc) {
-	return {	
-		filters: {
-			"bank_type": "Indian Bank"
-		}
-	}
-};
-
-cur_frm.fields_dict.supplier_bank.get_query = function(doc) {
-	return {
-		filters: {
-			"bank_type": "Foreign Bank"
-		}
-	}
-};
-
-cur_frm.fields_dict.loan_account.get_query = function(doc) {
-	return {
-		filters: {
-			"account_type": "Bank",
-			"account_currency": doc.credit_currency
-		}
-	}
-};
-
-cur_frm.fields_dict.loan_credit_account.get_query = function(doc) {
-	return {
-		filters: {
-			"account_type": "Bank"
-		}
-	}
-};
-
 frappe.ui.form.on("Post Shipment", {
-	setup: function(frm){
-		frm.set_query("forward_contract", "forwards", function() {
+	setup(frm) {
+		frm.add_fetch("forward_contract", "booking_rate", "forward_rate");
+		frm.add_fetch("forward_contract", "amount", "forward_amount");
+		frm.add_fetch("forward_contract", "maturity_from", "maturity_from");
+		frm.add_fetch("forward_contract", "maturity_to", "maturity_to");
+		frm.add_fetch(
+			"forward_contract",
+			"amount_outstanding",
+			"amount_outstanding"
+		);
+		frm.add_fetch(
+			"forward_contract",
+			"amount_outstanding",
+			"amount_utilized"
+		);
+
+		frm.add_fetch(
+			"pre_shipment",
+			"loan_outstanding_amount",
+			"outstanding_amount"
+		);
+		frm.add_fetch(
+			"pre_shipment",
+			"loan_outstanding_amount",
+			"repayment_amount"
+		);
+		frm.add_fetch(
+			"pre_shipment",
+			"loan_outstanding_amount_inr",
+			"outstanding_amount_inr"
+		);
+		frm.add_fetch(
+			"pre_shipment",
+			"loan_outstanding_amount_inr",
+			"repayment_amount_inr"
+		);
+		frm.add_fetch(
+			"pre_shipment",
+			"source_exchange_rate",
+			"exchange_rate"
+		);
+		frm.add_fetch(
+			"pre_shipment",
+			"credit_currency",
+			"currency"
+		);
+		frm.add_fetch(
+			"pre_shipment",
+			"loan_account",
+			"loan_account"
+		);
+
+		frm.set_query("funding_bank", function () {
 			return {
-				"filters": {
-					"hedge": "Export",
-					"status": "Open",
-					"docstatus": 1,
-					"amount_outstanding": ['>', '0'],
-					"currency": frm.doc.credit_currency
-				}
+				filters: {
+					bank_type: "Indian Bank",
+				},
 			};
 		});
 
-		frm.set_query("pre_shipment", "repayments", function() {
+		frm.set_query("supplier_bank", function () {
 			return {
-				"filters": {
-					"docstatus": 1,
-					"loan_outstanding_amount": [">", 0]
-				}
-			}
-		})
+				filters: {
+					bank_type: "Foreign Bank",
+				},
+			};
+		});
+
+		frm.set_query("loan_account", function (doc) {
+			return {
+				filters: {
+					account_type: "Bank",
+					account_currency: doc.credit_currency,
+				},
+			};
+		});
+
+		frm.set_query("loan_credit_account", function () {
+			return {
+				filters: {
+					account_type: "Bank",
+				},
+			};
+		});
+
+		frm.set_query("forward_contract", "forwards", function () {
+			return {
+				filters: {
+					hedge: "Export",
+					status: "Open",
+					docstatus: 1,
+					amount_outstanding: [">", "0"],
+					currency: frm.doc.credit_currency,
+				},
+			};
+		});
+
+		frm.set_query("pre_shipment", "repayments", function () {
+			return {
+				filters: {
+					docstatus: 1,
+					loan_outstanding_amount: [">", 0],
+				},
+			};
+		});
 	},
 
 	onload: function(frm){

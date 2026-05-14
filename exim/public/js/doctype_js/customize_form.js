@@ -1,8 +1,8 @@
 frappe.ui.form.on("Customize Form", {
-    refresh: function(frm) {
-        cur_frm.fields_dict.fields.grid.grid_pagination.page_length = 1000;
-        cur_frm.refresh_fields('fields');
-    }
+    refresh(frm) {
+		frm.fields_dict.fields.grid.grid_pagination.page_length = 1000;
+		frm.refresh_field("fields");
+	},
 });
 
 frappe.customize_form.save_customization = function (frm) {

@@ -10,14 +10,16 @@ QUnit.test("test: Export Document", function (assert) {
 
 	frappe.run_serially([
 		// insert a new Export Document
-		() => frappe.tests.make('Export Document', [
-			// values to be set
-			{key: 'value'}
-		]),
-		() => {
-			assert.equal(cur_frm.doc.key, 'value');
-		},
-		() => done()
-	]);
+		() =>
+			frappe.tests.make("Export Document", [
+				// values to be set
+				{ key: "value" },
+			]),
 
+		(frm) => {
+			assert.equal(frm.doc.key, "value");
+		},
+
+		() => done(),
+	]);
 });
