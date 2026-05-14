@@ -1,23 +1,33 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup, find_packages
-import re, ast
 
-with open('requirements.txt') as f:
-	install_requires = f.read().strip().split('\n')
+import ast
+import os
+import re
 
-# get version from __version__ variable in exim/__init__.py
-_version_re = re.compile(r'__version__\s+=\s+(.*)')
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
-with open('exim/__init__.py', 'rb') as f:
-	version = str(ast.literal_eval(_version_re.search(
-		f.read().decode('utf-8')).group(1)))
+requirements_path = os.path.join(BASE_DIR, "requirements.txt")
+init_path = os.path.join(BASE_DIR, "exim", "__init__.py")
+
+with open(requirements_path, encoding="utf-8") as f:
+	install_requires = f.read().strip().split("\n")
+
+_version_re = re.compile(r"__version__\s+=\s+(.*)")
+
+with open(init_path, encoding="utf-8") as f:
+	version = str(
+		ast.literal_eval(
+			_version_re.search(f.read()).group(1)
+		)
+	)
 
 setup(
-	name='exim',
+	name="exim",
 	version=version,
-	description='custom app for exim module',
-	author='FinByz Tech Pvt Ltd',
-	author_email='info@finbyz.com',
+	description="custom app for exim module",
+	author="FinByz Tech Pvt Ltd",
+	author_email="info@finbyz.com",
 	packages=find_packages(),
 	zip_safe=False,
 	include_package_data=True,

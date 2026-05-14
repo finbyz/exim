@@ -3,6 +3,7 @@
 
 import frappe
 
+
 def execute(filters=None):
 	columns, data = get_data(filters)
 	return columns, data
@@ -34,22 +35,23 @@ def get_data(filters):
 		filters.get("to_date"),
 	)
 
-	container_details = frappe.db.sql(
-		f"""
+	container_query = """
 		SELECT
 			cd.container_no,
 			si.name
 		FROM `tabContainer Details` AS cd
 		LEFT JOIN `tabSales Invoice` AS si
 			ON cd.parent = si.name
-		WHERE si.docstatus = 1 {conditions}
-		""",
+		WHERE si.docstatus = 1
+	""" + conditions
+
+	container_details = frappe.db.sql(
+		container_query,
 		query_args,
 		as_dict=1,
 	)
 
-	data = frappe.db.sql(
-		f"""
+	data_query = """
 		SELECT
 			sii.item_name,
 			sii.qty,
@@ -62,8 +64,11 @@ def get_data(filters):
 		FROM `tabSales Invoice Item` AS sii
 		LEFT JOIN `tabSales Invoice` AS si
 			ON sii.parent = si.name
-		WHERE si.docstatus = 1 {conditions}
-		""",
+		WHERE si.docstatus = 1
+	""" + conditions
+
+	data = frappe.db.sql(
+		data_query,
 		query_args,
 		as_dict=1,
 	)

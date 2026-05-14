@@ -27,26 +27,54 @@ class HedgingDetailsReport(object):
 	def get_data(self):
 		currency = self.filters.get('currency') or "INR"
 		if self.filters.get('currency'):
-			conditions = "= %s"
+			currency_condition = "AND currency = %s"
 		else:
-			conditions = "!= %s"
+			currency_condition = "AND currency != %s"
 
-		self.currency_cond = conditions % currency
-		
-		self.data = frappe.db.sql("""
-			SELECT name as sales_order, transaction_date, customer, currency, 
-				(grand_total - (advance_paid / conversion_rate)) as total_amount, conversion_rate as rate, 
-				base_grand_total as inr_amount, delivery_date, status 
-			from `tabSales Order`
-			where docstatus = 1 and status not in ('Closed', 'Completed')
-				and amount_hedged < grand_total and currency {conditions}
-			order by delivery_date """.format(conditions=conditions), currency, as_dict=1)
+		query = """
+			SELECT
+				name as sales_order,
+				transaction_date,
+				customer,
+				currency,
+				(grand_total - (advance_paid / conversion_rate)) as total_amount,
+				conversion_rate as rate,
+				base_grand_total as inr_amount,
+				delivery_date,
+				status
+			FROM `tabSales Order`
+			WHERE docstatus = 1
+				AND status NOT IN ('Closed', 'Completed')
+				AND amount_hedged < grand_total
+		"""
 
-		self.forward_data = frappe.get_list("Forward Booking",
-			filters = {'docstatus': 1, 'currency': self.currency_cond.split() },
-			fields = ['name', 'maturity_to', 'booking_date', 'booking_rate', 'amount_outstanding'],
-			order_by = "maturity_to")
+		query += " " + currency_condition
+		query += " ORDER BY delivery_date"
 
+		self.data = frappe.db.sql(
+			query,
+			(currency,),
+			as_dict=1
+		)
+
+		self.forward_data = frappe.get_list(
+			"Forward Booking",
+			filters={
+				'docstatus': 1,
+				'currency': [
+					'=' if self.filters.get('currency') else '!=',
+					currency
+				]
+			},
+			fields=[
+				'name',
+				'maturity_to',
+				'booking_date',
+				'booking_rate',
+				'amount_outstanding'
+			],
+			order_by="maturity_to"
+		)
 	def get_dist_months(self):
 		for row in self.data:
 			delivery_date = getdate(row.delivery_date)
