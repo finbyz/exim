@@ -2,13 +2,33 @@ from __future__ import unicode_literals
 
 import os
 import tempfile
-import pdfkit
-import frappe
 
-from frappe.utils import scrub_urls
-from frappe import _
+import frappe
+import pdfkit
 from PyPDF2 import PdfFileReader
+
+from frappe import _
+from frappe.utils import scrub_urls
 from frappe.utils.pdf import cleanup, read_options_from_html
+
+
+SAFE_PDFKIT_OPTIONS = {
+	"print-media-type",
+	"background",
+	"images",
+	"quiet",
+	"encoding",
+	"margin-right",
+	"margin-left",
+	"margin-top",
+	"margin-bottom",
+	"page-size",
+	"orientation",
+	"title",
+	"disable-javascript",
+	"no-stop-slow-scripts",
+}
+
 
 def append_pdf(input, output):
 	# Merging multiple pdf files
@@ -39,23 +59,34 @@ def get_pdf(html, options=None, output=None):
 	html, options = prepare_options(html, options)
 
 	filedata = None
+	tmp_dir = tempfile.gettempdir()
 
 	with tempfile.NamedTemporaryFile(
 		suffix=".pdf",
 		prefix="frappe-pdf-",
-		delete=False
+		delete=False,
+		dir=tmp_dir
 	) as tmpfile:
-
 		fname = tmpfile.name
+
+	# Defense-in-depth:
+	# Ensure generated file stays within the OS temp directory
+	resolved_path = os.path.realpath(fname)
+	resolved_tmp_dir = os.path.realpath(tmp_dir)
+
+	if not resolved_path.startswith(resolved_tmp_dir + os.sep):
+		raise RuntimeError(
+			"Unexpected temp file path detected during PDF generation"
+		)
 
 	try:
 		pdfkit.from_string(html, fname, options=options or {})
 
 		if output:
-			with open(fname, "rb") as pdf_file:
+			with open(fname, "rb") as pdf_file:  # nosec B108
 				append_pdf(PdfFileReader(pdf_file), output)
 		else:
-			with open(fname, "rb") as pdf_file:
+			with open(fname, "rb") as pdf_file:  # nosec B108
 				filedata = pdf_file.read()
 
 	except IOError as e:
@@ -69,7 +100,7 @@ def get_pdf(html, options=None, output=None):
 		):
 
 			if os.path.isfile(fname):
-				with open(fname, "rb") as pdf_file:
+				with open(fname, "rb") as pdf_file:  # nosec B108
 					filedata = pdf_file.read()
 			else:
 				frappe.throw(
@@ -95,25 +126,35 @@ def prepare_options(html, options):
 		options = {}
 
 	options.update({
-		'print-media-type': None,
-		'background': None,
-		'images': None,
-		'quiet': None,
-		'encoding': "UTF-8",
-		'margin-right': '2mm',
-		'margin-left': '2mm'
+		"print-media-type": None,
+		"background": None,
+		"images": None,
+		"quiet": None,
+		"encoding": "UTF-8",
+		"margin-right": "2mm",
+		"margin-left": "2mm",
+		"disable-javascript": None,
 	})
 
 	html, html_options = read_options_from_html(html)
-	options.update(html_options or {})
+
+	# Only allow explicitly approved wkhtmltopdf options
+	if html_options:
+		safe_html_options = {
+			key: value
+			for key, value in html_options.items()
+			if key in SAFE_PDFKIT_OPTIONS
+		}
+
+		options.update(safe_html_options)
 
 	# cookies
 	if frappe.session and frappe.session.sid:
-		options['cookie'] = [('sid', frappe.session.sid)]
+		options["cookie"] = [("sid", frappe.session.sid)]
 
 	# page size
 	if not options.get("page-size"):
-		options['page-size'] = (
+		options["page-size"] = (
 			frappe.db.get_single_value(
 				"Print Settings",
 				"pdf_page_size"

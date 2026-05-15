@@ -181,7 +181,7 @@ frappe.ui.form.on("Post Shipment", {
 	},
 
 	cal_cash_amount: function(frm){
-		const cash_amount = flt(cur_frm.doc.loan_amount) - flt(frm.doc.total_amount_utilized) - flt(frm.doc.total_repayment_amount);
+		const cash_amount = flt(frm.doc.loan_amount) - flt(frm.doc.total_amount_utilized) - flt(frm.doc.total_repayment_amount);
 		frm.set_value('cash_amount', flt(cash_amount));
 	},
 
@@ -198,20 +198,20 @@ frappe.ui.form.on("Post Shipment", {
 			frm.events.set_currency_lables(frm);
 		}
 		else {
-			cur_frm.set_df_property("source_exchange_rate", "description", "");
+			frm.set_df_property("source_exchange_rate", "description", "");
 		}
 	},
 
 	set_currency_lables: function(frm){
-		cur_frm.set_df_property("loan_amount_inr", "read_only", frm.doc.credit_currency == 'INR'? 0:1);
+		frm.set_df_property("loan_amount_inr", "read_only", frm.doc.credit_currency == 'INR'? 0:1);
 
-		cur_frm.set_df_property("amount_utilized", "options", "credit_currency", cur_frm.doc.name, "forwards");
-		cur_frm.set_df_property("forward_amount", "options", "credit_currency", cur_frm.doc.name, "forwards");
-		cur_frm.set_df_property("amount_outstanding", "options", "credit_currency", cur_frm.doc.name, "forwards");
+		frm.set_df_property("amount_utilized", "options", "credit_currency", frm.doc.name, "forwards");
+		frm.set_df_property("forward_amount", "options", "credit_currency", frm.doc.name, "forwards");
+		frm.set_df_property("amount_outstanding", "options", "credit_currency", frm.doc.name, "forwards");
 
 		var company_currency = frm.doc.company? frappe.get_doc(":Company", frm.doc.company).default_currency: "";
 
-		cur_frm.set_df_property("source_exchange_rate", "description",
+		frm.set_df_property("source_exchange_rate", "description",
 			("1 " + frm.doc.credit_currency + " = [?] " + company_currency));
 
 		frm.set_currency_labels(["loan_amount"], frm.doc.credit_currency);

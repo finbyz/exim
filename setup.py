@@ -5,10 +5,30 @@ import ast
 import os
 import re
 
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+BASE_DIR = os.path.realpath(os.path.dirname(__file__))
 
-requirements_path = os.path.join(BASE_DIR, "requirements.txt")
-init_path = os.path.join(BASE_DIR, "exim", "__init__.py")
+def safe_project_path(*parts):
+	"""
+	Resolve a project-relative path and ensure it
+	stays inside the project root directory.
+	"""
+	target = os.path.realpath(os.path.join(BASE_DIR, *parts))
+
+	if not target.startswith(BASE_DIR + os.sep):
+		raise ValueError(f"Path traversal detected: {target}")
+
+	return target
+
+requirements_path = safe_project_path("requirements.txt")
+init_path = safe_project_path("exim", "__init__.py")
+
+# Optional integrity checks
+for path, label in [
+	(requirements_path, "requirements.txt"),
+	(init_path, "exim/__init__.py"),
+]:
+	if not os.path.isfile(path):
+		raise FileNotFoundError(f"Expected project file not found: {label}")
 
 with open(requirements_path, encoding="utf-8") as f:
 	install_requires = f.read().strip().split("\n")
@@ -16,11 +36,12 @@ with open(requirements_path, encoding="utf-8") as f:
 _version_re = re.compile(r"__version__\s+=\s+(.*)")
 
 with open(init_path, encoding="utf-8") as f:
-	version = str(
-		ast.literal_eval(
-			_version_re.search(f.read()).group(1)
-		)
-	)
+	match = _version_re.search(f.read())
+
+	if not match:
+		raise ValueError("Unable to determine package version")
+
+	version = str(ast.literal_eval(match.group(1)))
 
 setup(
 	name="exim",
