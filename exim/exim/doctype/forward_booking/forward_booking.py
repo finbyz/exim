@@ -187,15 +187,35 @@ class ForwardBooking(Document):
 
 		pnl_amount = abs(row.profit_or_loss)
 
-		jv.append('accounts', {
+		# Get all accounting dimensions
+		dimension_fields = frappe.get_all(
+			"Accounting Dimension",
+			pluck="fieldname"
+		)
+	
+		credit_row = {
 			'account': credit_account,
 			'credit_in_account_currency': pnl_amount,
-		})
+		}
 
-		jv.append('accounts', {
+		debit_row = {
 			'account': debit_account,
 			'debit_in_account_currency': pnl_amount
-		})
+		}
+
+		for fieldname in dimension_fields:
+
+			if hasattr(self, fieldname):
+
+				value = self.get(fieldname)
+
+				if value:
+					credit_row[fieldname] = value
+					debit_row[fieldname] = value
+
+		jv.append('accounts', credit_row)
+		jv.append('accounts', debit_row)
+
 
 		jv.cheque_no = self.name
 		jv.cheque_date = row.date
