@@ -441,6 +441,8 @@ def pe_on_submit(self, method):
 def fwd_uti(self):
 	if self.get('forwards'):
 		for row in self.get('forwards'):
+			if row.type == "Spot" or not row.forward_contract:
+				continue
 			target_doc = frappe.get_doc("Forward Booking", row.forward_contract)
 			if not frappe.db.get_value("Forward Booking Utilization", filters={"parent": row.forward_contract, "voucher_type": "Payment Entry", "voucher_no": self.name}):
 				target_doc.append("payment_entries", {
@@ -459,6 +461,8 @@ def pe_on_cancel(self, method):
 def fwd_uti_cancel(self):
 	if self.get('forwards'):
 		for row in self.get('forwards'):
+			if row.type == "Spot" or not row.forward_contract:
+				continue
 			doc = frappe.get_doc("Forward Booking", row.forward_contract)
 			to_remove = [row for row in doc.payment_entries if row.voucher_no == self.name and row.voucher_type == "Payment Entry"]
 			[doc.remove(row) for row in to_remove]
