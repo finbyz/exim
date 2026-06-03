@@ -469,6 +469,8 @@ def fwd_uti_cancel(self):
 			doc.save()
 
 	for row in self.get('forwards'):
+		if row.type == "Spot" or not row.forward_contract:
+				continue
 		doc = frappe.get_doc("Forward Booking", row.forward_contract)
 		to_remove = [row for row in doc.payment_entries if row.voucher_no == self.name and row.voucher_type == "Payment Entry"]
 		[doc.remove(row) for row in to_remove]
