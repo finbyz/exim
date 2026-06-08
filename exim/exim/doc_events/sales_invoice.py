@@ -100,7 +100,20 @@ def duty_calculation(self):
 		for row in self.items:
 			child_meta = frappe.get_meta(row.doctype)
 			if child_meta.has_field('duty_drawback_rate') and row.duty_drawback_rate and row.fob_value:
-				duty_drawback_amount = flt(row.fob_value * row.duty_drawback_rate / 100.0)
+				duty_drawback_amount = flt(
+				row.fob_value * row.duty_drawback_rate / 100.0
+				)
+
+				max_duty_drawback_amount = flt(
+					(row.max_duty_drawback_rate or 0) * (row.qty or 0)
+				)
+
+					# Take lower value
+				if max_duty_drawback_amount > 0:
+					duty_drawback_amount = min(
+						duty_drawback_amount,
+						max_duty_drawback_amount
+					)
 				if child_meta.has_field('duty_drawback_amount'):
 					if row.maximum_cap == 1:
 						if row.capped_amount < duty_drawback_amount:
