@@ -1,102 +1,102 @@
 //EXIM
 frappe.ui.form.on("Sales Invoice", {
     setup(frm) {
-		frm.add_fetch(
-			"advance_authorisation_license",
-			"approved_qty",
-			"license_qty"
-		);
+        frm.add_fetch(
+            "advance_authorisation_license",
+            "approved_qty",
+            "license_qty"
+        );
 
-		frm.add_fetch(
-			"advance_authorisation_license",
-			"remaining_export_qty",
-			"license_remaining_qty"
-		);
+        frm.add_fetch(
+            "advance_authorisation_license",
+            "remaining_export_qty",
+            "license_remaining_qty"
+        );
 
-		frm.add_fetch(
-			"advance_authorisation_license",
-			"approved_amount",
-			"license_amount"
-		);
+        frm.add_fetch(
+            "advance_authorisation_license",
+            "approved_amount",
+            "license_amount"
+        );
 
-		frm.add_fetch(
-			"advance_authorisation_license",
-			"remaining_license_amount",
-			"license_remaining_amount"
-		);
+        frm.add_fetch(
+            "advance_authorisation_license",
+            "remaining_license_amount",
+            "license_remaining_amount"
+        );
 
-		// Notify Party Address Filter
-		frm.set_query("notify_party", function () {
-			return {
-				query:
-					"frappe.contacts.doctype.address.address.address_query",
-				filters: {
-					link_doctype: "Customer",
-					link_name: frm.doc.customer,
-				},
-			};
-		});
+        // Notify Party Address Filter
+        frm.set_query("notify_party", function () {
+            return {
+                query:
+                    "frappe.contacts.doctype.address.address.address_query",
+                filters: {
+                    link_doctype: "Customer",
+                    link_name: frm.doc.customer,
+                },
+            };
+        });
 
-		// Customer Address Filter
-		frm.set_query("customer_address", function () {
-			return {
-				query:
-					"frappe.contacts.doctype.address.address.address_query",
-				filters: {
-					link_doctype: "Customer",
-					link_name: frm.doc.customer,
-				},
-			};
-		});
+        // Customer Address Filter
+        frm.set_query("customer_address", function () {
+            return {
+                query:
+                    "frappe.contacts.doctype.address.address.address_query",
+                filters: {
+                    link_doctype: "Customer",
+                    link_name: frm.doc.customer,
+                },
+            };
+        });
 
-		// Shipping Address Filter
-		frm.set_query("shipping_address_name", function () {
-			return {
-				query:
-					"frappe.contacts.doctype.address.address.address_query",
-				filters: {},
-			};
-		});
+        // Shipping Address Filter
+        frm.set_query("shipping_address_name", function () {
+            return {
+                query:
+                    "frappe.contacts.doctype.address.address.address_query",
+                filters: {},
+            };
+        });
 
-		// Customer Contact Filter
-		frm.set_query("contact_person", function () {
-			return {
-				query:
-					"frappe.contacts.doctype.contact.contact.contact_query",
-				filters: {
-					link_doctype: "Customer",
-					link_name: frm.doc.customer,
-				},
-			};
-		});
+        // Customer Contact Filter
+        frm.set_query("contact_person", function () {
+            return {
+                query:
+                    "frappe.contacts.doctype.contact.contact.contact_query",
+                filters: {
+                    link_doctype: "Customer",
+                    link_name: frm.doc.customer,
+                },
+            };
+        });
 
-		frappe.db
-			.get_single_value(
-				"Exim Settings",
-				"use_advance_authorization_license_based_on_cas_no_of_item"
-			)
-			.then((data) => {
-				frm.fields_dict.items.grid.get_field(
-					"advance_authorisation_license"
-				).get_query = function (doc, cdt, cdn) {
-					let d = locals[cdt][cdn];
+        frappe.db
+            .get_single_value(
+                "Exim Settings",
+                "use_advance_authorization_license_based_on_cas_no_of_item"
+            )
+            .then((data) => {
+                frm.fields_dict.items.grid.get_field(
+                    "advance_authorisation_license"
+                ).get_query = function (doc, cdt, cdn) {
+                    let d = locals[cdt][cdn];
 
-					if (data) {
-						return {
-							filters: {
-								cas_number: d.cas_number,
-							},
-						};
-					}
+                    if (data) {
+                        return {
+                            filters: {
+                                cas_number: d.cas_number,
+                            },
+                        };
+                    }
 
-					return {
-						filters: {
-							export_item: d.item_code,
-						},
-					};
-				};
-			});
-	},
+                    return {
+                        filters: {
+                            export_item: d.item_code,
+                        },
+                    };
+                };
+            });
+    },
     onload: function (frm) {
         // frm.trigger("set_package");
         if (frm.doc.customer_address || frm.doc.shipping_address_name) {
@@ -127,6 +127,26 @@ frappe.ui.form.on("Sales Invoice", {
                 }
             })
         }
+
+        console.log(frm.doc.freight_calculated);
+
+        const is_manual =
+            frm.doc.freight_calculated === "By Amount" ||
+            frm.doc.freight_calculated === "By Qty";
+
+        const read_only = is_manual ? 0 : 1;
+
+        frm.set_df_property("freight", "read_only", read_only);
+        frm.set_df_property("insurance", "read_only", read_only);
+
+        frm.set_df_property("freight", "read_only_depends_on", " ");
+        frm.set_df_property("insurance", "read_only_depends_on", " ");
+
+        console.log("freight read_only:", read_only);
+        console.log("insurance read_only:", read_only);
+
+        frm.refresh_field("freight");
+        frm.refresh_field("insurance");
     },
     contract_and_lc: function (frm) {
         if (frm.doc.contract_and_lc) {
@@ -180,19 +200,19 @@ frappe.ui.form.on("Sales Invoice", {
                 d.freight = frm.doc.freight * d.base_amount / frm.doc.base_total;
                 d.insurance = frm.doc.insurance * d.base_amount / frm.doc.base_total;
             }
-            
+
             d.total_tare_weight = d.tare_wt * d.no_of_packages;
             let pallet = d.pallet_weight * d.total_pallets;
             d.gross_wt = d.total_tare_weight + (d.qty * (flt(d.weight_per_unit) || 1)) + pallet;
-            
+
             if ((frm.doc.gst_category == "Overseas") && (!frm.doc.manually_enter_fob_value)) {
-                if (['CIF', 'CFR', 'CNF', 'CPT'].indexOf(frm.doc.shipping_terms) != -1){
+                if (['CIF', 'CFR', 'CNF', 'CPT'].indexOf(frm.doc.shipping_terms) != -1) {
                     d.fob_value = d.base_amount - (d.freight * frm.doc.conversion_rate) - (d.insurance * frm.doc.conversion_rate);
                 } else {
                     d.fob_value = d.base_amount;
                 }
             }
-            
+
             total_fob_value += flt(d.fob_value);
             total_qty += flt(d.qty);
             total_packages += flt(d.no_of_packages);
@@ -258,22 +278,22 @@ frappe.ui.form.on("Sales Invoice", {
             }
         });
     },
-    manually_enter_fob_value: function(frm){
+    manually_enter_fob_value: function (frm) {
         frm.trigger("run_all_calculation");
     },
-    freight: function(frm){
+    freight: function (frm) {
         frm.trigger("run_all_calculation");
     },
-    freight_calculated: function(frm){
+    freight_calculated: function (frm) {
         frm.trigger("run_all_calculation");
     },
-    insurance: function(frm){
+    insurance: function (frm) {
         frm.trigger("run_all_calculation");
     },
-    shipping_terms: function(frm){
+    shipping_terms: function (frm) {
         frm.trigger("run_all_calculation");
     },
-    insurance_percentage: function(frm){
+    insurance_percentage: function (frm) {
         frm.trigger("run_all_calculation");
     },
     notify_party: function (frm) {
@@ -365,6 +385,27 @@ frappe.ui.form.on("Sales Invoice", {
         });
         frm.refresh_field('items');
     },
+    freight_calculated: function (frm) {
+        console.log(frm.doc.freight_calculated);
+
+        const is_manual =
+            frm.doc.freight_calculated === "By Amount" ||
+            frm.doc.freight_calculated === "By Qty";
+
+        const read_only = is_manual ? 0 : 1;
+
+        frm.set_df_property("freight", "read_only", read_only);
+        frm.set_df_property("insurance", "read_only", read_only);
+
+        frm.set_df_property("freight", "read_only_depends_on", " ");
+        frm.set_df_property("insurance", "read_only_depends_on", " ");
+
+        console.log("freight read_only:", read_only);
+        console.log("insurance read_only:", read_only);
+
+        frm.refresh_field("freight");
+        frm.refresh_field("insurance");
+    }
 });
 frappe.ui.form.on("Sales Invoice Item", {
     qty: function (frm, cdt, cdn) {
@@ -464,9 +505,9 @@ frappe.ui.form.on("Sales Invoice Item", {
 
         }
     },
-    advance_authorisation_license : function(frm, cdt, cdn){
+    advance_authorisation_license: function (frm, cdt, cdn) {
         let d = locals[cdt][cdn];
-        if (d.advance_authorisation_license != ""){
+        if (d.advance_authorisation_license != "") {
             frappe.model.set_value(cdt, cdn, "duty_drawback_rate", 0);
         }
 
