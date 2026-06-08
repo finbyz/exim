@@ -199,14 +199,43 @@ frappe.ui.form.on("Sales Invoice", {
         }
     },
     meis_calculation: function (frm) {
+
         if (frm.doc.gst_category == "Overseas") {
+
             let total_meis = 0.0;
-            frm.doc.items.forEach(function (d) {
-                d.meis_value = flt(d.fob_value * d.meis_rate / 100.0);
-                total_meis += flt(d.meis_value)
+
+            (frm.doc.items || []).forEach(function (d) {
+
+                let meis_value = flt(
+                    (d.fob_value || 0) * (d.meis_rate || 0) / 100
+                );
+
+                let max_meis_amount = flt(
+                    (d.max_rodtep_rate || 0) * (d.qty || 0)
+                );
+
+                if (max_meis_amount > 0) {
+                    meis_value = Math.min(
+                        meis_value,
+                        max_meis_amount
+                    );
+                }
+
+                d.meis_value = meis_value;
+                total_meis += meis_value;
             });
+
             frm.refresh_field("items");
             frm.set_value("total_meis", total_meis);
+
+        } else {
+
+            (frm.doc.items || []).forEach(function (d) {
+                d.meis_value = 0;
+            });
+
+            frm.refresh_field("items");
+            frm.set_value("total_meis", 0);
         }
     },
     run_all_calculation: function (frm) {

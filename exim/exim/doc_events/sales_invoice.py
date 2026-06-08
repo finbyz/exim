@@ -131,17 +131,28 @@ def duty_calculation(self):
 
 		self.total_duty_drawback = total_duty_drawback
 
-
 def meis_calculation(self):
 	if frappe.db.get_value('Address', self.customer_address, 'country') != "India":
 		total_meis = 0.0
+
 		for row in self.items:
 			if row.fob_value and row.meis_rate:
-				meis_value = flt(row.fob_value * row.meis_rate / 100.0)
+
+				meis_value = flt(
+					(row.fob_value or 0) * (row.meis_rate or 0) / 100
+				)
+
+				max_rodtep_rate = flt(
+					(row.max_rodtep_rate or 0) * (row.qty or 0)
+				)
+
+				if max_rodtep_rate:
+					meis_value = min(meis_value, max_rodtep_rate)
+
 				row.meis_value = meis_value
 
 				total_meis += flt(row.meis_value)
-		
+
 		self.total_meis = total_meis
 
 
