@@ -506,6 +506,11 @@ def cancel_jv(self):
 			jv = frappe.get_doc("Journal Entry", self.meis_jv)
 			jv.cancel()
 			self.db_set('meis_jv','')
+	if meta.has_field('igst_refund_jv'):
+		if self.get('igst_refund_jv'):
+			jv = frappe.get_doc("Journal Entry", self.igst_refund_jv)
+			jv.cancel()
+			self.db_set('igst_refund_jv','')
 
 
 def apply_accounting_dimensions(source_doc, target_row):
