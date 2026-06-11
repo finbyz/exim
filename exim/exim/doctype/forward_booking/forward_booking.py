@@ -256,7 +256,7 @@ class ForwardBooking(Document):
 	
 	def set_status(self):
 		self.amount_outstanding = flt(self.amount) - flt(self.total_utilization) - flt(self.total_cancelled)
-		
+		self.outstanding_inr = flt(self.amount_outstanding) * flt(self.booking_rate)
 		if self.amount_outstanding < 0.0:
 			frappe.throw(_("Amount Outstanding is becoming negative for forward contract %s." % self.name))
 			validated = False
