@@ -42,8 +42,8 @@ def calculate_total(self):
 	total_fob_value = 0
 	total_pallets = 0
 
-	if self.gst_category == "Overseas" and not self.manually_enter_fob_value and self.freight_calculated in ["By Qty", "By Amount"] and self.shipping_terms not in ["CIF", "CFR", "CNF", "CPT"]:
-		frappe.msgprint(f"To calculate item wise freight please ensure shipping terms are set either of {frappe.bold('CIF, CFR, CNF OR CPT')}.")
+	if self.gst_category == "Overseas" and not self.manually_enter_fob_value and self.freight_calculated in ["By Qty", "By Amount"] and self.incoterm not in ["CIF", "CFR", "CNF", "CPT"]:
+		frappe.msgprint(f"To calculate item wise freight please ensure incoterm is set either of {frappe.bold('CIF, CFR, CNF OR CPT')}.")
 
 	for row in self.items:
 		if self.freight_calculated == "By Qty":
@@ -64,12 +64,29 @@ def calculate_total(self):
 		pallet = flt(row.pallet_weight) * flt(row.total_pallets)
 		row.gross_wt = flt(row.total_tare_weight) + (flt(row.qty) * (flt(row.weight_per_unit) or 1)) + flt(pallet)
 		
+		# if not self.manually_enter_fob_value and self.gst_category == "Overseas":
+		# 	if self.shipping_terms in ["CIF", "CFR", "CNF", "CPT"]:
+		# 		row.fob_value = flt(row.base_amount) - flt(row.freight * self.conversion_rate) - flt(row.insurance * self.conversion_rate)
+		# 	else:
+		# 		row.fob_value = flt(row.base_amount)
 		if not self.manually_enter_fob_value and self.gst_category == "Overseas":
-			if self.shipping_terms in ["CIF", "CFR", "CNF", "CPT"]:
-				row.fob_value = flt(row.base_amount) - flt(row.freight * self.conversion_rate) - flt(row.insurance * self.conversion_rate)
-			else:
+
+			if self.incoterm in ["CIF", "CIP"]:
+				row.fob_value = (
+					flt(row.base_amount)
+					- flt(row.freight * self.conversion_rate)
+					- flt(row.insurance * self.conversion_rate)
+				)
+
+			elif self.incoterm in ["CFR", "CPT", "DAP", "DPU", "DDP"]:
+				row.fob_value = (
+					flt(row.base_amount)
+					- flt(row.freight * self.conversion_rate)
+				)
+
+			elif self.incoterm in ["EXW", "FCA", "FAS", "FOB"]:
 				row.fob_value = flt(row.base_amount)
-		
+    
 		total_tare_wt += flt(row.total_tare_weight)
 		total_gr_wt += flt(row.gross_wt)
 		total_insurance += flt(row.insurance)
@@ -100,7 +117,20 @@ def duty_calculation(self):
 		for row in self.items:
 			child_meta = frappe.get_meta(row.doctype)
 			if child_meta.has_field('duty_drawback_rate') and row.duty_drawback_rate and row.fob_value:
-				duty_drawback_amount = flt(row.fob_value * row.duty_drawback_rate / 100.0)
+				duty_drawback_amount = flt(
+				row.fob_value * row.duty_drawback_rate / 100.0
+				)
+
+				max_duty_drawback_amount = flt(
+					(row.max_duty_drawback_rate or 0) * (row.qty or 0)
+				)
+
+					# Take lower value
+				if max_duty_drawback_amount > 0:
+					duty_drawback_amount = min(
+						duty_drawback_amount,
+						max_duty_drawback_amount
+					)
 				if child_meta.has_field('duty_drawback_amount'):
 					if row.maximum_cap == 1:
 						if row.capped_amount < duty_drawback_amount:
@@ -119,16 +149,29 @@ def duty_calculation(self):
 		self.total_duty_drawback = total_duty_drawback
 
 
+
 def meis_calculation(self):
 	if frappe.db.get_value('Address', self.customer_address, 'country') != "India":
 		total_meis = 0.0
+
 		for row in self.items:
 			if row.fob_value and row.meis_rate:
-				meis_value = flt(row.fob_value * row.meis_rate / 100.0)
+
+				meis_value = flt(
+					(row.fob_value or 0) * (row.meis_rate or 0) / 100
+				)
+
+				max_rodtep_rate = flt(
+					(row.max_rodtep_rate or 0) * (row.qty or 0)
+				)
+
+				if max_rodtep_rate:
+					meis_value = min(meis_value, max_rodtep_rate)
+
 				row.meis_value = meis_value
 
 				total_meis += flt(row.meis_value)
-		
+
 		self.total_meis = total_meis
 
 
@@ -482,6 +525,11 @@ def cancel_jv(self):
 			jv = frappe.get_doc("Journal Entry", self.meis_jv)
 			jv.cancel()
 			self.db_set('meis_jv','')
+	if meta.has_field('igst_refund_jv'):
+		if self.get('igst_refund_jv'):
+			jv = frappe.get_doc("Journal Entry", self.igst_refund_jv)
+			jv.cancel()
+			self.db_set('igst_refund_jv','')
 
 
 def apply_accounting_dimensions(source_doc, target_row):

@@ -43,7 +43,6 @@ doctype_js = {
     "Payment Entry": "public/js/doctype_js/payment_entry.js",
     "Customize Form": "public/js/doctype_js/customize_form.js",
 }
-
 # after_migrate = ["exim.exim.doc_events.update_field_order.after_migrate"]
 
 # fixtures = ["Custom Field"]

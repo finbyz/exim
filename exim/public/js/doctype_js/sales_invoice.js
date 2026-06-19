@@ -205,11 +205,35 @@ frappe.ui.form.on("Sales Invoice", {
             let pallet = d.pallet_weight * d.total_pallets;
             d.gross_wt = d.total_tare_weight + (d.qty * (flt(d.weight_per_unit) || 1)) + pallet;
 
-            if ((frm.doc.gst_category == "Overseas") && (!frm.doc.manually_enter_fob_value)) {
-                if (['CIF', 'CFR', 'CNF', 'CPT'].indexOf(frm.doc.shipping_terms) != -1) {
-                    d.fob_value = d.base_amount - (d.freight * frm.doc.conversion_rate) - (d.insurance * frm.doc.conversion_rate);
+            // if ((frm.doc.gst_category == "Overseas") && (!frm.doc.manually_enter_fob_value)) {
+            //     if (['CIF', 'CFR', 'CNF', 'CPT'].indexOf(frm.doc.shipping_terms) != -1) {
+            //         d.fob_value = d.base_amount - (d.freight * frm.doc.conversion_rate) - (d.insurance * frm.doc.conversion_rate);
+            //     } else {
+            //         d.fob_value = d.base_amount;
+            //     }
+            // }
+
+            if (frm.doc.gst_category == "Overseas" && !frm.doc.manually_enter_fob_value) {
+            
+                if (["CIF", "CIP"].includes(frm.doc.incoterm)) {
+
+                    d.fob_value = flt(d.base_amount)
+                        - flt(d.freight * frm.doc.conversion_rate)
+                        - flt(d.insurance * frm.doc.conversion_rate);
+
+                } else if (["CFR", "CPT", "DAP", "DPU", "DDP"].includes(frm.doc.incoterm)) {
+
+                    d.fob_value = flt(d.base_amount)
+                        - flt(d.freight * frm.doc.conversion_rate);
+
+                } else if (["EXW", "FCA", "FAS", "FOB"].includes(frm.doc.incoterm)) {
+
+                    d.fob_value = flt(d.base_amount);
+
                 } else {
-                    d.fob_value = d.base_amount;
+
+                    d.fob_value = flt(d.base_amount);
+
                 }
             }
 
@@ -248,12 +272,30 @@ frappe.ui.form.on("Sales Invoice", {
     meis_calculation: function (frm) {
         if (frm.doc.gst_category == "Overseas") {
             let total_meis = 0.0;
-            frm.doc.items.forEach(function (d) {
-                d.meis_value = flt(d.fob_value * d.meis_rate / 100.0);
-                total_meis += flt(d.meis_value)
+            (frm.doc.items || []).forEach(function (d) {
+                let meis_value = flt(
+                    (d.fob_value || 0) * (d.meis_rate || 0) / 100
+                );
+                let max_meis_amount = flt(
+                    (d.max_rodtep_rate || 0) * (d.qty || 0)
+                );
+                if (max_meis_amount > 0) {
+                    meis_value = Math.min(
+                        meis_value,
+                        max_meis_amount
+                    );
+                }
+                d.meis_value = meis_value;
+                total_meis += meis_value;
             });
             frm.refresh_field("items");
             frm.set_value("total_meis", total_meis);
+        } else {
+            (frm.doc.items || []).forEach(function (d) {
+                d.meis_value = 0;
+            });
+            frm.refresh_field("items");
+            frm.set_value("total_meis", 0);
         }
     },
     run_all_calculation: function (frm) {
@@ -290,7 +332,7 @@ frappe.ui.form.on("Sales Invoice", {
     insurance: function (frm) {
         frm.trigger("run_all_calculation");
     },
-    shipping_terms: function (frm) {
+    incoterm: function (frm) {
         frm.trigger("run_all_calculation");
     },
     insurance_percentage: function (frm) {
