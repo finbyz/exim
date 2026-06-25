@@ -62,15 +62,30 @@ class DutyDrawBackClaim(Document):
 
 		if not self.credit_account:
 			frappe.throw("""Set credit account first""")
-
+   
+		self.update_drawback_received()
+  
 	def on_cancel(self):
 		if self.journal_entry_ref:
 			jv = frappe.get_doc("Journal Entry", self.journal_entry_ref)
 			jv.cancel()
 			self.db_set("journal_entry_ref", "")
+			self.reset_drawback_received()
+   
+	def reset_drawback_received(self):
+		for row in self.rodtep_details:
+			if row.cheque_no:
+				si = frappe.get_doc("Sales Invoice", row.cheque_no)
+				si.db_set("drawback_received", 0)
+   
+	def update_drawback_received(self):
+		for row in self.rodtep_details:
+			if row.cheque_no:
+				si = frappe.get_doc("Sales Invoice", row.cheque_no)
+				si.db_set("drawback_received", 1)
 
 def exp_je_data(company):
-
+	
 	list_of_je = frappe.db.sql(
 		"""
 		SELECT
