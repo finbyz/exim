@@ -187,6 +187,9 @@ doc_events = {
     "Duty DrawBack Claim": {
         "on_submit": "exim.exim.doctype.duty_drawback_claim.duty_drawback_claim.create_jv_on_submit"
     },
+    "IGST Refund Claim": {
+        "on_submit": "exim.exim.doctype.igst_refund_claim.igst_refund_claim.create_jv_on_submit"
+    },
     "Payment Entry": {
         "on_submit": "exim.api.pe_on_submit",
         "before_cancel": "exim.api.pe_on_cancel",
