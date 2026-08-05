@@ -1,5 +1,19 @@
-//EXIM
 frappe.ui.form.on("Sales Invoice", {
+    refresh: function (frm) {
+        if (frm.doc.docstatus !== 1) return;
+        if (frm.doc.drawback_received || frm.doc.igst_received) return;
+        frappe.db.get_single_value('Selling Settings', 'si_taxes_update_permission_role')
+            .then(role => {
+                const is_authorized = frappe.session.user === 'Administrator' ||
+                    (role && frappe.user.has_role(role));
+
+                if (is_authorized) {
+                    frm.add_custom_button(__('Update Taxes'), function () {
+                        show_tax_type_dialog(frm);
+                    });
+                }
+            });
+    },
     setup(frm) {
         frm.add_fetch(
             "advance_authorisation_license",
@@ -225,6 +239,8 @@ frappe.ui.form.on("Sales Invoice", {
 
                     d.fob_value = flt(d.base_amount)
                         - flt(d.freight * frm.doc.conversion_rate);
+                        - flt(d.insurance * frm.doc.conversion_rate);
+
 
                 } else if (["EXW", "FCA", "FAS", "FOB"].includes(frm.doc.incoterm)) {
 
@@ -580,3 +596,109 @@ frappe.ui.form.on('Notify Party Address', {
         }
     }
 })
+
+
+
+// Sales Invoice — "Update Taxes" (RoDTEP / Duty Drawback)
+
+
+
+function show_tax_type_dialog(frm) {
+    const type_dialog = new frappe.ui.Dialog({
+        title: __('Select Tax Type to Update'),
+        fields: [
+            {
+                fieldname: 'tax_type',
+                fieldtype: 'Select',
+                label: __('Journal Voucher Type'),
+                options: ['RoDTEP', 'Duty Drawback'],
+                reqd: 1
+            }
+        ],
+        primary_action_label: __('Next'),
+        primary_action: function (values) {
+            type_dialog.hide();
+            show_amount_dialog(frm, values.tax_type);
+        }
+    });
+    type_dialog.show();
+}
+
+function show_amount_dialog(frm, tax_type) {
+    frappe.call({
+        method: 'exim.exim.doc_events.sales_invoice.get_default_amount',
+        args: {
+            sales_invoice: frm.doc.name,
+            tax_type: tax_type
+        },
+        freeze: true,
+        callback: function (r) {
+            if (!r.message || !r.message.jv) {
+                frappe.msgprint({
+                    title: __('No Journal Voucher Found'),
+                    message: __('No existing {0} Journal Voucher is linked to this Sales Invoice.', [tax_type]),
+                    indicator: 'orange'
+                });
+                return;
+            }
+
+            const default_amount = r.message.amount || 0;
+
+            const amount_dialog = new frappe.ui.Dialog({
+                title: __('Update {0} Amount', [tax_type]),
+                fields: [
+                    {
+                        fieldname: 'current_jv',
+                        fieldtype: 'Data',
+                        label: __('Existing Journal Voucher'),
+                        default: r.message.jv,
+                        read_only: 1
+                    },
+                    {
+                        fieldname: 'amount',
+                        fieldtype: 'Currency',
+                        label: __('Amount'),
+                        default: default_amount,
+                        reqd: 1
+                    }
+                ],
+                primary_action_label: __('Submit'),
+                primary_action: function (values) {
+                    amount_dialog.hide();
+                    confirm_and_update(frm, tax_type, values.amount);
+                }
+            });
+            amount_dialog.show();
+        }
+    });
+}
+
+function confirm_and_update(frm, tax_type, amount) {
+    frappe.confirm(
+        __('This action will cancel the existing Journal Voucher and create a new Journal Voucher with the updated amount. Do you want to continue?'),
+        function () {
+            // on yes
+            frappe.call({
+                method: 'exim.exim.doc_events.sales_invoice.update_tax_jv',
+                args: {
+                    sales_invoice: frm.doc.name,
+                    tax_type: tax_type,
+                    new_amount: amount
+                },
+                freeze: true,
+                freeze_message: __('Updating {0} Journal Voucher...', [tax_type]),
+                callback: function (r) {
+                    if (r.message) {
+                        frappe.msgprint({
+                            title: __('Journal Voucher Updated'),
+                            message: __('Old Journal Voucher {0} was cancelled and new Journal Voucher {1} was created and submitted.', [r.message.old_jv, r.message.new_jv]),
+                            indicator: 'green'
+                        });
+                        frm.reload_doc();
+                    }
+                }
+            });
+        }
+        // on no -> do nothing, dialogs already closed
+    );
+}

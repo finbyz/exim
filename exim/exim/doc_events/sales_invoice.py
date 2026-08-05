@@ -82,6 +82,7 @@ def calculate_total(self):
 				row.fob_value = (
 					flt(row.base_amount)
 					- flt(row.freight * self.conversion_rate)
+					- flt(row.insurance * self.conversion_rate)
 				)
 
 			elif self.incoterm in ["EXW", "FCA", "FAS", "FOB"]:
@@ -535,4 +536,144 @@ def cancel_jv(self):
 def apply_accounting_dimensions(source_doc, target_row):
     for dim in get_accounting_dimensions():
         if source_doc.get(dim):
-            target_row[dim] = source_doc.get(dim)
+            target_row[dim] = source_doc.get(dim)# Sales Invoice — "Update Taxes" (RoDTEP / Duty Drawback)
+
+
+
+# Map each supported tax type to the fields on Sales Invoice that hold
+# (a) the amount currently used for that tax, and (b) the linked Journal Entry.
+# Rename these to match fields that already exist in your system.
+TAX_TYPE_FIELD_MAP = {
+    "RoDTEP": {
+        "amount_field": "total_meis",
+        "jv_link_field": "meis_jv",
+    },
+    "Duty Drawback": {
+        "amount_field": "total_duty_drawback",
+        "jv_link_field": "duty_drawback_jv",
+    },
+}
+
+
+def _validate_tax_type(tax_type):
+    if tax_type not in TAX_TYPE_FIELD_MAP:
+        frappe.throw(_("Invalid Tax Type: {0}").format(tax_type))
+
+
+def _get_allowed_role():
+    """Role permitted to update tax Journal Vouchers, configured in Selling Settings."""
+    return frappe.db.get_single_value("Selling Settings", "si_taxes_update_permission_role")
+
+
+def _check_permission():
+    if frappe.session.user == "Administrator":
+        return
+
+    allowed_role = _get_allowed_role()
+    if not allowed_role:
+        frappe.throw(_("No role configured for tax updates. Set it in Selling Settings."))
+
+    if allowed_role not in frappe.get_roles(frappe.session.user):
+        frappe.throw(_("You are not permitted to update tax Journal Vouchers."), frappe.PermissionError)
+
+
+@frappe.whitelist()
+def get_default_amount(sales_invoice, tax_type):
+    """Return the current amount and linked JV for the given tax type on a Sales Invoice."""
+    _validate_tax_type(tax_type)
+    _check_permission()
+
+    field_map = TAX_TYPE_FIELD_MAP[tax_type]
+    si = frappe.get_doc("Sales Invoice", sales_invoice)
+
+    if si.docstatus != 1:
+        frappe.throw(_("Sales Invoice must be submitted to update taxes."))
+
+    return {
+        "amount": si.get(field_map["amount_field"]) or 0,
+        "jv": si.get(field_map["jv_link_field"]),
+    }
+
+
+@frappe.whitelist()
+def update_tax_jv(sales_invoice, tax_type, new_amount=None):
+    """
+    Cancel the existing RoDTEP/Duty Drawback Journal Voucher linked to a Sales Invoice
+    and create a new (amended) Journal Voucher with the updated amount.
+
+    Audit trail is preserved via Frappe's native amendment mechanism (amended_from)
+    plus explanatory comments on both documents.
+    """
+    _validate_tax_type(tax_type)
+    _check_permission()
+
+    if new_amount in (None, ""):
+        frappe.throw(_("Amount is required. This usually means the client did not pass 'new_amount' — check the Update Taxes dialog's submit handler."))
+
+    new_amount = flt(new_amount)
+    if new_amount <= 0:
+        frappe.throw(_("Amount must be greater than zero."))
+
+    field_map = TAX_TYPE_FIELD_MAP[tax_type]
+    si = frappe.get_doc("Sales Invoice", sales_invoice)
+
+    if si.docstatus != 1:
+        frappe.throw(_("Sales Invoice must be submitted to update taxes."))
+
+    old_jv_name = si.get(field_map["jv_link_field"])
+    if not old_jv_name:
+        frappe.throw(_("No existing {0} Journal Voucher is linked to this Sales Invoice.").format(tax_type))
+
+    old_jv = frappe.get_doc("Journal Entry", old_jv_name)
+    if old_jv.docstatus != 1:
+        frappe.throw(_("Linked Journal Voucher {0} is not in a submitted state.").format(old_jv_name))
+
+    old_total = flt(old_jv.total_debit) or flt(old_jv.total_credit)
+    if not old_total:
+        frappe.throw(_("Could not determine the current amount on Journal Voucher {0}.").format(old_jv_name))
+
+    ratio = new_amount / old_total
+
+    # Temporarily clear the Sales Invoice's link to the old JV so Frappe's
+    # "linked document" check doesn't block cancellation. No explicit commit
+    # needed — the check runs in the same DB transaction, which always sees
+    # its own uncommitted writes. If anything below raises, Frappe rolls back
+    # the entire request transaction automatically, so this clear is undone
+    # along with everything else — no manual restore logic required.
+    si.db_set(field_map["jv_link_field"], None)
+
+    # Cancel the existing Journal Voucher
+    old_jv.cancel()
+    old_jv.add_comment(
+        "Info",
+        _("Cancelled via Sales Invoice {0} — Update Taxes ({1}). Requested new amount: {2}").format(
+            sales_invoice, tax_type, new_amount
+        ),
+    )
+
+    # Create the amended Journal Voucher, scaling every row so debit = credit is preserved
+    new_jv = frappe.copy_doc(old_jv)
+    new_jv.amended_from = old_jv.name
+    new_jv.docstatus = 0
+
+    for row in new_jv.accounts:
+        row.debit_in_account_currency = flt(row.debit_in_account_currency) * ratio
+        row.debit = flt(row.debit) * ratio
+        row.credit_in_account_currency = flt(row.credit_in_account_currency) * ratio
+        row.credit = flt(row.credit) * ratio
+
+    new_jv.insert()
+    new_jv.submit()
+
+    # Point the Sales Invoice at the new Journal Voucher and updated amount
+    si.db_set(field_map["jv_link_field"], new_jv.name)
+    si.db_set(field_map["amount_field"], new_amount)
+
+    si.add_comment(
+        "Info",
+        _("{0} Journal Voucher updated by {1}. Old: {2} (cancelled), New: {3}, Amount: {4}").format(
+            tax_type, frappe.session.user, old_jv_name, new_jv.name, new_amount
+        ),
+    )
+
+    return {"old_jv": old_jv_name, "new_jv": new_jv.name, "amount": new_amount}
