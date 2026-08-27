@@ -1,4 +1,3 @@
-
 cur_frm.add_fetch('forward_contract', 'booking_rate', 'forward_rate');
 cur_frm.add_fetch('forward_contract', 'amount', 'amount');
 cur_frm.add_fetch('forward_contract', 'maturity_from', 'maturity_from');
@@ -140,7 +139,9 @@ frappe.ui.form.on("Payment Entry", {
 		frm.doc.forwards.forEach((row) => {
 			total_amount_utilized += flt(row.amount_utilized);
 		});
-		frm.set_value("total_amount_utilized", total_amount_utilized);
+		// Rounded to 4 decimal places — plain float addition across many rows can
+		// otherwise leave long trailing precision (e.g. 1234.56000000000023).
+		frm.set_value("total_amount_utilized", flt(total_amount_utilized, 4));
 	},
 });
 
