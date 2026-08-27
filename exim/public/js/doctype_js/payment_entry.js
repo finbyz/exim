@@ -145,6 +145,7 @@ frappe.ui.form.on("Payment Entry", {
 	},
 });
 
+
 frappe.ui.form.on("Forward Utilization", {
 	forwards_remove:function(frm,cdt,cdn){
 		frm.events.cal_average_forward_rate(frm);
