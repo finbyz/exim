@@ -161,6 +161,7 @@ def journal_entry_list(start_date, end_date, company):
 			AND je.posting_date >= %(r_start_date)s
 			AND je.posting_date <= %(r_end_date)s
 			AND jea.debit_in_account_currency > 0
+			AND si.igst_received != 1
 			AND je.docstatus < 2
 			AND je.company = %(company)s
 			AND jea.account = c.igst_export_refund_receivable
