@@ -35,7 +35,7 @@ cur_frm.cscript.onload = function (frm) {
 }
 frappe.ui.form.on("Sales Order", {
     before_save: function (frm) {
-        frm.trigger("cal_total");
+        // frm.trigger("cal_total");
         frappe.call({
             method: 'exim.api.company_address',
             args: {
@@ -159,7 +159,7 @@ frappe.ui.form.on("Sales Order Item", {
     },
     no_of_packages: function (frm, cdt, cdn) {
         frm.events.box_cal(frm);
-        frm.events.cal_total(frm);
+        // frm.events.cal_total(frm);
     },
 
 });

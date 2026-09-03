@@ -211,7 +211,7 @@ frappe.ui.form.on("Sales Invoice", {
     },
     run_all_calculation: function (frm) {
         frappe.run_serially([
-            () => frm.trigger("caclulate_total"),
+            // () => frm.trigger("caclulate_total"),
             () => frm.trigger("duty_calculation"),
             () => frm.trigger("meis_calculation"),
         ]);

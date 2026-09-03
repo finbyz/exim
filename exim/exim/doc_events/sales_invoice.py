@@ -7,7 +7,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 
 
 def before_save(self, method):
-	calculate_total(self)
+	# calculate_total(self)
 	duty_calculation(self)
 	meis_calculation(self)
 
