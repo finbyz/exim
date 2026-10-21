@@ -2,6 +2,7 @@ frappe.ui.form.on("Sales Invoice", {
     refresh: function (frm) {
         if (frm.doc.docstatus !== 1) return;
         if (frm.doc.drawback_received) return;
+        if (!(frm.doc.meis_jv || frm.doc.duty_drawback_jv)) return;
         frappe.db.get_single_value('Selling Settings', 'si_taxes_update_permission_role')
             .then(role => {
                 const is_authorized = frappe.session.user === 'Administrator' ||
