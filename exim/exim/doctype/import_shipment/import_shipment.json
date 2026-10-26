@@ -1,0 +1,616 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-09-22 17:54:23.009148",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "tab_shipment_details",
+  "sec_identification",
+  "naming_series",
+  "shipment_no",
+  "shipper",
+  "country",
+  "cha",
+  "no_of_containers",
+  "purchase_invoice",
+  "authorized_purchase_invoice",
+  "col_id_break",
+  "status",
+  "company",
+  "currency",
+  "cfs_terminal",
+  "lot_no",
+  "remarks",
+  "container_nos",
+  "sec_logistics",
+  "etd",
+  "eta",
+  "week",
+  "destination_port",
+  "shipping_line",
+  "free_days",
+  "col_logistics_break",
+  "port_in",
+  "port_out",
+  "cfs_in",
+  "cfs_out",
+  "inward_date",
+  "transport_details",
+  "sec_items",
+  "items",
+  "sec_item_summary",
+  "total_boxes",
+  "total_net_weight",
+  "col_item_summary_break",
+  "total_gross_weight",
+  "total_qty",
+  "total_item_amount",
+  "total_item_amount_inr",
+  "sec_charges",
+  "charges",
+  "sec_charge_summary",
+  "total_expenses",
+  "col_charge_summary_break",
+  "total_actual_expenses",
+  "differ",
+  "tab_commercial",
+  "sec_commercial",
+  "invoice_no",
+  "invoice_date",
+  "invoice_value",
+  "incoterm",
+  "col_comm_break",
+  "exchange_rate",
+  "invoice_value_inr",
+  "insurance",
+  "cif_value",
+  "duty_basic",
+  "cess_and_gst",
+  "tab_customs",
+  "required_documents_section_section",
+  "document_template",
+  "required_documents",
+  "sec_customs",
+  "bl_no",
+  "bl_date",
+  "be_no",
+  "be_date",
+  "be_mapped_date",
+  "col_customs_break",
+  "igm_details",
+  "swift_no",
+  "swift_date",
+  "import_shipping_docs_with_boe",
+  "original_bill_received",
+  "fssai_noc_received_date",
+  "tab_billing",
+  "sec_billing",
+  "cha_bill_no",
+  "transport_bill_no",
+  "col_billing_break",
+  "cost_sheet_recd_date",
+  "cost_sheet_revert_date"
+ ],
+ "fields": [
+  {
+   "fieldname": "tab_shipment_details",
+   "fieldtype": "Tab Break",
+   "label": "Shipment Details"
+  },
+  {
+   "fieldname": "sec_identification",
+   "fieldtype": "Section Break",
+   "label": "Identification & parties"
+  },
+  {
+   "default": "IS-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "no_copy": 1,
+   "options": "IS-.####\nSHP-.YYYY.-.#####\nIMP-.YYYY.-.#####",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "shipment_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Shipment No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "shipper",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Shipper",
+   "options": "Supplier",
+   "reqd": 1
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cha",
+   "fieldtype": "Data",
+   "label": "CHA",
+   "options": "Supplier",
+   "reqd": 1
+  },
+  {
+   "fieldname": "col_id_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Docs received",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Docs received\nDraft\nIn Transit\nCustoms In Process\nCustoms Cleared\nReceived at CFS\nDelivered\nCompleted\nCancelled",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "remember_last_selected_value": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "cfs_terminal",
+   "fieldtype": "Data",
+   "label": "CFS / Terminal",
+   "reqd": 1
+  },
+  {
+   "fieldname": "lot_no",
+   "fieldtype": "Data",
+   "label": "Lot No",
+   "reqd": 1
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sec_logistics",
+   "fieldtype": "Section Break",
+   "label": "Logistics"
+  },
+  {
+   "fieldname": "etd",
+   "fieldtype": "Date",
+   "label": "ETD"
+  },
+  {
+   "fieldname": "eta",
+   "fieldtype": "Date",
+   "label": "ETA"
+  },
+  {
+   "fieldname": "week",
+   "fieldtype": "Int",
+   "label": "Week",
+   "read_only": 1
+  },
+  {
+   "fieldname": "destination_port",
+   "fieldtype": "Data",
+   "label": "Destination Port (Dest)"
+  },
+  {
+   "fieldname": "shipping_line",
+   "fieldtype": "Data",
+   "label": "Shipping Line"
+  },
+  {
+   "fieldname": "free_days",
+   "fieldtype": "Int",
+   "label": "Free Days"
+  },
+  {
+   "fieldname": "col_logistics_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "port_in",
+   "fieldtype": "Date",
+   "label": "Port In"
+  },
+  {
+   "fieldname": "port_out",
+   "fieldtype": "Date",
+   "label": "Port Out"
+  },
+  {
+   "fieldname": "cfs_in",
+   "fieldtype": "Date",
+   "label": "CFS In"
+  },
+  {
+   "fieldname": "cfs_out",
+   "fieldtype": "Date",
+   "label": "CFS Out"
+  },
+  {
+   "fieldname": "inward_date",
+   "fieldtype": "Date",
+   "label": "Inward Date"
+  },
+  {
+   "fieldname": "transport_details",
+   "fieldtype": "Small Text",
+   "label": "Transport Details"
+  },
+  {
+   "fieldname": "no_of_containers",
+   "fieldtype": "Int",
+   "label": "No of Cont"
+  },
+  {
+   "fieldname": "container_nos",
+   "fieldtype": "Small Text",
+   "label": "Container Nos"
+  },
+  {
+   "fieldname": "sec_items",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Import Shipment Item",
+   "options": "Import Shipment Item"
+  },
+  {
+   "fieldname": "sec_item_summary",
+   "fieldtype": "Section Break",
+   "label": "Item Summary"
+  },
+  {
+   "fieldname": "total_boxes",
+   "fieldtype": "Float",
+   "label": "Boxes (doc level)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_net_weight",
+   "fieldtype": "Float",
+   "label": "Net Weight KGS (doc level)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_item_summary_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_gross_weight",
+   "fieldtype": "Float",
+   "label": "Gross Weight KGS (doc level)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_qty",
+   "fieldtype": "Float",
+   "label": "Total Qty",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_item_amount",
+   "fieldtype": "Currency",
+   "label": "Total Item Amount",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_item_amount_inr",
+   "fieldtype": "Currency",
+   "label": "Total Item Amount (INR)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sec_charges",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "charges",
+   "fieldtype": "Table",
+   "label": "Import Shipment Charge",
+   "options": "Import Shipment Charge"
+  },
+  {
+   "fieldname": "sec_charge_summary",
+   "fieldtype": "Section Break",
+   "label": "Charge Summary"
+  },
+  {
+   "fieldname": "total_expenses",
+   "fieldtype": "Currency",
+   "label": "Total Exp (doc level)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_charge_summary_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_actual_expenses",
+   "fieldtype": "Currency",
+   "label": "Total Actual Exp",
+   "read_only": 1
+  },
+  {
+   "fieldname": "differ",
+   "fieldtype": "Currency",
+   "label": "Differ (doc level)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tab_commercial",
+   "fieldtype": "Tab Break",
+   "label": "Commercial"
+  },
+  {
+   "fieldname": "sec_commercial",
+   "fieldtype": "Section Break",
+   "label": "Commercial Details"
+  },
+  {
+   "fieldname": "invoice_no",
+   "fieldtype": "Data",
+   "label": "Invoice No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoice_date",
+   "fieldtype": "Date",
+   "label": "Invoice Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoice_value",
+   "fieldtype": "Currency",
+   "label": "Invoice Value",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "incoterm",
+   "fieldtype": "Select",
+   "label": "Incoterm",
+   "options": "\nCIF\nFOB\nCFR\nEXW\nDAP\nDDP\nFCA\nCPT\nCIP\nDPU\nFAS",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_comm_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "exchange_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoice_value_inr",
+   "fieldtype": "Currency",
+   "label": "Invoice Value (INR)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "insurance",
+   "fieldtype": "Currency",
+   "label": "Insurance (INS)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cif_value",
+   "fieldtype": "Currency",
+   "label": "CIF Value",
+   "read_only": 1
+  },
+  {
+   "fieldname": "duty_basic",
+   "fieldtype": "Currency",
+   "label": "Duty Basic (LIC)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cess_and_gst",
+   "fieldtype": "Currency",
+   "label": "CESS + GST",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tab_customs",
+   "fieldtype": "Tab Break",
+   "label": "Customs & shipping documents"
+  },
+  {
+   "fieldname": "sec_customs",
+   "fieldtype": "Section Break",
+   "label": "Customs & Shipping Documents"
+  },
+  {
+   "fieldname": "bl_no",
+   "fieldtype": "Data",
+   "label": "BL No"
+  },
+  {
+   "fieldname": "bl_date",
+   "fieldtype": "Date",
+   "label": "BL Date"
+  },
+  {
+   "fieldname": "be_no",
+   "fieldtype": "Data",
+   "label": "BE No"
+  },
+  {
+   "fieldname": "be_date",
+   "fieldtype": "Date",
+   "label": "BE Date"
+  },
+  {
+   "fieldname": "be_mapped_date",
+   "fieldtype": "Date",
+   "label": "BE Mapped Date"
+  },
+  {
+   "fieldname": "col_customs_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "igm_details",
+   "fieldtype": "Data",
+   "label": "IGM No / Item No / IGM Dt"
+  },
+  {
+   "fieldname": "swift_no",
+   "fieldtype": "Data",
+   "label": "Swift No"
+  },
+  {
+   "fieldname": "swift_date",
+   "fieldtype": "Date",
+   "label": "Swift Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "import_shipping_docs_with_boe",
+   "fieldtype": "Check",
+   "label": "Import Shipping Docs w/ BOE"
+  },
+  {
+   "default": "0",
+   "fieldname": "original_bill_received",
+   "fieldtype": "Check",
+   "label": "Original Bill Received"
+  },
+  {
+   "fieldname": "fssai_noc_received_date",
+   "fieldtype": "Date",
+   "label": "FSSAI NOC Received Date"
+  },
+  {
+   "fieldname": "tab_billing",
+   "fieldtype": "Tab Break",
+   "label": "Billing & cost-sheet tracking"
+  },
+  {
+   "fieldname": "sec_billing",
+   "fieldtype": "Section Break",
+   "label": "Billing & Cost-sheet Tracking"
+  },
+  {
+   "fieldname": "purchase_invoice",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Purchase Invoice",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "authorized_purchase_invoice",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Authorized Purchase Invoice",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "cha_bill_no",
+   "fieldtype": "Data",
+   "label": "CHA Bill No"
+  },
+  {
+   "fieldname": "transport_bill_no",
+   "fieldtype": "Data",
+   "label": "Transport Bill No"
+  },
+  {
+   "fieldname": "col_billing_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cost_sheet_recd_date",
+   "fieldtype": "Date",
+   "label": "Cost Sheet Recd Date (WhatsApp)"
+  },
+  {
+   "fieldname": "cost_sheet_revert_date",
+   "fieldtype": "Date",
+   "label": "Cost Sheet Revert Date"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "required_documents_section_section",
+   "fieldtype": "Section Break",
+   "label": "Required Documents Section"
+  },
+  {
+   "fieldname": "document_template",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Document Template",
+   "options": "Document Template"
+  },
+  {
+   "fieldname": "required_documents",
+   "fieldtype": "Table",
+   "label": "Required Documents",
+   "options": "Required Document"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-10-26 17:19:06.780159",
+ "modified_by": "Administrator",
+ "module": "Exim",
+ "name": "Import Shipment",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

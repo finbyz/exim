@@ -64,4 +64,19 @@ frappe.ui.form.on("Purchase Order", {
 			});
 		}
 	},
+
+	refresh(frm) {
+		if (frm.doc.docstatus === 1 && frm.doc.status !== "Closed") {
+			frm.add_custom_button(
+				__("Import Shipment"),
+				function () {
+					frappe.model.open_mapped_doc({
+						method: "exim.exim.doctype.import_shipment.import_shipment.make_import_shipment",
+						frm: frm
+					});
+				},
+				__("Create")
+			);
+		}
+	},
 });

@@ -1,0 +1,177 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "creation": "2026-09-22 18:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "product",
+  "item_name",
+  "hsn_code",
+  "variety",
+  "boxes",
+  "net_weight",
+  "gross_weight",
+  "column_break_tcvl",
+  "qty",
+  "uom",
+  "currency",
+  "rate",
+  "amount",
+  "base_rate",
+  "base_amount",
+  "tentative_rate",
+  "landed_rate",
+  "purchase_order",
+  "purchase_order_item"
+ ],
+ "fields": [
+  {
+   "fieldname": "product",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Product",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "product.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "product.gst_hsn_code",
+   "fieldname": "hsn_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "HSN Code",
+   "options": "GST HSN Code"
+  },
+  {
+   "fetch_from": "product.variety",
+   "fieldname": "variety",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Variety"
+  },
+  {
+   "fieldname": "boxes",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Boxes"
+  },
+  {
+   "fieldname": "net_weight",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Net Wt (kg)"
+  },
+  {
+   "fieldname": "gross_weight",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Gross Wt (kg)"
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "product.stock_uom",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Currency",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rate",
+   "options": "currency"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amt",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rate (INR)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amt (INR)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tentative_rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Tentative Rate"
+  },
+  {
+   "fieldname": "landed_rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Landed Rate (Actual)"
+  },
+  {
+   "fieldname": "purchase_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Purchase Order",
+   "options": "Purchase Order",
+   "read_only": 1
+  },
+  {
+   "fieldname": "purchase_order_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Purchase Order Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_tcvl",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-10-23 14:58:31.747882",
+ "modified_by": "Administrator",
+ "module": "Exim",
+ "name": "Import Shipment Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

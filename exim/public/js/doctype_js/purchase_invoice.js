@@ -115,6 +115,21 @@ frappe.ui.form.on("Purchase Invoice", {
 			);
 		}
 	},
+
+	refresh(frm) {
+		sync_import_shipment_from_po(frm);
+	},
+
+	import_shipment(frm) {
+		if (frm.doc.import_shipment && frm.doc.items) {
+			frm.doc.items.forEach(row => {
+				if (!row.import_shipment) {
+					frappe.model.set_value(row.doctype, row.name, "import_shipment", frm.doc.import_shipment);
+				}
+			});
+			frm.refresh_field("items");
+		}
+	},
 });
 
 frappe.ui.form.on("Purchase Invoice Item", {
@@ -193,4 +208,37 @@ frappe.ui.form.on("Purchase Invoice Item", {
 			);
 		}
 	},
+
+	purchase_order(frm, cdt, cdn) {
+		sync_import_shipment_from_po(frm);
+	},
+
+	items_add(frm, cdt, cdn) {
+		if (frm.doc.import_shipment) {
+			frappe.model.set_value(cdt, cdn, "import_shipment", frm.doc.import_shipment);
+		}
+	}
 });
+
+function sync_import_shipment_from_po(frm) {
+	if (frm.doc.import_shipment) return;
+
+	let po_name = null;
+	(frm.doc.items || []).forEach(row => {
+		if (row.purchase_order && !po_name) {
+			po_name = row.purchase_order;
+		}
+	});
+
+	if (po_name) {
+		frappe.call({
+			method: "exim.exim.utils.purchase_invoice.get_po_import_shipment",
+			args: { purchase_order: po_name },
+			callback: function (r) {
+				if (r && r.message && !frm.doc.import_shipment) {
+					frm.set_value("import_shipment", r.message);
+				}
+			}
+		});
+	}
+}

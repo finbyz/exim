@@ -148,9 +148,9 @@ fixtures = [
     {"dt": "Custom Field", "filters": [["module", "in", ["Exim"]]]},
     {"dt": "Property Setter", "filters": [["module", "in", ["Exim"]]]},
 ]
-# override_whitelisted_methods = {
-# 	"frappe.utils.print_format.download_pdf": "exim.print_format.download_pdf",
-# }
+override_whitelisted_methods = {
+    "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice": "exim.exim.utils.purchase_invoice.make_purchase_invoice",
+}
 
 doc_events = {
     "Sales Invoice": {
@@ -160,8 +160,20 @@ doc_events = {
         "on_cancel": "exim.exim.doc_events.sales_invoice.on_cancel",
     },
     "Purchase Invoice": {
-         "on_submit": "exim.exim.doc_events.purchase_invoice.pi_on_submit",
-        "on_cancel": "exim.exim.doc_events.purchase_invoice.pi_on_cancel",
+        "validate": "exim.exim.utils.purchase_invoice.validate_purchase_invoice",
+        "on_submit": [
+            "exim.exim.doc_events.purchase_invoice.pi_on_submit",
+            "exim.exim.utils.purchase_invoice.update_import_shipment_on_submit",
+        ],
+        "on_cancel": [
+            "exim.exim.doc_events.purchase_invoice.pi_on_cancel",
+            "exim.exim.utils.purchase_invoice.update_import_shipment_on_cancel",
+        ],
+    },
+    "Bill of Entry": {
+        "on_update": "exim.exim.utils.bill_of_entry.update_import_shipment_from_boe",
+        "on_submit": "exim.exim.utils.bill_of_entry.update_import_shipment_from_boe",
+        "on_cancel": "exim.exim.utils.bill_of_entry.update_import_shipment_from_boe_on_cancel",
     },
     (
         "Purchase Invoice",
