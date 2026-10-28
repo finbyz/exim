@@ -142,7 +142,7 @@
   },
   {
    "fieldname": "cha",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "CHA",
    "options": "Supplier",
    "reqd": 1
@@ -179,8 +179,9 @@
   },
   {
    "fieldname": "cfs_terminal",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "CFS / Terminal",
+   "options": "Supplier",
    "reqd": 1
   },
   {
@@ -218,13 +219,15 @@
   },
   {
    "fieldname": "destination_port",
-   "fieldtype": "Data",
-   "label": "Destination Port (Dest)"
+   "fieldtype": "Link",
+   "label": "Destination Port (Dest)",
+   "options": "Port Details"
   },
   {
    "fieldname": "shipping_line",
-   "fieldtype": "Data",
-   "label": "Shipping Line"
+   "fieldtype": "Link",
+   "label": "Shipping Line",
+   "options": "Supplier"
   },
   {
    "fieldname": "free_days",
@@ -588,7 +591,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-26 17:19:06.780159",
+ "modified": "2026-10-28 16:33:42.160633",
  "modified_by": "Administrator",
  "module": "Exim",
  "name": "Import Shipment",

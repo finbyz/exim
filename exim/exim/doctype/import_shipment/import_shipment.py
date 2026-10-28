@@ -22,10 +22,31 @@ class ImportShipment(Document):
 		self.validate_purchase_order_qty()
 		self.calculate_week()
 		self.calculate_item_totals()
+		self.auto_fill_destination_port_charges()
 		self.calculate_charge_totals()
 		self.calculate_rates()
 		self.calculate_commercial_totals()
 		self.update_boe_details()
+
+	def auto_fill_destination_port_charges(self):
+		if not getattr(self, "destination_port", None):
+			return
+
+		has_charges = any(row.get("charge_type") for row in (self.get("charges") or []))
+		if has_charges:
+			return
+
+		charges = get_charges_for_destination_port(self.destination_port)
+		if not charges:
+			return
+
+		self.set("charges", [])
+		for item in charges:
+			self.append("charges", {
+				"charge_type": item["charge_type"],
+				"item_name": item["item_name"],
+				"amount": item["amount"],
+			})
 
 	def on_update(self):
 		if not self.shipment_no and self.name and not self.name.startswith("new-"):
@@ -374,3 +395,37 @@ def make_import_shipment(source_name, target_doc=None, args=None):
 
 	doc.run_method("validate")
 	return doc
+
+
+@frappe.whitelist()
+def get_charges_for_destination_port(destination_port):
+	"""
+	Fetch configured service charges from Import Export Charges for the destination port.
+	Returns list of dicts: [{'charge_type': service_item, 'item_name': item_name, 'amount': amount}]
+	"""
+	if not destination_port or not frappe.db.exists("DocType", "Import Export Charges"):
+		return []
+
+	charges_doc_name = frappe.db.get_value(
+		"Import Export Charges",
+		{"port": destination_port, "type": "Import"},
+		"name",
+	)
+
+	if not charges_doc_name:
+		return []
+
+	doc = frappe.get_cached_doc("Import Export Charges", charges_doc_name)
+	result = []
+	for row in doc.get("charges") or []:
+		if not row.service:
+			continue
+		item_name = frappe.db.get_value("Item", row.service, "item_name") or row.service
+		result.append({
+			"charge_type": row.service,
+			"item_name": item_name,
+			"amount": flt(row.amount),
+		})
+
+	return result
+

@@ -20,6 +20,30 @@ frappe.ui.form.on("Import Shipment", {
 				}
 			};
 		});
+
+		frm.set_query("cha", function() {
+			return {
+				filters: {
+					supplier_group: "CHA"
+				}
+			};
+		});
+
+		frm.set_query("cfs_terminal", function() {
+			return {
+				filters: {
+					supplier_group: "CFS"
+				}
+			};
+		});
+
+		frm.set_query("shipping_line", function() {
+			return {
+				filters: {
+					supplier_group: "Shipping Line"
+				}
+			};
+		});
 	},
 
 	onload(frm) {
@@ -87,6 +111,60 @@ frappe.ui.form.on("Import Shipment", {
 		if (frm.doc.be_no && !frm.doc.authorized_purchase_invoice) {
 			fetch_boe_taxes(frm, false);
 		}
+	},
+
+	destination_port(frm) {
+		if (frm.doc.docstatus !== 0 || !frm.doc.destination_port) {
+			return;
+		}
+
+		frappe.call({
+			method: "exim.exim.doctype.import_shipment.import_shipment.get_charges_for_destination_port",
+			args: {
+				destination_port: frm.doc.destination_port
+			},
+			freeze: true,
+			freeze_message: __("Fetching port charges..."),
+			callback: function(r) {
+				if (!r || !r.message || !r.message.length) {
+					frappe.show_alert({
+						message: __("No Import charges configured for port {0}", [frm.doc.destination_port]),
+						indicator: "orange"
+					});
+					return;
+				}
+
+				const charges = r.message;
+
+				const populate_charges = function() {
+					frm.clear_table("charges");
+					charges.forEach(function(item) {
+						let row = frm.add_child("charges");
+						row.charge_type = item.charge_type;
+						row.item_name = item.item_name;
+						row.amount = flt(item.amount);
+					});
+					frm.refresh_field("charges");
+					frm.trigger("calculate_charge_totals");
+					frappe.show_alert({
+						message: __("Loaded {0} charge(s) for port {1}", [charges.length, frm.doc.destination_port]),
+						indicator: "green"
+					});
+				};
+
+				const has_existing = (frm.doc.charges || []).some(row => row.charge_type);
+				if (has_existing) {
+					frappe.confirm(
+						__("Charges already exist in Import Shipment Charge table. Replace them with charges for destination port <b>{0}</b>?", [frm.doc.destination_port]),
+						function() {
+							populate_charges();
+						}
+					);
+				} else {
+					populate_charges();
+				}
+			}
+		});
 	},
 
 	eta(frm) {
