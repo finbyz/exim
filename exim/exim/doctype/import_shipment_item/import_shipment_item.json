@@ -34,7 +34,6 @@
    "in_list_view": 1,
    "label": "Product",
    "options": "Item",
-   "permlevel": 1,
    "reqd": 1
   },
   {
@@ -42,7 +41,6 @@
    "fieldname": "item_name",
    "fieldtype": "Data",
    "label": "Item Name",
-   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -51,44 +49,38 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "HSN Code",
-   "options": "GST HSN Code",
-   "permlevel": 1
+   "options": "GST HSN Code"
   },
   {
    "fetch_from": "product.variety",
    "fieldname": "variety",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Variety",
-   "permlevel": 1
+   "label": "Variety"
   },
   {
    "fieldname": "boxes",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Boxes",
-   "permlevel": 1
+   "label": "Boxes"
   },
   {
    "fieldname": "net_weight",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Net Wt (kg)",
-   "permlevel": 1
+   "label": "Net Wt (kg)"
   },
   {
    "fieldname": "gross_weight",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Gross Wt (kg)",
-   "permlevel": 1
+   "label": "Gross Wt (kg)"
   },
   {
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Qty",
-   "permlevel": 1,
    "reqd": 1
   },
   {
@@ -96,8 +88,7 @@
    "fieldname": "uom",
    "fieldtype": "Link",
    "label": "UOM",
-   "options": "UOM",
-   "permlevel": 1
+   "options": "UOM"
   },
   {
    "fieldname": "currency",
@@ -105,7 +96,6 @@
    "hidden": 1,
    "label": "Currency",
    "options": "Currency",
-   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -161,7 +151,6 @@
    "in_list_view": 1,
    "label": "Purchase Order",
    "options": "Purchase Order",
-   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -169,7 +158,6 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Purchase Order Item",
-   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -181,7 +169,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-28 17:24:12.275845",
+ "modified": "2026-10-29 12:03:30.437255",
  "modified_by": "Administrator",
  "module": "Exim",
  "name": "Import Shipment Item",
