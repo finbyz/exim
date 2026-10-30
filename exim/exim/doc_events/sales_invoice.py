@@ -212,8 +212,14 @@ def create_jv_with_gst(self):
 				"company_gstin": self.company_gstin,
 				"branch": self.branch,
 				"cheque_no": self.name,
+				"user_remark": (
+					"IGST Refund against " + self.name + " for " + self.customer
+				),
 				"accounts": []
 			})
+		jv.user_remark = (
+			"IGST Refund against " + self.name + " for " + self.customer
+		)
 
 		row1 = {
 			"account": self.debit_to,
@@ -243,9 +249,6 @@ def create_jv_with_gst(self):
 		apply_accounting_dimensions(self, row2)
 		jv.append("accounts", row2)
 
-		apply_accounting_dimensions(self, row2)
-		
-
 		if decimal_part:
 			rounded_off_account = f"Rounded Off - {company_abbr}"  
 			row3 = {
@@ -271,8 +274,14 @@ def create_jv_with_gst(self):
 				"company_gstin": self.company_gstin,
 				"branch": self.branch,
 				"cheque_no": self.name,
+				"user_remark": (
+					"IGST Refund against " + self.name + " for " + self.customer
+				),
 				"accounts": []
 			})
+		jv.user_remark = (
+			"IGST Refund against " + self.name + " for " + self.customer
+		)
 		
 		row1 = {
 			"account": self.debit_to,
@@ -298,13 +307,6 @@ def create_jv_with_gst(self):
 		}
 		apply_accounting_dimensions(self, row2)
 		jv.append("accounts", row2)
-		
-		jv.save(ignore_permissions=True)
-		jv.submit()
-		meta = frappe.get_meta(self.doctype)
-		if meta.has_field("igst_refund_jv"):
-			self.db_set("igst_refund_jv", jv.name)
-
 
 	jv.save(ignore_permissions=True)
 	jv.submit()
