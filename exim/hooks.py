@@ -129,9 +129,14 @@ doctype_js = {
 # Reason: get_due_date is a module-level function with no Frappe hook/override
 # support. Subclassing AccountsController is not viable because the function is
 # called directly (not via self). Tracked in issue #<N> for upstream fix.
-from exim.exim.monkey_patch.accounts_controller import get_due_date
-from erpnext.controllers import accounts_controller
-accounts_controller.get_due_date = get_due_date
+try:
+    from erpnext.controllers import accounts_controller
+
+    from exim.exim.monkey_patch.accounts_controller import get_due_date
+
+    accounts_controller.get_due_date = get_due_date
+except ImportError:
+    pass
 
 
 # Overriding Whitelisted Methods
