@@ -22,11 +22,10 @@ class ImportShipment(Document):
 		self.validate_purchase_order_qty()
 		self.calculate_week()
 		self.calculate_item_totals()
-		self.auto_fill_destination_port_charges()
 		self.calculate_charge_totals()
 		self.calculate_rates()
+		self.sync_commercial_details_from_pi()
 		self.calculate_commercial_totals()
-		self.update_boe_details()
 
 	def auto_fill_destination_port_charges(self):
 		if not getattr(self, "destination_port", None):
@@ -246,6 +245,107 @@ class ImportShipment(Document):
 		except Exception:
 			pass
 
+	def sync_custom_duty_charge(self):
+		duty = flt(self.duty_basic)
+		if duty <= 0:
+			return
+
+		item_code = "Custom Duty"
+		item_name = frappe.db.get_value("Item", item_code, "item_name") or "Custom Duty"
+
+		custom_duty_row = None
+		empty_row = None
+
+		for row in self.get("charges", []):
+			if row.charge_type in ("Custom Duty", item_code):
+				custom_duty_row = row
+				break
+			elif not row.charge_type and not flt(row.amount) and not flt(row.actual_amount):
+				if empty_row is None:
+					empty_row = row
+
+		if custom_duty_row:
+			custom_duty_row.charge_type = item_code
+			custom_duty_row.amount = duty
+			custom_duty_row.actual_amount = duty
+			if not custom_duty_row.item_name:
+				custom_duty_row.item_name = item_name
+		elif empty_row:
+			empty_row.charge_type = item_code
+			empty_row.item_name = item_name
+			empty_row.amount = duty
+			empty_row.actual_amount = duty
+		else:
+			self.append(
+				"charges",
+				{
+					"charge_type": item_code,
+					"item_name": item_name,
+					"amount": duty,
+					"actual_amount": duty,
+				},
+			)
+
+	def sync_commercial_details_from_pi(self):
+		pi_name = self.authorized_purchase_invoice or self.purchase_invoice
+		if not pi_name and self.name and not self.name.startswith("new-"):
+			pi_name = frappe.db.get_value(
+				"Purchase Invoice",
+				{"import_shipment": self.name, "docstatus": ["!=", 2]},
+				"name",
+				order_by="docstatus desc, creation desc",
+			)
+			if pi_name:
+				is_auth = frappe.db.get_value("Purchase Invoice", pi_name, "authority")
+				if is_auth and str(is_auth).strip().lower() == "authorized":
+					self.authorized_purchase_invoice = pi_name
+				else:
+					self.purchase_invoice = pi_name
+
+		if not pi_name:
+			doc_before_save = self.get_doc_before_save() if hasattr(self, "get_doc_before_save") else None
+			if doc_before_save and (doc_before_save.purchase_invoice or doc_before_save.authorized_purchase_invoice):
+				self.invoice_value = 0.0
+				self.invoice_value_inr = 0.0
+				self.cif_value = flt(self.insurance)
+				self.invoice_no = None
+			return
+
+		pi_data = frappe.db.get_value(
+			"Purchase Invoice",
+			pi_name,
+			[
+				"grand_total",
+				"base_grand_total",
+				"conversion_rate",
+				"bill_no",
+				"bill_date",
+				"posting_date",
+				"currency",
+				"docstatus",
+			],
+			as_dict=True,
+		)
+		if not pi_data:
+			return
+
+		inv_val = flt(pi_data.grand_total)
+		conv_rate = flt(pi_data.conversion_rate) if flt(pi_data.conversion_rate) > 0 else (flt(self.exchange_rate) or 1.0)
+		inv_val_inr = flt(pi_data.base_grand_total) if flt(pi_data.base_grand_total) > 0 else (inv_val * conv_rate)
+
+		if inv_val > 0 or not flt(self.invoice_value):
+			self.invoice_value = inv_val
+			self.exchange_rate = conv_rate
+			self.invoice_value_inr = inv_val_inr
+			self.cif_value = inv_val_inr + flt(self.insurance)
+
+		if not self.invoice_no and (pi_data.bill_no or pi_name):
+			self.invoice_no = pi_data.bill_no or pi_name
+		if not self.invoice_date and (pi_data.bill_date or pi_data.posting_date):
+			self.invoice_date = pi_data.bill_date or pi_data.posting_date
+		if pi_data.currency and not self.currency:
+			self.currency = pi_data.currency
+
 	def update_passing_amount(self):
 		try:
 			# pyrefly: ignore [missing-import]
@@ -395,37 +495,3 @@ def make_import_shipment(source_name, target_doc=None, args=None):
 
 	doc.run_method("validate")
 	return doc
-
-
-@frappe.whitelist()
-def get_charges_for_destination_port(destination_port):
-	"""
-	Fetch configured service charges from Import Export Charges for the destination port.
-	Returns list of dicts: [{'charge_type': service_item, 'item_name': item_name, 'amount': amount}]
-	"""
-	if not destination_port or not frappe.db.exists("DocType", "Import Export Charges"):
-		return []
-
-	charges_doc_name = frappe.db.get_value(
-		"Import Export Charges",
-		{"port": destination_port, "type": "Import"},
-		"name",
-	)
-
-	if not charges_doc_name:
-		return []
-
-	doc = frappe.get_cached_doc("Import Export Charges", charges_doc_name)
-	result = []
-	for row in doc.get("charges") or []:
-		if not row.service:
-			continue
-		item_name = frappe.db.get_value("Item", row.service, "item_name") or row.service
-		result.append({
-			"charge_type": row.service,
-			"item_name": item_name,
-			"amount": flt(row.amount),
-		})
-
-	return result
-

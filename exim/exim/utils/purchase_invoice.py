@@ -37,6 +37,22 @@ def ensure_import_shipment_pi_fields():
 	pass
 
 
+def ensure_pi_import_shipment_allow_on_submit():
+	"""Ensure import_shipment on Purchase Invoice and Purchase Invoice Item have allow_on_submit=1."""
+	try:
+		changed = False
+		for cf_name in ("Purchase Invoice Item-import_shipment", "Purchase Invoice-import_shipment"):
+			if frappe.db.exists("Custom Field", cf_name):
+				if not frappe.db.get_value("Custom Field", cf_name, "allow_on_submit"):
+					frappe.db.set_value("Custom Field", cf_name, "allow_on_submit", 1, update_modified=False)
+					changed = True
+		if changed:
+			frappe.clear_cache(doctype="Purchase Invoice")
+			frappe.clear_cache(doctype="Purchase Invoice Item")
+	except Exception:
+		pass
+
+
 def ensure_purchase_order_import_shipment_custom_field():
 	"""Ensure import_shipment custom field exists on Purchase Order."""
 	try:
@@ -137,43 +153,211 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 
 def validate_purchase_invoice(doc, method=None):
 	"""Sync import_shipment from linked Purchase Order."""
+	ensure_pi_import_shipment_allow_on_submit()
 	ensure_purchase_order_import_shipment_custom_field()
 	sync_import_shipment_from_po(doc)
+
+
+def is_commercial_purchase_invoice(doc):
+	"""
+	Returns True if this Purchase Invoice is for commercial goods,
+	rather than only freight/service expenses.
+	"""
+	for item in doc.get("items", []):
+		if item.item_code and not is_service_item(item.item_code, item):
+			return True
+
+	if doc.get("authority") or doc.get("unauthorized_purchase_invoice"):
+		return True
+
+	return False
+
+
+def sync_commercial_pi_to_shipment(doc, shipment_name=None):
+	"""
+	Sync commercial values from Purchase Invoice to linked Import Shipment:
+	- invoice_value = doc.grand_total
+	- exchange_rate = doc.conversion_rate
+	- invoice_value_inr = doc.base_grand_total
+	- invoice_no = doc.bill_no or doc.name
+	- invoice_date = doc.bill_date or doc.posting_date
+	- purchase_invoice / authorized_purchase_invoice = doc.name
+	- cif_value = invoice_value_inr + insurance
+	"""
+	target_shipment = shipment_name or doc.get("import_shipment")
+	if not target_shipment:
+		for item in doc.get("items", []):
+			if item.get("import_shipment"):
+				target_shipment = item.import_shipment
+				break
+
+	if not target_shipment or not frappe.db.exists("Import Shipment", target_shipment):
+		return
+
+	if not is_commercial_purchase_invoice(doc):
+		return
+
+	# Revert any other shipments previously linked to this Purchase Invoice
+	other_linked_shipments = frappe.get_all(
+		"Import Shipment",
+		filters=[
+			["name", "!=", target_shipment],
+			["purchase_invoice", "=", doc.name],
+		],
+		pluck="name",
+	) + frappe.get_all(
+		"Import Shipment",
+		filters=[
+			["name", "!=", target_shipment],
+			["authorized_purchase_invoice", "=", doc.name],
+		],
+		pluck="name",
+	)
+	for old_name in set(other_linked_shipments):
+		revert_commercial_pi_from_shipment(doc, old_name)
+
+	is_authorized = (
+		(doc.get("authority") and str(doc.get("authority")).strip().lower() == "authorized")
+		or bool(doc.get("unauthorized_purchase_invoice"))
+	)
+	target_col = "authorized_purchase_invoice" if is_authorized else "purchase_invoice"
+
+	inv_value = flt(doc.grand_total)
+	conv_rate = flt(doc.conversion_rate) if flt(doc.conversion_rate) > 0 else 1.0
+	inv_value_inr = flt(doc.base_grand_total) if flt(doc.base_grand_total) > 0 else (inv_value * conv_rate)
+	inv_no = doc.bill_no or doc.name
+	inv_date = doc.bill_date or doc.posting_date
+
+	update_values = {}
+	if frappe.db.has_column("Import Shipment", target_col):
+		update_values[target_col] = doc.name
+	if frappe.db.has_column("Import Shipment", "invoice_value"):
+		update_values["invoice_value"] = inv_value
+	if frappe.db.has_column("Import Shipment", "exchange_rate"):
+		update_values["exchange_rate"] = conv_rate
+	if frappe.db.has_column("Import Shipment", "invoice_value_inr"):
+		update_values["invoice_value_inr"] = inv_value_inr
+	if frappe.db.has_column("Import Shipment", "invoice_no"):
+		update_values["invoice_no"] = inv_no
+	if frappe.db.has_column("Import Shipment", "invoice_date") and inv_date:
+		update_values["invoice_date"] = inv_date
+	if doc.currency and frappe.db.has_column("Import Shipment", "currency"):
+		update_values["currency"] = doc.currency
+
+	if frappe.db.has_column("Import Shipment", "cif_value"):
+		curr_ins = flt(frappe.db.get_value("Import Shipment", target_shipment, "insurance"))
+		update_values["cif_value"] = inv_value_inr + curr_ins
+
+	passing_amt = flt(doc.get("total_discount_amount"))
+	if passing_amt > 0 and frappe.db.has_column("Import Shipment", "passing_amount"):
+		update_values["passing_amount"] = passing_amt
+
+	if update_values:
+		frappe.db.set_value("Import Shipment", target_shipment, update_values)
+
+
+def revert_commercial_pi_from_shipment(doc, shipment_name):
+	"""
+	Revert commercial values on Import Shipment if this Purchase Invoice was unlinked or cancelled.
+	"""
+	if not shipment_name or not frappe.db.exists("Import Shipment", shipment_name):
+		return
+
+	shp = frappe.db.get_value(
+		"Import Shipment",
+		shipment_name,
+		["purchase_invoice", "authorized_purchase_invoice", "insurance"],
+		as_dict=True,
+	)
+	if not shp:
+		return
+
+	is_linked = (shp.purchase_invoice == doc.name or shp.authorized_purchase_invoice == doc.name)
+	if not is_linked:
+		return
+
+	other_pi = frappe.db.get_value(
+		"Purchase Invoice",
+		{"import_shipment": shipment_name, "name": ["!=", doc.name], "docstatus": ["!=", 2]},
+		["name", "grand_total", "base_grand_total", "conversion_rate", "bill_no", "bill_date", "currency", "authority", "unauthorized_purchase_invoice"],
+		as_dict=True,
+		order_by="docstatus desc, creation desc",
+	)
+
+	update_values = {}
+	if other_pi:
+		is_auth = (other_pi.authority and str(other_pi.authority).strip().lower() == "authorized") or bool(other_pi.unauthorized_purchase_invoice)
+		target_col = "authorized_purchase_invoice" if is_auth else "purchase_invoice"
+		other_col = "purchase_invoice" if is_auth else "authorized_purchase_invoice"
+
+		inv_val = flt(other_pi.grand_total)
+		conv = flt(other_pi.conversion_rate) or 1.0
+		inv_val_inr = flt(other_pi.base_grand_total) or (inv_val * conv)
+
+		update_values[target_col] = other_pi.name
+		update_values[other_col] = None
+		update_values["invoice_value"] = inv_val
+		update_values["exchange_rate"] = conv
+		update_values["invoice_value_inr"] = inv_val_inr
+		update_values["invoice_no"] = other_pi.bill_no or other_pi.name
+		if other_pi.bill_date:
+			update_values["invoice_date"] = other_pi.bill_date
+		if other_pi.currency:
+			update_values["currency"] = other_pi.currency
+		update_values["cif_value"] = inv_val_inr + flt(shp.insurance)
+	else:
+		update_values["purchase_invoice"] = None
+		update_values["authorized_purchase_invoice"] = None
+		update_values["invoice_value"] = 0.0
+		update_values["invoice_value_inr"] = 0.0
+		update_values["invoice_no"] = None
+		update_values["invoice_date"] = None
+		update_values["cif_value"] = flt(shp.insurance)
+
+	frappe.db.set_value("Import Shipment", shipment_name, update_values)
+
+
+def update_import_shipment_on_update(doc, method=None):
+	"""
+	Hook on Purchase Invoice on_update:
+	Syncs commercial details to linked Import Shipment.
+	"""
+	doc_before = doc.get_doc_before_save() if hasattr(doc, "get_doc_before_save") else None
+	if doc_before:
+		old_shipment = doc_before.get("import_shipment")
+		new_shipment = doc.get("import_shipment")
+		if old_shipment and old_shipment != new_shipment:
+			revert_commercial_pi_from_shipment(doc, old_shipment)
+
+	if doc.get("import_shipment"):
+		sync_commercial_pi_to_shipment(doc)
+
+
+@frappe.whitelist()
+def sync_pi_import_shipment_commercial(purchase_invoice, import_shipment=None):
+	"""Whitelisted helper for client-side when import_shipment is selected on Purchase Invoice."""
+	if not purchase_invoice or not frappe.db.exists("Purchase Invoice", purchase_invoice):
+		return {"success": False}
+
+	doc = frappe.get_doc("Purchase Invoice", purchase_invoice)
+	target_shipment = import_shipment or doc.get("import_shipment")
+	if target_shipment and frappe.db.exists("Import Shipment", target_shipment):
+		old_shipment = doc.get("import_shipment")
+		if old_shipment and old_shipment != target_shipment:
+			revert_commercial_pi_from_shipment(doc, old_shipment)
+		sync_commercial_pi_to_shipment(doc, shipment_name=target_shipment)
+		return {"success": True}
+	return {"success": False}
 
 
 def update_import_shipment_on_submit(doc, method=None):
 	"""
 	When a Purchase Invoice is submitted:
 	1. Set purchase_invoice or authorized_purchase_invoice on linked Import Shipment.
-	2. For each service item linked to an Import Shipment, update or add charge in charges table.
+	2. Sync commercial invoice values (invoice_value, invoice_value_inr, exchange_rate, etc.).
+	3. For each service item linked to an Import Shipment, update or add charge in charges table.
 	"""
-	shipment_name = doc.get("import_shipment")
-	if not shipment_name:
-		for item in doc.get("items", []):
-			if item.get("import_shipment"):
-				shipment_name = item.import_shipment
-				break
-
-	if shipment_name and frappe.db.exists("Import Shipment", shipment_name):
-		is_authorized = (
-			(doc.get("authority") and str(doc.get("authority")).strip().lower() == "authorized")
-			or bool(doc.get("unauthorized_purchase_invoice"))
-		)
-		target_col = "authorized_purchase_invoice" if is_authorized else "purchase_invoice"
-		shipment_updates = {}
-		if frappe.db.has_column("Import Shipment", target_col):
-			shipment_updates[target_col] = doc.name
-
-		passing_amt = flt(doc.get("total_discount_amount"))
-		if passing_amt > 0 and frappe.db.has_column("Import Shipment", "passing_amount"):
-			shipment_updates["passing_amount"] = passing_amt
-
-		if shipment_updates:
-			frappe.db.set_value(
-				"Import Shipment",
-				shipment_name,
-				shipment_updates,
-			)
+	sync_commercial_pi_to_shipment(doc)
 
 	shipment_items_map = get_shipment_items_map(doc)
 	if not shipment_items_map:
@@ -222,7 +406,7 @@ def update_import_shipment_on_submit(doc, method=None):
 def update_import_shipment_on_cancel(doc, method=None):
 	"""
 	When a Purchase Invoice is cancelled:
-	1. Revert purchase_invoice or authorized_purchase_invoice on linked Import Shipment.
+	1. Revert commercial values and purchase_invoice link on linked Import Shipment.
 	2. Revert actual amount on linked Import Shipment charges for service items.
 	"""
 	shipment_name = doc.get("import_shipment")
@@ -233,29 +417,7 @@ def update_import_shipment_on_cancel(doc, method=None):
 				break
 
 	if shipment_name and frappe.db.exists("Import Shipment", shipment_name):
-		fields_to_check = []
-		if frappe.db.has_column("Import Shipment", "purchase_invoice"):
-			fields_to_check.append("purchase_invoice")
-		if frappe.db.has_column("Import Shipment", "authorized_purchase_invoice"):
-			fields_to_check.append("authorized_purchase_invoice")
-
-		if fields_to_check:
-			shipment_data = frappe.db.get_value(
-				"Import Shipment",
-				shipment_name,
-				fields_to_check,
-				as_dict=True,
-			)
-			if shipment_data:
-				update_fields = {}
-				if shipment_data.get("purchase_invoice") == doc.name:
-					update_fields["purchase_invoice"] = None
-				if shipment_data.get("authorized_purchase_invoice") == doc.name:
-					update_fields["authorized_purchase_invoice"] = None
-				if frappe.db.has_column("Import Shipment", "passing_amount"):
-					update_fields["passing_amount"] = 0.0
-				if update_fields:
-					frappe.db.set_value("Import Shipment", shipment_name, update_fields)
+		revert_commercial_pi_from_shipment(doc, shipment_name)
 
 	shipment_items_map = get_shipment_items_map(doc)
 	if not shipment_items_map:

@@ -152,6 +152,7 @@ accounting_dimension_doctypes = ["Drawback Details", "Rodtep Details"]
 fixtures = [
     {"dt": "Custom Field", "filters": [["module", "in", ["Exim"]]]},
     {"dt": "Property Setter", "filters": [["module", "in", ["Exim"]]]},
+    {"dt": "Item", "filters": [["item_code", "in", ["Custom Duty"]]]},
 ]
 override_whitelisted_methods = {
     "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice": "exim.exim.utils.purchase_invoice.make_purchase_invoice",
@@ -166,6 +167,8 @@ doc_events = {
     },
     "Purchase Invoice": {
         "validate": "exim.exim.utils.purchase_invoice.validate_purchase_invoice",
+        "on_update": "exim.exim.utils.purchase_invoice.update_import_shipment_on_update",
+        "on_update_after_submit": "exim.exim.utils.purchase_invoice.update_import_shipment_on_update",
         "on_submit": [
             "exim.exim.doc_events.purchase_invoice.pi_on_submit",
             "exim.exim.utils.purchase_invoice.update_import_shipment_on_submit",

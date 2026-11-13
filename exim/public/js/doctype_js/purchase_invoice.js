@@ -121,13 +121,33 @@ frappe.ui.form.on("Purchase Invoice", {
 	},
 
 	import_shipment(frm) {
-		if (frm.doc.import_shipment && frm.doc.items) {
-			frm.doc.items.forEach(row => {
-				if (!row.import_shipment) {
-					frappe.model.set_value(row.doctype, row.name, "import_shipment", frm.doc.import_shipment);
-				}
-			});
-			frm.refresh_field("items");
+		if (frm.doc.import_shipment) {
+			if (frm.doc.items) {
+				frm.doc.items.forEach(row => {
+					if (!row.import_shipment || row.import_shipment !== frm.doc.import_shipment) {
+						frappe.model.set_value(row.doctype, row.name, "import_shipment", frm.doc.import_shipment);
+					}
+				});
+				frm.refresh_field("items");
+			}
+
+			if (frm.doc.name && !frm.is_new()) {
+				frappe.call({
+					method: "exim.exim.utils.purchase_invoice.sync_pi_import_shipment_commercial",
+					args: {
+						purchase_invoice: frm.doc.name,
+						import_shipment: frm.doc.import_shipment
+					},
+					callback: function(r) {
+						if (r && r.message && r.message.success) {
+							frappe.show_alert({
+								message: __("Synced invoice values to Import Shipment {0}", [frm.doc.import_shipment]),
+								indicator: "green"
+							});
+						}
+					}
+				});
+			}
 		}
 	},
 });

@@ -99,6 +99,107 @@ frappe.ui.form.on("Import Shipment", {
 				fetch_boe_taxes(frm, false);
 			}
 		}
+
+		frm.add_custom_button(
+			__("Sync Purchase Invoice"),
+			function () {
+				const pi = frm.doc.authorized_purchase_invoice || frm.doc.purchase_invoice;
+				if (pi) {
+					sync_commercial_details_from_pi(frm, pi, true);
+				} else if (frm.doc.name && !frm.is_new()) {
+					frappe.db.get_value("Purchase Invoice", {"import_shipment": frm.doc.name, "docstatus": ["!=", 2]}, ["name"]).then(r => {
+						if (r && r.message && r.message.name) {
+							sync_commercial_details_from_pi(frm, r.message.name, true);
+						} else {
+							frappe.msgprint(__("No Purchase Invoice linked to this Import Shipment."));
+						}
+					});
+				} else {
+					frappe.msgprint(__("Please save the Import Shipment or specify Purchase Invoice first."));
+				}
+			},
+			__("Actions")
+		);
+
+		// Auto-sync commercial details if invoice_value or invoice_value_inr is not yet populated
+		if (!flt(frm.doc.invoice_value) || !flt(frm.doc.invoice_value_inr)) {
+			const pi = frm.doc.authorized_purchase_invoice || frm.doc.purchase_invoice;
+			if (pi) {
+				sync_commercial_details_from_pi(frm, pi);
+			} else if (frm.doc.name && !frm.is_new()) {
+				frappe.db.get_value("Purchase Invoice", {"import_shipment": frm.doc.name, "docstatus": ["!=", 2]}, ["name"]).then(r => {
+					if (r && r.message && r.message.name) {
+						sync_commercial_details_from_pi(frm, r.message.name);
+					}
+				});
+			}
+		}
+
+		if (frm.doc.docstatus === 0 && flt(frm.doc.duty_basic) > 0) {
+			const has_custom_duty = (frm.doc.charges || []).some(r => r.charge_type === "Custom Duty");
+			if (!has_custom_duty) {
+				frm.trigger("sync_custom_duty_charge");
+			}
+		}
+	},
+
+	purchase_invoice(frm) {
+		if (frm.doc.purchase_invoice) {
+			sync_commercial_details_from_pi(frm, frm.doc.purchase_invoice, true);
+		}
+	},
+
+	authorized_purchase_invoice(frm) {
+		if (frm.doc.authorized_purchase_invoice) {
+			sync_commercial_details_from_pi(frm, frm.doc.authorized_purchase_invoice, true);
+			fetch_boe_taxes(frm, true);
+		}
+	},
+
+	duty_basic(frm) {
+		frm.trigger("sync_custom_duty_charge");
+	},
+
+	sync_custom_duty_charge(frm) {
+		const duty = flt(frm.doc.duty_basic);
+		if (duty <= 0) return;
+
+		let custom_duty_row = (frm.doc.charges || []).find(r => r.charge_type === "Custom Duty");
+		if (custom_duty_row) {
+			let needs_update = false;
+			if (flt(custom_duty_row.amount) !== duty) {
+				frappe.model.set_value(custom_duty_row.doctype, custom_duty_row.name, "amount", duty);
+				needs_update = true;
+			}
+			if (flt(custom_duty_row.actual_amount) !== duty) {
+				frappe.model.set_value(custom_duty_row.doctype, custom_duty_row.name, "actual_amount", duty);
+				needs_update = true;
+			}
+			if (!custom_duty_row.item_name) {
+				frappe.model.set_value(custom_duty_row.doctype, custom_duty_row.name, "item_name", "Custom Duty");
+				needs_update = true;
+			}
+			if (needs_update) {
+				frm.refresh_field("charges");
+				frm.trigger("calculate_charge_totals");
+			}
+		} else {
+			let empty_row = (frm.doc.charges || []).find(r => !r.charge_type && !flt(r.amount) && !flt(r.actual_amount));
+			if (empty_row) {
+				frappe.model.set_value(empty_row.doctype, empty_row.name, "charge_type", "Custom Duty");
+				frappe.model.set_value(empty_row.doctype, empty_row.name, "item_name", "Custom Duty");
+				frappe.model.set_value(empty_row.doctype, empty_row.name, "amount", duty);
+				frappe.model.set_value(empty_row.doctype, empty_row.name, "actual_amount", duty);
+			} else {
+				let row = frm.add_child("charges");
+				frappe.model.set_value(row.doctype, row.name, "charge_type", "Custom Duty");
+				frappe.model.set_value(row.doctype, row.name, "item_name", "Custom Duty");
+				frappe.model.set_value(row.doctype, row.name, "amount", duty);
+				frappe.model.set_value(row.doctype, row.name, "actual_amount", duty);
+			}
+			frm.refresh_field("charges");
+			frm.trigger("calculate_charge_totals");
+		}
 	},
 
 	authorized_purchase_invoice(frm) {
@@ -467,6 +568,18 @@ frappe.ui.form.on("Import Shipment Item", {
 });
 
 frappe.ui.form.on("Import Shipment Charge", {
+	charge_type(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (row && row.charge_type === "Custom Duty" && flt(frm.doc.duty_basic) > 0) {
+			const duty = flt(frm.doc.duty_basic);
+			frappe.model.set_value(cdt, cdn, "amount", duty);
+			frappe.model.set_value(cdt, cdn, "actual_amount", duty);
+			if (!row.item_name) {
+				frappe.model.set_value(cdt, cdn, "item_name", "Custom Duty");
+			}
+		}
+	},
+
 	amount(frm) {
 		frm.trigger("calculate_charge_totals");
 	},
@@ -516,6 +629,10 @@ function fetch_boe_taxes(frm, show_alert = false) {
 				if (!frm.doc.be_date && r.message.bill_of_entry_date) {
 					frm.set_value("be_date", r.message.bill_of_entry_date);
 					updated = true;
+				}
+
+				if (duty > 0) {
+					frm.trigger("sync_custom_duty_charge");
 				}
 
 				if (show_alert) {
@@ -586,3 +703,66 @@ function set_default_currency(frm) {
 		}
 	}
 }
+
+function sync_commercial_details_from_pi(frm, pi_name, show_alert = false) {
+	if (!pi_name) return;
+	frappe.db.get_value("Purchase Invoice", pi_name, [
+		"name", "grand_total", "base_grand_total", "conversion_rate",
+		"bill_no", "bill_date", "currency", "posting_date", "authority", "unauthorized_purchase_invoice"
+	]).then(r => {
+		if (r && r.message) {
+			const pi = r.message;
+			const inv_val = flt(pi.grand_total);
+			const conv_rate = flt(pi.conversion_rate) > 0 ? flt(pi.conversion_rate) : (flt(frm.doc.exchange_rate) || 1.0);
+			const inv_val_inr = flt(pi.base_grand_total) > 0 ? flt(pi.base_grand_total) : (inv_val * conv_rate);
+
+			let updated = false;
+			if (flt(frm.doc.invoice_value) !== inv_val) {
+				frm.set_value("invoice_value", inv_val);
+				updated = true;
+			}
+			if (flt(frm.doc.exchange_rate) !== conv_rate) {
+				frm.set_value("exchange_rate", conv_rate);
+				updated = true;
+			}
+			if (flt(frm.doc.invoice_value_inr) !== inv_val_inr) {
+				frm.set_value("invoice_value_inr", inv_val_inr);
+				updated = true;
+			}
+			frm.set_value("cif_value", inv_val_inr + flt(frm.doc.insurance));
+
+			if (pi.bill_no && frm.doc.invoice_no !== pi.bill_no) {
+				frm.set_value("invoice_no", pi.bill_no);
+				updated = true;
+			}
+			if (pi.bill_date && frm.doc.invoice_date !== pi.bill_date) {
+				frm.set_value("invoice_date", pi.bill_date);
+				updated = true;
+			}
+			if (pi.currency && frm.doc.currency !== pi.currency) {
+				frm.set_value("currency", pi.currency);
+				updated = true;
+			}
+
+			const is_auth = (pi.authority && String(pi.authority).trim().toLowerCase() === "authorized") || !!pi.unauthorized_purchase_invoice;
+			if (is_auth && frm.doc.authorized_purchase_invoice !== pi.name) {
+				frm.set_value("authorized_purchase_invoice", pi.name);
+				updated = true;
+			} else if (!is_auth && frm.doc.purchase_invoice !== pi.name) {
+				frm.set_value("purchase_invoice", pi.name);
+				updated = true;
+			}
+
+			if (show_alert && updated) {
+				frappe.show_alert({
+					message: __("Updated Commercial details from Purchase Invoice {0} (Value: {1})", [
+						pi.name,
+						format_currency(inv_val, pi.currency || frm.doc.currency)
+					]),
+					indicator: "green"
+				});
+			}
+		}
+	});
+}
+

@@ -174,6 +174,18 @@ def get_bill_of_entry_details(shipment_name=None, authorized_purchase_invoice=No
 
 		frappe.db.set_value("Import Shipment", shipment_name, update_values)
 
+	duty = flt(boe_data.get("total_customs_duty", 0.0))
+	if duty > 0:
+		try:
+			shp_doc = frappe.get_doc("Import Shipment", shipment_name)
+			if shp_doc.docstatus == 0:
+				shp_doc.sync_custom_duty_charge()
+				shp_doc.calculate_charge_totals()
+				shp_doc.calculate_rates()
+				shp_doc.save(ignore_permissions=True)
+		except Exception:
+			pass
+
 	return data
 
 
@@ -265,6 +277,18 @@ def sync_shipment_boe_taxes(shipment_name):
 				update_values["passing_amount"] = disc_amt
 
 	frappe.db.set_value("Import Shipment", shipment_name, update_values)
+
+	duty = flt(boe_data.get("total_customs_duty", 0.0))
+	if duty > 0:
+		try:
+			shp_doc = frappe.get_doc("Import Shipment", shipment_name)
+			if shp_doc.docstatus == 0:
+				shp_doc.sync_custom_duty_charge()
+				shp_doc.calculate_charge_totals()
+				shp_doc.calculate_rates()
+				shp_doc.save(ignore_permissions=True)
+		except Exception:
+			pass
 
 
 def update_import_shipment_from_boe(doc, method=None):

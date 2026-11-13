@@ -397,8 +397,7 @@
    "fieldname": "invoice_value",
    "fieldtype": "Currency",
    "label": "Invoice Value",
-   "options": "currency",
-   "read_only": 1
+   "options": "currency"
   },
   {
    "fieldname": "incoterm",
@@ -530,19 +529,19 @@
   },
   {
    "fieldname": "purchase_invoice",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Purchase Invoice",
    "no_copy": 1,
-   "read_only": 1
+   "options": "Purchase Invoice"
   },
   {
    "fieldname": "authorized_purchase_invoice",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Authorized Purchase Invoice",
    "no_copy": 1,
-   "read_only": 1
+   "options": "Purchase Invoice"
   },
   {
    "fieldname": "cha_bill_no",
