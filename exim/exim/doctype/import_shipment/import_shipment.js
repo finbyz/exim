@@ -60,6 +60,9 @@ frappe.ui.form.on("Import Shipment", {
 	refresh(frm) {
 		set_item_currency_options(frm);
 		update_currency_labels(frm);
+		frm.set_df_property("exchange_rate", "read_only", 1);
+		frm.set_df_property("invoice_value", "read_only", 1);
+
 		if (frm.doc.docstatus === 0) {
 			frm.add_custom_button(
 				__("Purchase Order"),
@@ -93,11 +96,6 @@ frappe.ui.form.on("Import Shipment", {
 				},
 				__("Actions")
 			);
-
-			// Auto-sync on refresh if duty_basic or cess_and_gst are not populated yet
-			if (!flt(frm.doc.duty_basic) && !flt(frm.doc.cess_and_gst)) {
-				fetch_boe_taxes(frm, false);
-			}
 		}
 
 		frm.add_custom_button(
@@ -120,27 +118,6 @@ frappe.ui.form.on("Import Shipment", {
 			},
 			__("Actions")
 		);
-
-		// Auto-sync commercial details if invoice_value or invoice_value_inr is not yet populated
-		if (!flt(frm.doc.invoice_value) || !flt(frm.doc.invoice_value_inr)) {
-			const pi = frm.doc.authorized_purchase_invoice || frm.doc.purchase_invoice;
-			if (pi) {
-				sync_commercial_details_from_pi(frm, pi);
-			} else if (frm.doc.name && !frm.is_new()) {
-				frappe.db.get_value("Purchase Invoice", {"import_shipment": frm.doc.name, "docstatus": ["!=", 2]}, ["name"]).then(r => {
-					if (r && r.message && r.message.name) {
-						sync_commercial_details_from_pi(frm, r.message.name);
-					}
-				});
-			}
-		}
-
-		if (frm.doc.docstatus === 0 && flt(frm.doc.duty_basic) > 0) {
-			const has_custom_duty = (frm.doc.charges || []).some(r => r.charge_type === "Custom Duty");
-			if (!has_custom_duty) {
-				frm.trigger("sync_custom_duty_charge");
-			}
-		}
 	},
 
 	purchase_invoice(frm) {
@@ -729,7 +706,11 @@ function sync_commercial_details_from_pi(frm, pi_name, show_alert = false) {
 				frm.set_value("invoice_value_inr", inv_val_inr);
 				updated = true;
 			}
-			frm.set_value("cif_value", inv_val_inr + flt(frm.doc.insurance));
+			const new_cif = inv_val_inr + flt(frm.doc.insurance);
+			if (flt(frm.doc.cif_value) !== new_cif) {
+				frm.set_value("cif_value", new_cif);
+				updated = true;
+			}
 
 			if (pi.bill_no && frm.doc.invoice_no !== pi.bill_no) {
 				frm.set_value("invoice_no", pi.bill_no);

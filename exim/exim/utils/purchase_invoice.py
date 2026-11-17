@@ -222,6 +222,19 @@ def sync_commercial_pi_to_shipment(doc, shipment_name=None):
 	)
 	target_col = "authorized_purchase_invoice" if is_authorized else "purchase_invoice"
 
+	if not is_authorized:
+		existing_auth_pi = frappe.db.get_value("Import Shipment", target_shipment, "authorized_purchase_invoice")
+		if existing_auth_pi and frappe.db.exists("Purchase Invoice", existing_auth_pi):
+			updates = {}
+			if frappe.db.has_column("Import Shipment", target_col):
+				updates[target_col] = doc.name
+			passing_amt = flt(doc.get("total_discount_amount"))
+			if passing_amt > 0 and frappe.db.has_column("Import Shipment", "passing_amount"):
+				updates["passing_amount"] = passing_amt
+			if updates:
+				frappe.db.set_value("Import Shipment", target_shipment, updates)
+			return
+
 	inv_value = flt(doc.grand_total)
 	conv_rate = flt(doc.conversion_rate) if flt(doc.conversion_rate) > 0 else 1.0
 	inv_value_inr = flt(doc.base_grand_total) if flt(doc.base_grand_total) > 0 else (inv_value * conv_rate)
@@ -329,8 +342,15 @@ def update_import_shipment_on_update(doc, method=None):
 		if old_shipment and old_shipment != new_shipment:
 			revert_commercial_pi_from_shipment(doc, old_shipment)
 
-	if doc.get("import_shipment"):
-		sync_commercial_pi_to_shipment(doc)
+	shipment_to_sync = doc.get("import_shipment")
+	if not shipment_to_sync:
+		for item in doc.get("items", []):
+			if item.get("import_shipment"):
+				shipment_to_sync = item.import_shipment
+				break
+
+	if shipment_to_sync:
+		sync_commercial_pi_to_shipment(doc, shipment_name=shipment_to_sync)
 
 
 @frappe.whitelist()
