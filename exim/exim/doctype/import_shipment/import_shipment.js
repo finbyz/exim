@@ -1080,8 +1080,6 @@ function render_link_documents(frm) {
 				const group = (r.message || []).find((g) => g.doctype === doctype);
 				if (!group || !group.names.length) {
 					frappe.set_route("List", doctype);
-				} else if (group.has_link_field) {
-					frappe.set_route("List", doctype, { import_shipment: frm.doc.name });
 				} else {
 					frappe.set_route("List", doctype, { name: ["in", group.names] });
 				}

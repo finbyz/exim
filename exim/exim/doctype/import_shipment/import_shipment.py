@@ -610,7 +610,16 @@ def get_link_documents(shipment):
 			return []
 		return frappe.get_all(doctype, filters={"import_shipment": shipment}, pluck="name", order_by="creation")
 
-	po = by_field("Purchase Order")
+	# Purchase Orders: the shipment's item rows, plus any PO tagged with the shipment
+	po = unique(
+		frappe.get_all(
+			"Import Shipment Item",
+			filters={"parent": shipment, "parenttype": "Import Shipment", "purchase_order": ("is", "set")},
+			pluck="purchase_order",
+			order_by="idx",
+		)
+		+ by_field("Purchase Order")
+	)
 
 	pi = by_field("Purchase Invoice")
 	if has_field("Purchase Invoice Item"):
@@ -620,6 +629,10 @@ def get_link_documents(shipment):
 			pluck="parent",
 		)
 	pi += [v for v in frappe.db.get_value("Import Shipment", shipment, ["purchase_invoice", "authorized_purchase_invoice"]) or [] if v]
+	if po:
+		pi += frappe.get_all(
+			"Purchase Invoice Item", filters={"purchase_order": ("in", po), "parenttype": "Purchase Invoice"}, pluck="parent"
+		)
 	pi = unique(pi)
 
 	pr = []
