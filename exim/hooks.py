@@ -18,6 +18,7 @@ app_version = "3.1.0"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/exim/css/exim.css"
 # app_include_js = "/assets/exim/js/exim.js"
+app_include_js = ["/assets/exim/js/serial_batch_container.js"]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/exim/css/exim.css"
@@ -39,6 +40,7 @@ doctype_js = {
     "Purchase Receipt": "public/js/doctype_js/purchase_receipt.js",
     "Purchase Invoice": "public/js/doctype_js/purchase_invoice.js",
     "Purchase Order": "public/js/doctype_js/purchase_order.js",
+    "Supplier Quotation": "public/js/doctype_js/supplier_quotation.js",
     "Lead": "public/js/doctype_js/lead.js",
     "Payment Entry": "public/js/doctype_js/payment_entry.js",
     "Customize Form": "public/js/doctype_js/customize_form.js",
@@ -156,9 +158,21 @@ fixtures = [
 ]
 override_whitelisted_methods = {
     "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice": "exim.exim.utils.purchase_invoice.make_purchase_invoice",
+    # Container No in the Serial / Batch selector (CSV upload and dialog table)
+    "erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.upload_csv_file": "exim.exim.utils.serial_batch_container.upload_csv_file",
+    "erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.add_serial_batch_ledgers": "exim.exim.utils.serial_batch_container.add_serial_batch_ledgers",
+    "erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_ledgers": "exim.exim.utils.serial_batch_container.get_serial_batch_ledgers",
+    "frappe.utils.print_format.download_pdf": "exim.exim.utils.shipment_attachments.custom_download_pdf",
 }
 
 doc_events = {
+    "Print Format": {
+        # formats showing shipment attachments always use the "Attachments" PDF generator
+        "validate": "exim.exim.utils.shipment_attachments.set_attachments_pdf_generator",
+    },
+    "Serial and Batch Bundle": {
+        "validate": "exim.exim.utils.serial_batch_container.set_entry_containers",
+    },
     "Sales Invoice": {
         "before_save": "exim.exim.doc_events.sales_invoice.before_save",
         "validate": "exim.exim.doc_events.sales_invoice.validate",
@@ -218,3 +232,14 @@ doc_events = {
         "validate": "exim.exim.doc_events.igst_calculation.cal_igst"
     },
 }
+
+# Print formats: {{ get_attachment_files(doc) }} -> the shipment's attached files (preview)
+jinja = {
+    "methods": [
+        "exim.exim.utils.shipment_attachments.get_attachment_files",
+        "exim.exim.utils.shipment_attachments.get_attachment_pages",
+    ],
+}
+
+# Print Format with PDF Generator = "Attachments": PDF made of the real attached files
+pdf_generator = ["exim.exim.utils.shipment_attachments.attachments_pdf_generator"]

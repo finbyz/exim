@@ -49,6 +49,8 @@
         "total_qty",
         "total_item_amount",
         "total_item_amount_inr",
+        "sec_container_details",
+        "container_details",
         "sec_charges",
         "charges",
         "sec_charge_summary",
@@ -333,6 +335,17 @@
             "fieldtype": "Currency",
             "label": "Total Item Amount (INR)",
             "read_only": 1
+        },
+        {
+            "fieldname": "sec_container_details",
+            "fieldtype": "Section Break",
+            "label": "Container Details"
+        },
+        {
+            "fieldname": "container_details",
+            "fieldtype": "Table",
+            "label": "Container Details",
+            "options": "Import Shipment Container Details"
         },
         {
             "fieldname": "sec_charges",

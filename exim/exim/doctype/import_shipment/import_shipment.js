@@ -44,6 +44,20 @@ frappe.ui.form.on("Import Shipment", {
 				}
 			};
 		});
+
+		setup_container_details_queries(frm);
+	},
+
+	onload_post_render(frm) {
+		setup_container_details_queries(frm);
+	},
+
+	items_add(frm) {
+		setup_container_details_queries(frm);
+	},
+
+	items_remove(frm) {
+		setup_container_details_queries(frm);
 	},
 
 	onload(frm) {
@@ -58,10 +72,13 @@ frappe.ui.form.on("Import Shipment", {
 	},
 
 	refresh(frm) {
+		setup_required_documents_grid(frm);
+		add_print_attachments_button(frm);
 		set_item_currency_options(frm);
 		update_currency_labels(frm);
 		frm.set_df_property("exchange_rate", "read_only", 1);
 		frm.set_df_property("invoice_value", "read_only", 1);
+		setup_container_details_queries(frm);
 
 		if (frm.doc.docstatus === 0) {
 			frm.add_custom_button(
@@ -290,6 +307,7 @@ frappe.ui.form.on("Import Shipment", {
 	exchange_rate(frm) {
 		frm.trigger("calculate_item_totals");
 		frm.trigger("calculate_commercial_totals");
+		(frm.doc.items || []).forEach((row) => update_passing_rate_per_kg(frm, row.doctype, row.name));
 	},
 
 	insurance(frm) {
@@ -407,11 +425,73 @@ function get_item_weight_per_unit(item_code, callback) {
 	});
 }
 
-function update_item_net_weight(frm, cdt, cdn) {
+const item_uom_factor_cache = {};
+
+function get_item_uom_factors(item_code) {
+	if (!item_code) return Promise.resolve({});
+	if (item_uom_factor_cache[item_code]) return Promise.resolve(item_uom_factor_cache[item_code]);
+	return frappe
+		.xcall("exim.exim.doctype.import_shipment.import_shipment.get_item_uom_factors", { item_code })
+		.then((data) => (item_uom_factor_cache[item_code] = data || {}));
+}
+
+function factor_for(factors, names) {
+	const uom = Object.keys(factors || {}).find((u) => names.includes((u || "").trim().toLowerCase()));
+	return uom ? flt(factors[uom]) : 0;
+}
+
+// Boxes = Qty / factor(UOM); Net Wt (kg) = Boxes x factor(Kg).
+// Item UOM factor = how many of that UOM are in one Box (e.g. Kg = 9, Nos = 12).
+// Same rule as set_boxes_and_net_weight() in import_shipment.py. Resolves false if Item has no Kg factor.
+async function set_boxes_and_net_weight(frm, cdt, cdn) {
+	const row = locals[cdt] && locals[cdt][cdn];
+	if (!row || !row.product || !flt(row.qty)) return false;
+
+	const data = await get_item_uom_factors(row.product);
+	const factors = data.factors || {};
+	const kg_factor = factor_for(factors, ["kg", "kgs"]);
+	const uom_factor = flt(factors[row.uom || data.stock_uom]);
+	if (!kg_factor || !uom_factor) return false;
+
+	const box_uoms = ["box", "boxes", "ctn", "carton"];
+	const stock_units = flt(row.qty) / uom_factor;
+	const box_factor = box_uoms.includes((data.stock_uom || "").toLowerCase())
+		? flt(factors[data.stock_uom])
+		: factor_for(factors, box_uoms);
+
+	await frappe.model.set_value(cdt, cdn, {
+		boxes: stock_units * (box_factor || 1),
+		net_weight: stock_units * kg_factor,
+	});
+	return true;
+}
+
+// Passing Rate per KG = Passing Rate / (Net Wt / Qty); INR uses the shipment exchange rate.
+function update_passing_rate_per_kg(frm, cdt, cdn) {
+	const row = locals[cdt] && locals[cdt][cdn];
+	if (!row || !frappe.meta.has_field(cdt, "passing_rate_per_kg")) return;
+
+	const kg_per_unit = flt(row.qty) ? flt(row.net_weight) / flt(row.qty) : 0;
+	const passing_rate = flt(row.passing_rate);
+	const values = {
+		passing_rate_per_kg: kg_per_unit ? (passing_rate * flt(frm.doc.exchange_rate)) / kg_per_unit : 0,
+	};
+	if (frappe.meta.has_field(cdt, "passing_rate_per_kg_usd")) {
+		values.passing_rate_per_kg_usd = kg_per_unit ? passing_rate / kg_per_unit : 0;
+	}
+	const changed = Object.keys(values).some((k) => flt(row[k]) !== flt(values[k]));
+	if (changed) frappe.model.set_value(cdt, cdn, values);
+}
+
+async function update_item_net_weight(frm, cdt, cdn) {
 	const row = locals[cdt][cdn];
 	if (!row) return;
 
 	const qty = flt(row.qty);
+
+	if (await set_boxes_and_net_weight(frm, cdt, cdn)) {
+		return; // net_weight handler recalculates totals and per-kg rates
+	}
 
 	if (row.product) {
 		get_item_weight_per_unit(row.product, function(weight_per_unit) {
@@ -458,14 +538,15 @@ frappe.ui.form.on("Import Shipment Item", {
 					if (!row.variety && r.message.variety) {
 						values_to_set.variety = r.message.variety;
 					}
-					frappe.model.set_value(cdt, cdn, values_to_set);
-					const wpu = flt(r.message.weight_per_unit);
-					item_weight_cache[row.product] = wpu;
-					if (wpu > 0 && flt(row.qty) > 0) {
-						frappe.model.set_value(cdt, cdn, "net_weight", flt(row.qty) * wpu);
-					}
+					item_weight_cache[row.product] = flt(r.message.weight_per_unit);
+					frappe.model.set_value(cdt, cdn, values_to_set).then(() => {
+						if (flt(row.qty) > 0) update_item_net_weight(frm, cdt, cdn);
+					});
 				}
+				setup_container_details_queries(frm);
 			});
+		} else {
+			setup_container_details_queries(frm);
 		}
 	},
 
@@ -531,8 +612,17 @@ frappe.ui.form.on("Import Shipment Item", {
 		frm.trigger("calculate_item_totals");
 	},
 
-	net_weight(frm) {
+	net_weight(frm, cdt, cdn) {
 		frm.trigger("calculate_item_totals");
+		update_passing_rate_per_kg(frm, cdt, cdn);
+	},
+
+	uom(frm, cdt, cdn) {
+		update_item_net_weight(frm, cdt, cdn);
+	},
+
+	passing_rate(frm, cdt, cdn) {
+		update_passing_rate_per_kg(frm, cdt, cdn);
 	},
 
 	gross_weight(frm) {
@@ -744,6 +834,190 @@ function sync_commercial_details_from_pi(frm, pi_name, show_alert = false) {
 				});
 			}
 		}
+	});
+}
+
+frappe.ui.form.on("Import Shipment Container Details", {
+	form_render(frm, cdt, cdn) {
+		setup_container_details_queries(frm);
+	},
+	container_details_add(frm, cdt, cdn) {
+		setup_container_details_queries(frm);
+		sync_container_summary_from_details(frm);
+	},
+	container_details_remove(frm) {
+		sync_container_summary_from_details(frm);
+	},
+	item_code(frm, cdt, cdn) {
+		let row = locals[cdt] && locals[cdt][cdn];
+		if (!row || !row.item_code) return;
+
+		let valid_items = (frm.doc.items || [])
+			.map((d) => d.product || d.item_code)
+			.filter(Boolean);
+		if (valid_items.length && !valid_items.includes(row.item_code)) {
+			frappe.msgprint(
+				__("Item {0} is not present in the Shipment Items table.", [frappe.bold(row.item_code)])
+			);
+			frappe.model.set_value(cdt, cdn, "item_code", "");
+			frappe.model.set_value(cdt, cdn, "item_name", "");
+			return;
+		}
+
+		frappe.db.get_value("Item", row.item_code, "item_name", (r) => {
+			if (r && r.item_name) {
+				frappe.model.set_value(cdt, cdn, "item_name", r.item_name);
+			}
+		});
+	},
+	container(frm, cdt, cdn) {
+		sync_container_summary_from_details(frm);
+	}
+});
+
+function setup_container_details_queries(frm) {
+	if (!frm.fields_dict.container_details || !frm.fields_dict.container_details.grid) return;
+
+	let container_query = function() {
+		return {
+			filters: {
+				"enable": 1
+			}
+		};
+	};
+
+	let item_query = function(doc, cdt, cdn) {
+		let parent_doc = doc || frm.doc;
+		let items = (parent_doc.items || [])
+			.map((d) => d.product || d.item_code)
+			.filter(Boolean);
+		items = [...new Set(items)];
+
+		if (!items.length) {
+			return {
+				filters: {
+					name: ["in", ["__NONE__"]]
+				}
+			};
+		}
+
+		return {
+			filters: {
+				name: ["in", items]
+			}
+		};
+	};
+
+	frm.set_query("container", "container_details", container_query);
+	frm.set_query("item_code", "container_details", item_query);
+
+	let grid = frm.fields_dict.container_details.grid;
+	if (grid) {
+		grid.get_field("container").get_query = container_query;
+		grid.get_field("item_code").get_query = item_query;
+
+		(grid.grid_rows || []).forEach((row) => {
+			(row.columns_list || []).forEach((col) => {
+				if (col.df && col.df.fieldname === "item_code" && col.field) {
+					col.field.get_query = item_query;
+				}
+				if (col.df && col.df.fieldname === "container" && col.field) {
+					col.field.get_query = container_query;
+				}
+			});
+			if (row.grid_form && row.grid_form.fields_dict) {
+				if (row.grid_form.fields_dict.item_code) {
+					row.grid_form.fields_dict.item_code.get_query = item_query;
+				}
+				if (row.grid_form.fields_dict.container) {
+					row.grid_form.fields_dict.container.get_query = container_query;
+				}
+			}
+		});
+	}
+}
+
+function sync_container_summary_from_details(frm) {
+	let rows = frm.doc.container_details || [];
+	let distinct_containers = [...new Set(rows.map((r) => r.container).filter(Boolean))];
+	if (distinct_containers.length > 0) {
+		frm.set_value("no_of_containers", distinct_containers.length);
+		frm.set_value("container_nos", distinct_containers.join(", "));
+	} else {
+		frm.set_value("no_of_containers", 0);
+		frm.set_value("container_nos", "");
+	}
+}
+
+// Required Documents (shared child table): on Import Shipment the attachment is the
+// "Draft Document" and a "Final Document" column is shown next to it. Other forms keep "Attachment".
+function setup_required_documents_grid(frm) {
+	const field = frm.fields_dict.required_documents;
+	const grid = field && field.grid;
+	if (!grid || grid.__exim_draft_final) return;
+	grid.__exim_draft_final = true;
+
+	const set_prop = (fieldname, prop, value) => {
+		// grid.docfields is this form's copy, so other forms keep their labels
+		(grid.docfields || []).forEach((df) => df.fieldname === fieldname && (df[prop] = value));
+		(grid.grid_rows || []).forEach((row) =>
+			(row.docfields || []).forEach((df) => df.fieldname === fieldname && (df[prop] = value))
+		);
+	};
+
+	set_prop("attachment", "label", __("Draft Document"));
+	if (frappe.meta.has_field("Required Document", "final_document")) {
+		set_prop("final_document", "in_list_view", 1);
+		set_prop("final_document", "columns", 2);
+	}
+	// rebuild the grid header/columns with the new labels
+	grid.visible_columns = [];
+	grid.refresh();
+}
+
+
+frappe.ui.form.on("Required Document", {
+	// expanded row form: rows added after load carry their own field copy
+	form_render(frm, cdt, cdn) {
+		if (frm.doctype !== "Import Shipment") return;
+		const grid_row = frm.fields_dict.required_documents.grid.get_row(cdn);
+		const field = grid_row && grid_row.grid_form && grid_row.grid_form.fields_dict.attachment;
+		if (field && field.df.label !== __("Draft Document")) {
+			field.df.label = __("Draft Document");
+			field.refresh();
+		}
+	},
+});
+
+// One PDF with only the attached files (Draft + Final of each Required Document):
+// PDF pages as they are, each image as a page. Word/other files cannot be converted.
+function add_print_attachments_button(frm) {
+	if (frm.is_new()) return;
+	const urls = [];
+	(frm.doc.required_documents || []).forEach((row) => {
+		[row.attachment, row.final_document].forEach((u) => u && !urls.includes(u) && urls.push(u));
+	});
+	if (!urls.length) return;
+
+	frm.add_custom_button(__("Print Attachments"), () => {
+		const printable = ["pdf", "png", "jpg", "jpeg", "gif", "webp", "bmp", "tif", "tiff"];
+		const ext = (u) => (u.split("?")[0].split(".").pop() || "").toLowerCase();
+		const skipped = urls.filter((u) => !printable.includes(ext(u)));
+		if (skipped.length === urls.length) {
+			frappe.msgprint(__("Only PDF and image attachments can be printed."));
+			return;
+		}
+		if (skipped.length) {
+			frappe.show_alert({
+				message: __("Not included (only PDF and images can be printed): {0}", [
+					skipped.map((u) => u.split("/").pop()).join(", "),
+				]),
+				indicator: "orange",
+			}, 10);
+		}
+		const url = `/api/method/exim.exim.utils.shipment_attachments.download_attachments_pdf?name=${encodeURIComponent(frm.doc.name)}`;
+		const w = window.open(frappe.urllib.get_full_url(url));
+		if (!w) frappe.msgprint(__("Please enable pop-ups"));
 	});
 }
 

@@ -20,12 +20,37 @@ class ImportShipment(Document):
 			self.shipment_no = self.name
 		self.set_currency_and_company_defaults()
 		self.validate_purchase_order_qty()
+		self.validate_container_details_items()
 		self.calculate_week()
 		self.calculate_item_totals()
 		self.calculate_charge_totals()
 		self.calculate_rates()
 		self.sync_commercial_details_from_pi()
 		self.calculate_commercial_totals()
+
+	def validate_container_details_items(self):
+		if not self.get("container_details"):
+			return
+
+		valid_items = {
+			row.get("product") or row.get("item_code")
+			for row in (self.get("items") or [])
+			if (row.get("product") or row.get("item_code"))
+		}
+
+		invalid_rows = []
+		for idx, row in enumerate(self.get("container_details") or [], start=1):
+			item_code = row.get("item_code")
+			if item_code and item_code not in valid_items:
+				row_idx = row.get("idx") or idx
+				invalid_rows.append(
+					_("Row #{0}: Item {1} is not present in Shipment Items table.").format(
+						row_idx, frappe.bold(item_code)
+					)
+				)
+
+		if invalid_rows:
+			frappe.throw("<br>".join(invalid_rows), title=_("Invalid Container Item"))
 
 	def auto_fill_destination_port_charges(self):
 		if not getattr(self, "destination_port", None):
@@ -181,8 +206,11 @@ class ImportShipment(Document):
 						if not item.uom:
 							item.uom = item_data.stock_uom
 
-			# Auto-calculate net_weight if qty was updated via backend or if empty
-			if doc_before_save and item.name and item.product:
+			# Boxes / Net Wt from the Item's UOM factors (factor = units of that UOM in one Box)
+			if set_boxes_and_net_weight(item):
+				pass
+			# Fallback: Item has no Kg factor. Auto-calculate net_weight if qty changed or if empty
+			elif doc_before_save and item.name and item.product:
 				old_item = next((d for d in doc_before_save.get("items", []) if d.name == item.name), None)
 				if old_item and flt(old_item.qty) != flt(item.qty):
 					wpu = flt(frappe.db.get_value("Item", item.product, "weight_per_unit"))
@@ -198,6 +226,7 @@ class ImportShipment(Document):
 			item.amount = flt(item.qty) * flt(item.rate)
 			item.base_rate = flt(item.rate) * rate_multiplier
 			item.base_amount = flt(item.amount) * rate_multiplier
+			set_passing_rate_per_kg(item, rate_multiplier)
 
 			total_boxes += flt(item.boxes)
 			total_net_weight += flt(item.net_weight)
@@ -495,3 +524,72 @@ def make_import_shipment(source_name, target_doc=None, args=None):
 
 	doc.run_method("validate")
 	return doc
+
+
+@frappe.whitelist()
+def get_charges_for_destination_port(destination_port):
+	"""Import charges configured for the destination port (Import Export Charges)."""
+	from exim.exim.utils.port_charges import get_port_charges
+
+	return get_port_charges(destination_port, "Import")
+
+
+BOX_UOMS = ("box", "boxes", "ctn", "carton")
+KG_UOMS = ("kg", "kgs")
+
+
+@frappe.whitelist()
+def get_item_uom_factors(item_code):
+	"""{"stock_uom": .., "factors": {uom: factor}} where factor = units of that UOM in one stock unit (Box)."""
+	if not item_code:
+		return {}
+	frappe.has_permission("Item", "read", item_code, throw=True)
+	return _get_item_uom_factors(item_code)
+
+
+def _get_item_uom_factors(item_code):
+	stock_uom = frappe.get_cached_value("Item", item_code, "stock_uom")
+	rows = frappe.get_all(
+		"UOM Conversion Detail",
+		filters={"parent": item_code, "parenttype": "Item"},
+		fields=["uom", "conversion_factor"],
+	)
+	factors = {r.uom: flt(r.conversion_factor) for r in rows if flt(r.conversion_factor)}
+	if stock_uom:
+		factors.setdefault(stock_uom, 1.0)
+	return {"stock_uom": stock_uom, "factors": factors}
+
+
+def _factor_for(factors, names):
+	return next((f for uom, f in factors.items() if (uom or "").strip().lower() in names), 0)
+
+
+def set_boxes_and_net_weight(item):
+	"""Boxes = Qty / factor(UOM); Net Wt (kg) = Boxes x factor(Kg). Returns False if Item has no Kg factor."""
+	if not (item.product and flt(item.qty)):
+		return False
+
+	data = _get_item_uom_factors(item.product)
+	factors = data.get("factors") or {}
+	kg_factor = _factor_for(factors, KG_UOMS)
+	uom_factor = factors.get(item.uom or data.get("stock_uom"))
+	if not (kg_factor and uom_factor):
+		return False
+
+	stock_units = flt(item.qty) / uom_factor  # in stock UOM (Box)
+	box_factor = factors.get(data.get("stock_uom")) if (data.get("stock_uom") or "").lower() in BOX_UOMS else _factor_for(factors, BOX_UOMS)
+	item.boxes = stock_units * (box_factor or 1)
+	item.net_weight = stock_units * kg_factor
+	return True
+
+
+def set_passing_rate_per_kg(item, exchange_rate):
+	"""Passing Rate per KG = Passing Rate / (Net Wt / Qty), in INR and in the shipment currency (USD)."""
+	if not item.meta.has_field("passing_rate_per_kg"):
+		return
+	kg_per_unit = flt(item.net_weight) / flt(item.qty) if flt(item.qty) else 0
+	passing_rate = flt(item.get("passing_rate"))
+	item.passing_rate_per_kg = (passing_rate * flt(exchange_rate)) / kg_per_unit if kg_per_unit else 0
+	if item.meta.has_field("passing_rate_per_kg_usd"):
+		item.passing_rate_per_kg_usd = passing_rate / kg_per_unit if kg_per_unit else 0
+
