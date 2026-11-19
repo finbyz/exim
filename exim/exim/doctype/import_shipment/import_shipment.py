@@ -593,3 +593,82 @@ def set_passing_rate_per_kg(item, exchange_rate):
 	if item.meta.has_field("passing_rate_per_kg_usd"):
 		item.passing_rate_per_kg_usd = passing_rate / kg_per_unit if kg_per_unit else 0
 
+
+@frappe.whitelist()
+def get_link_documents(shipment):
+	"""Documents linked to an Import Shipment, as [{doctype, names, has_link_field}] for the Link Documents section."""
+	frappe.has_permission("Import Shipment", "read", shipment, throw=True)
+
+	def has_field(doctype, fieldname="import_shipment"):
+		return bool(frappe.db.exists("DocType", doctype)) and frappe.get_meta(doctype).has_field(fieldname)
+
+	def unique(names):
+		return list(dict.fromkeys(n for n in names if n))
+
+	def by_field(doctype):
+		if not has_field(doctype):
+			return []
+		return frappe.get_all(doctype, filters={"import_shipment": shipment}, pluck="name", order_by="creation")
+
+	po = by_field("Purchase Order")
+
+	pi = by_field("Purchase Invoice")
+	if has_field("Purchase Invoice Item"):
+		pi += frappe.get_all(
+			"Purchase Invoice Item",
+			filters={"import_shipment": shipment, "parenttype": "Purchase Invoice"},
+			pluck="parent",
+		)
+	pi += [v for v in frappe.db.get_value("Import Shipment", shipment, ["purchase_invoice", "authorized_purchase_invoice"]) or [] if v]
+	pi = unique(pi)
+
+	pr = []
+	if pi:
+		pr += frappe.get_all(
+			"Purchase Receipt Item", filters={"purchase_invoice": ("in", pi), "parenttype": "Purchase Receipt"}, pluck="parent"
+		)
+		pr += frappe.get_all(
+			"Purchase Invoice Item", filters={"parent": ("in", pi), "purchase_receipt": ("is", "set")}, pluck="purchase_receipt"
+		)
+	if po:
+		pr += frappe.get_all(
+			"Purchase Receipt Item", filters={"purchase_order": ("in", po), "parenttype": "Purchase Receipt"}, pluck="parent"
+		)
+
+	boe = []
+	if pi and frappe.db.exists("DocType", "Bill of Entry Item"):
+		boe = frappe.get_all(
+			"Bill of Entry Item", filters={"purchase_invoice": ("in", pi), "parenttype": "Bill of Entry"}, pluck="parent"
+		)
+
+	pe = []
+	for ref_doctype, names in (("Purchase Invoice", pi), ("Purchase Order", po)):
+		if names:
+			pe += frappe.get_all(
+				"Payment Entry Reference",
+				filters={"reference_doctype": ref_doctype, "reference_name": ("in", names), "parenttype": "Payment Entry"},
+				pluck="parent",
+			)
+
+	linked = [
+		("Purchase Order", po),
+		("Purchase Receipt", unique(pr)),
+		("Unloading Checklist", by_field("Unloading Checklist")),
+		("Purchase Invoice", pi),
+		("Bill of Entry", unique(boe)),
+		("Payment Entry", unique(pe)),
+	]
+	out = []
+	for doctype, names in linked:
+		if not frappe.db.exists("DocType", doctype):
+			continue
+		readable = bool(frappe.has_permission(doctype, "read"))
+		out.append(
+			{
+				"doctype": doctype,
+				"names": unique(names) if readable else [],
+				"can_create": bool(frappe.has_permission(doctype, "create")),
+				"has_link_field": has_field(doctype),
+			}
+		)
+	return out

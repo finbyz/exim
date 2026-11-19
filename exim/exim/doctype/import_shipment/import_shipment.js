@@ -72,6 +72,7 @@ frappe.ui.form.on("Import Shipment", {
 	},
 
 	refresh(frm) {
+		render_link_documents(frm);
 		setup_required_documents_grid(frm);
 		add_print_attachments_button(frm);
 		set_item_currency_options(frm);
@@ -1021,3 +1022,76 @@ function add_print_attachments_button(frm) {
 	});
 }
 
+const LINK_DOCUMENT_COLOURS = {
+	"Purchase Order": ["#6D5BD0", "#EEEBFB"],
+	"Purchase Receipt": ["#EA7A1E", "#FDEEE0"],
+	"Unloading Checklist": ["#7C3AED", "#F1E9FD"],
+	"Purchase Invoice": ["#0891B2", "#E0F4F8"],
+	"Bill of Entry": ["#DC2626", "#FDE8E8"],
+	"Payment Entry": ["#16A34A", "#E3F5E9"],
+};
+
+function render_link_documents(frm) {
+	const field = frm.fields_dict.link_documents_html;
+	if (!field) return;
+	const wrapper = field.$wrapper;
+	if (frm.is_new()) {
+		wrapper.html(`<p class="text-muted">${__("Save the shipment to see its linked documents.")}</p>`);
+		return;
+	}
+
+	frappe.call({
+		method: "exim.exim.doctype.import_shipment.import_shipment.get_link_documents",
+		args: { shipment: frm.doc.name },
+		callback(r) {
+			const esc = frappe.utils.escape_html;
+			const rows = (r.message || []).map((g) => {
+				const [fg, bg] = LINK_DOCUMENT_COLOURS[g.doctype] || ["#475569", "#F1F5F9"];
+				const chips = g.names
+					.map(
+						(n) => `<a class="ld-chip" href="${frappe.utils.get_form_link(g.doctype, n)}">${esc(n)}</a>`
+					)
+					.join("");
+				const count = g.names.length > 1 ? `<a class="ld-count" data-list="${esc(g.doctype)}" title="${__("View all")}">${g.names.length}</a>` : "";
+				const add = g.can_create
+					? `<button class="btn btn-xs btn-default ld-add" data-new="${esc(g.doctype)}" title="${__("Create new {0}", [__(g.doctype)])}">+</button>`
+					: "";
+				return `<div class="ld-row">
+					<span class="ld-icon" style="color:${fg};background:${bg}">${esc(g.doctype.charAt(0))}</span>
+					<a class="ld-label" data-list="${esc(g.doctype)}">${__(g.doctype)}</a>${count}
+					<span class="ld-chips">${chips}</span>${add}
+				</div>`;
+			});
+
+			wrapper.html(`<style>
+				.ld-card{border:1px solid var(--border-color);border-radius:12px;padding:4px 20px;max-width:900px}
+				.ld-row{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--border-color)}
+				.ld-row:last-child{border-bottom:0}
+				.ld-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:600;flex:none}
+				.ld-label{width:170px;font-weight:600;color:var(--text-color);cursor:pointer;flex:none}
+				.ld-count{background:var(--control-bg);border-radius:10px;padding:0 7px;font-size:11px;color:var(--text-muted);margin-left:-6px;cursor:pointer}
+				.ld-chips{display:flex;flex-wrap:wrap;gap:8px;flex:1}
+				.ld-chip{background:#EAF1FE;border:1px solid #C9DAFB;color:#2563EB;border-radius:8px;padding:5px 12px;font-weight:600;font-size:12px}
+				.ld-add{margin-left:auto;flex:none}
+			</style><div class="ld-card">${rows.join("")}</div>`);
+
+			wrapper.find("[data-list]").on("click", function () {
+				const doctype = $(this).data("list");
+				const group = (r.message || []).find((g) => g.doctype === doctype);
+				if (!group || !group.names.length) {
+					frappe.set_route("List", doctype);
+				} else if (group.has_link_field) {
+					frappe.set_route("List", doctype, { import_shipment: frm.doc.name });
+				} else {
+					frappe.set_route("List", doctype, { name: ["in", group.names] });
+				}
+			});
+
+			wrapper.find("[data-new]").on("click", function () {
+				const doctype = $(this).data("new");
+				const group = (r.message || []).find((g) => g.doctype === doctype) || {};
+				frappe.new_doc(doctype, group.has_link_field ? { import_shipment: frm.doc.name } : {});
+			});
+		},
+	});
+}

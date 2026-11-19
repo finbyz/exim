@@ -94,7 +94,10 @@
         "transport_bill_no",
         "col_billing_break",
         "cost_sheet_recd_date",
-        "cost_sheet_revert_date"
+        "cost_sheet_revert_date",
+        "tab_connections",
+        "link_documents_section",
+        "link_documents_html"
     ],
     "fields": [
         {
@@ -599,6 +602,22 @@
             "fieldtype": "Table",
             "label": "Required Documents",
             "options": "Required Document"
+        },
+        {
+            "fieldname": "tab_connections",
+            "fieldtype": "Tab Break",
+            "label": "Connections"
+        },
+        {
+            "fieldname": "link_documents_section",
+            "fieldtype": "Section Break",
+            "label": "Link Documents",
+            "collapsible": 0
+        },
+        {
+            "fieldname": "link_documents_html",
+            "fieldtype": "HTML",
+            "label": "Link Documents"
         }
     ],
     "grid_page_length": 50,
