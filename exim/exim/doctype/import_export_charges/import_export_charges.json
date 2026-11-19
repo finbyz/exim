@@ -10,9 +10,7 @@
   "type",
   "port",
   "charges_section",
-  "charges",
-  "supplier_quotation_charges_section",
-  "supplier_quotation_charges"
+  "charges"
  ],
  "fields": [
   {
@@ -42,18 +40,6 @@
    "fieldname": "charges",
    "fieldtype": "Table",
    "label": "Charges",
-   "options": "Import Export Charge Item"
-  },
-  {
-   "fieldname": "supplier_quotation_charges_section",
-   "fieldtype": "Section Break",
-   "label": "Supplier Quotation Charges",
-   "description": "Fetched into Supplier Quotation when this Port is selected. Stock and non-stock items allowed."
-  },
-  {
-   "fieldname": "supplier_quotation_charges",
-   "fieldtype": "Table",
-   "label": "Supplier Quotation Charges",
    "options": "Import Export Charge Item"
   }
  ],

@@ -5,7 +5,8 @@
 
 Same as ERPNext's Supplier Quotation Comparison, plus the Tentative Amount from
 each quotation's Import Export Charges table. A quotation's charges are split
-across its items in proportion to each item's value in company currency, and
+across its items in proportion to each item's rate in company currency (or its qty, per the
+"Split Charges" filter), and
 the cheapest quote per item is decided on the landed price per stock unit.
 """
 
@@ -39,12 +40,78 @@ def execute(filters=None):
 	allocate_charges(supplier_quotation_data)
 
 	data, chart_data = prepare_data(supplier_quotation_data, filters)
+	if not chart_data:
+		chart_data = get_supplier_chart(supplier_quotation_data, filters)
 
-	return columns, data, get_message(), chart_data
+	return columns, data, get_message(), chart_data, get_report_summary(supplier_quotation_data, filters)
+
+
+def get_report_summary(rows, filters):
+	"""Summary cards: counts, price, charges and landed amount (company currency)."""
+	currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
+	key = get_splits(filters)[0]
+
+	price = sum(flt(d.base_amount) for d in rows)
+	charges = sum(flt(d.get(f"{key}_charges")) for d in rows)
+
+	def money(label, value, indicator):
+		return {"value": value, "label": label, "datatype": "Currency", "currency": currency, "indicator": indicator}
+
+	def count(label, value, indicator):
+		return {"value": value, "label": label, "datatype": "Int", "indicator": indicator}
+
+	return [
+		count(_("Quotations"), len({d.parent for d in rows}), "Blue"),
+		count(_("Suppliers"), len({d.supplier_name for d in rows}), "Purple"),
+		count(_("Items"), len({d.item_code for d in rows}), "Cyan"),
+		money(_("Total Price"), price, "Blue"),
+		money(_("Total Charges"), charges, "Orange"),
+		money(_("Amount after Charges"), price + charges, "Green"),
+	]
+
+
+def get_supplier_chart(rows, filters):
+	"""Stacked bar per supplier: price and charges (company currency), largest 12 suppliers."""
+	if not rows:
+		return None
+
+	key = get_splits(filters)[0]
+	price, charges = defaultdict(float), defaultdict(float)
+	for d in rows:
+		price[d.supplier_name] += flt(d.base_amount)
+		charges[d.supplier_name] += flt(d.get(f"{key}_charges"))
+
+	suppliers = sorted(price, key=lambda name: price[name] + charges[name], reverse=True)[:12]
+	return {
+		"data": {
+			"labels": suppliers,
+			"datasets": [
+				{"name": _("Price"), "values": [flt(price[name], 2) for name in suppliers]},
+				{"name": _("Charges"), "values": [flt(charges[name], 2) for name in suppliers]},
+			],
+		},
+		"type": "bar",
+		"barOptions": {"stacked": 1},
+		"colors": ["#2563EB", "#F59E0B"],
+		"fieldtype": "Currency",
+	}
+
+
+SPLITS = {"rate": "Rate Wise", "qty": "Qty Wise"}
+
+
+def get_splits(filters):
+	"""Selected charge splits, in display order. Rate Wise when nothing is ticked."""
+	selected = [key for key in SPLITS if cint(filters.get(f"{key}_wise"))]
+	return selected or ["rate"]
 
 
 def allocate_charges(rows):
-	"""Set `port`, `charges_amount` on each quotation item row (company currency)."""
+	"""Set `port` and, for both splits, `<key>_ratio` (%) and `<key>_charges` (company currency).
+
+	Rate wise shares a quotation's charges by each item's rate in company currency, qty wise by each
+	item's quantity.
+	"""
 	quotations = list({d.parent for d in rows})
 	if not quotations:
 		return
@@ -70,26 +137,25 @@ def allocate_charges(rows):
 	for d in frappe.get_all(
 		"Supplier Quotation Item",
 		filters={"parent": ("in", quotations), "parenttype": "Supplier Quotation"},
-		fields=["parent", "item_code", "base_amount", "qty"],
+		fields=["parent", "item_code", "base_rate", "qty"],
 	):
 		items_by_quotation[d.parent].append(d)
 
 	for row in rows:
 		row.port = ports.get(row.parent)
 		total_charges = flt(charges.get(row.parent))
-		row.charges_amount = 0.0
-		if not total_charges:
-			continue
-
 		siblings = items_by_quotation.get(row.parent) or []
-		total_base = sum(flt(d.base_amount) for d in siblings)
-		if total_base:
-			share = flt(row.base_amount) / total_base
-		else:
-			total_qty = sum(flt(d.qty) for d in siblings)
-			share = flt(row.qty) / total_qty if total_qty else 1.0 / (len(siblings) or 1)
+		total_rate = sum(flt(d.base_rate) for d in siblings)
+		total_qty = sum(flt(d.qty) for d in siblings)
+		even = 1.0 / (len(siblings) or 1)
 
-		row.charges_amount = total_charges * share
+		shares = {
+			"rate": flt(row.base_rate) / total_rate if total_rate else even,
+			"qty": flt(row.qty) / total_qty if total_qty else even,
+		}
+		for key, share in shares.items():
+			row[f"{key}_ratio"] = share * 100 if total_charges else 0.0
+			row[f"{key}_charges"] = total_charges * share
 
 
 def prepare_data(supplier_quotation_data, filters):
@@ -97,6 +163,7 @@ def prepare_data(supplier_quotation_data, filters):
 	group_wise_map = defaultdict(list)
 	supplier_qty_price_map = {}
 	rows_by_item = defaultdict(list)
+	splits = get_splits(filters)
 
 	group_by_field = (
 		"supplier_name" if filters.get("categorize_by") == "Categorize by Supplier" else "item_code"
@@ -108,8 +175,6 @@ def prepare_data(supplier_quotation_data, filters):
 		group = data.get(group_by_field)
 
 		base_amount = flt(data.get("base_amount"), float_precision)
-		charges_amount = flt(data.get("charges_amount"), float_precision)
-		landed_amount = flt(base_amount + charges_amount, float_precision)
 
 		row = {
 			"item_code": "" if group_by_field == "item_code" else data.get("item_code"),
@@ -125,15 +190,26 @@ def prepare_data(supplier_quotation_data, filters):
 			"base_amount": base_amount,
 			"base_rate": flt(data.get("base_rate"), float_precision),
 			"port": data.get("port"),
-			"charges_amount": charges_amount,
-			"landed_amount": landed_amount,
 			"request_for_quotation": data.get("request_for_quotation"),
 			"valid_till": data.get("valid_till"),
 			"lead_time_days": data.get("lead_time_days"),
 		}
 		row["price_per_unit"] = get_price_per_stock_unit(row["price"], data.get("rate"), data)
 		row["base_price_per_unit"] = get_price_per_stock_unit(row["base_amount"], row["base_rate"], data)
-		row["landed_price_per_unit"] = get_landed_price_per_unit(landed_amount, row["base_rate"], charges_amount, data)
+
+		for key in splits:
+			charges_amount = flt(data.get(f"{key}_charges"), float_precision)
+			landed_amount = flt(base_amount + charges_amount, float_precision)
+			row[f"{key}_ratio"] = flt(data.get(f"{key}_ratio"), float_precision)
+			row[f"{key}_charges"] = charges_amount
+			row[f"{key}_landed_amount"] = landed_amount
+			row[f"{key}_landed_price_per_unit"] = get_landed_price_per_unit(
+				landed_amount, row["base_rate"], charges_amount, data
+			)
+
+		# the chart and the price per box follow the first selected split
+		landed_amount = row[f"{splits[0]}_landed_amount"]
+		row["price_per_box"] = flt(landed_amount / flt(data.get("qty")), float_precision) if flt(data.get("qty")) else 0
 
 		group_wise_map[group].append(row)
 		rows_by_item[data.get("item_code")].append(row)
@@ -152,7 +228,7 @@ def prepare_data(supplier_quotation_data, filters):
 	qty_list = list(set(qty_list))
 
 	if group_by_field == "item_code" or filters.get("item_code"):
-		flag_cheapest_quotes(rows_by_item)
+		flag_cheapest_quotes(rows_by_item, splits)
 
 	for group in groups:
 		group_entries = group_wise_map[group]
@@ -173,20 +249,29 @@ def get_landed_price_per_unit(landed_amount, base_rate, charges_amount, data):
 	return per_uom / (flt(data.get("conversion_factor")) or 1)
 
 
-def flag_cheapest_quotes(rows_by_item):
+def flag_cheapest_quotes(rows_by_item, splits):
 	for rows in rows_by_item.values():
-		min_price = min(row["landed_price_per_unit"] for row in rows)
-		for row in rows:
-			if row["landed_price_per_unit"] == min_price:
-				row["min"] = 1
+		for key in splits:
+			field = f"{key}_landed_price_per_unit"
+			min_price = min(row[field] for row in rows)
+			for row in rows:
+				if row[field] == min_price:
+					row[f"min_{key}"] = 1
 
 
 def get_columns(filters):
 	currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
-	# "price" (amount in quotation currency) is not needed here
-	columns = [c for c in get_base_columns(filters) if c["fieldname"] != "price"]
+	# "price" (amount in quotation currency) and "base_amount" (Price in company currency) are not shown
+	columns = [c for c in get_base_columns(filters) if c["fieldname"] not in ("price", "base_amount")]
 
 	charge_columns = [
+		{
+			"fieldname": "price_per_box",
+			"label": _("Price per Box ({0})").format(currency),
+			"fieldtype": "Currency",
+			"options": "company_currency",
+			"width": 150,
+		},
 		{
 			"fieldname": "port",
 			"label": _("Port"),
@@ -194,28 +279,38 @@ def get_columns(filters):
 			"options": "Port Details",
 			"width": 110,
 		},
-		{
-			"fieldname": "charges_amount",
-			"label": _("Tentative Charges ({0})").format(currency),
-			"fieldtype": "Currency",
-			"options": "company_currency",
-			"width": 160,
-		},
-		{
-			"fieldname": "landed_amount",
-			"label": _("Amount after Charges ({0})").format(currency),
-			"fieldtype": "Currency",
-			"options": "company_currency",
-			"width": 180,
-		},
-		{
-			"fieldname": "landed_price_per_unit",
-			"label": _("Landed Price per Unit ({0})").format(currency),
-			"fieldtype": "Currency",
-			"options": "company_currency",
-			"width": 180,
-		},
 	]
+
+	for key in get_splits(filters):
+		charge_columns += [
+			{
+				"fieldname": f"{key}_ratio",
+				"label": _("Charge Share (%)"),
+				"fieldtype": "Percent",
+				"width": 150,
+			},
+			{
+				"fieldname": f"{key}_charges",
+				"label": _("Landed Cost Per Box"),
+				"fieldtype": "Currency",
+				"options": "company_currency",
+				"width": 180,
+			},
+			{
+				"fieldname": f"{key}_landed_amount",
+				"label": _("Amount after Charges ({0})").format(currency),
+				"fieldtype": "Currency",
+				"options": "company_currency",
+				"width": 200,
+			},
+			{
+				"fieldname": f"{key}_landed_price_per_unit",
+				"label": _("Landed Price per Unit ({0})").format(currency),
+				"fieldtype": "Currency",
+				"options": "company_currency",
+				"width": 200,
+			},
+		]
 
 	insert_at = next(
 		(i + 1 for i, c in enumerate(columns) if c["fieldname"] == "base_rate"), len(columns)

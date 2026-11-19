@@ -98,6 +98,36 @@ frappe.query_reports["Supplier Quotation Comparison Exim"] = {
 			default: "Submitted",
 		},
 		{
+			fieldname: "rate_wise",
+			on_change: () => {
+				// only one split at a time: ticking this one clears the other
+				if (frappe.query_report.get_filter_value("rate_wise")) {
+					frappe.query_report.set_filter_value("qty_wise", 0);
+				} else if (!frappe.query_report.get_filter_value("qty_wise")) {
+					frappe.query_report.set_filter_value("qty_wise", 1);
+				}
+				frappe.query_report.refresh();
+			},
+			label: __("Rate Wise Charges"),
+			fieldtype: "Check",
+			default: 1,
+		},
+		{
+			fieldname: "qty_wise",
+			on_change: () => {
+				// only one split at a time: ticking this one clears the other
+				if (frappe.query_report.get_filter_value("qty_wise")) {
+					frappe.query_report.set_filter_value("rate_wise", 0);
+				} else if (!frappe.query_report.get_filter_value("rate_wise")) {
+					frappe.query_report.set_filter_value("rate_wise", 1);
+				}
+				frappe.query_report.refresh();
+			},
+			label: __("Qty Wise Charges"),
+			fieldtype: "Check",
+			default: 0,
+		},
+		{
 			fieldtype: "Check",
 			label: __("Include Expired"),
 			fieldname: "include_expired",
@@ -116,14 +146,40 @@ frappe.query_reports["Supplier Quotation Comparison Exim"] = {
 			}
 		}
 
+		// column colours: price blue, charges amber, landed amounts green
+		const colours = {
+			base_rate: "#2563EB",
+			price_per_box: "#2563EB",
+			rate_ratio: "#B45309",
+			qty_ratio: "#B45309",
+			rate_charges: "#B45309",
+			qty_charges: "#B45309",
+			rate_landed_amount: "#15803D",
+			qty_landed_amount: "#15803D",
+		};
+		if (colours[column.fieldname] && data[column.fieldname]) {
+			value = `<span style="color:${colours[column.fieldname]}; font-weight:500">${value}</span>`;
+		}
+
 		// cheapest quote per item, decided on landed price (price + tentative charges)
-		if (column.fieldname === "landed_price_per_unit" && data.landed_price_per_unit && data.min === 1) {
+		const split = ["rate", "qty"].find((key) => column.fieldname === `${key}_landed_price_per_unit`);
+		if (split && data[column.fieldname] && data[`min_${split}`] === 1) {
 			value = `<div style="color:green; font-weight:600">${value}</div>`;
 		}
 		return value;
 	},
 
 	onload: (report) => {
+		// keep all summary cards in a single row
+		if (!document.getElementById("sqc-exim-style")) {
+			$("<style id='sqc-exim-style'>")
+				.text(
+					".report-summary{flex-wrap:nowrap;gap:8px;overflow-x:auto;justify-content:space-between;border-bottom:0}" +
+						".report-summary .summary-item{flex:1 1 0;min-width:110px;max-width:none;margin:0;padding:0 8px}"
+				)
+				.appendTo(document.head);
+		}
+
 		// Create a button for setting the default supplier
 		report.page.add_inner_button(
 			__("Select Default Supplier"),
