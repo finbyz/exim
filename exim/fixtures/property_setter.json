@@ -1,6 +1,38 @@
 [
  {
   "default_value": null,
+  "doc_type": "Sales Invoice Item",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "meis_rate",
+  "is_system_generated": 0,
+  "modified": "2026-06-08 10:58:47.451650",
+  "module": "Exim",
+  "name": "Sales Invoice Item-meis_rate-fetch_if_empty",
+  "property": "fetch_if_empty",
+  "property_type": "Check",
+  "row_name": null,
+  "value": "1"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Sales Invoice Item",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocField",
+  "field_name": "duty_drawback_rate",
+  "is_system_generated": 0,
+  "modified": "2026-06-08 10:58:35.254950",
+  "module": "Exim",
+  "name": "Sales Invoice Item-duty_drawback_rate-fetch_if_empty",
+  "property": "fetch_if_empty",
+  "property_type": "Check",
+  "row_name": null,
+  "value": "0"
+ },
+ {
+  "default_value": null,
   "doc_type": "Payment Term",
   "docstatus": 0,
   "doctype": "Property Setter",
@@ -48,17 +80,19 @@
   "value": "1"
  },
  {
-  "doctype": "Property Setter",
-  "name": "Print Format-pdf_generator-options",
+  "default_value": null,
   "doc_type": "Print Format",
+  "docstatus": 0,
+  "doctype": "Property Setter",
   "doctype_or_field": "DocField",
   "field_name": "pdf_generator",
+  "is_system_generated": 0,
+  "modified": "2026-11-19 13:00:00",
+  "module": "Exim",
+  "name": "Print Format-pdf_generator-options",
   "property": "options",
   "property_type": "Text",
-  "value": "wkhtmltopdf\nchrome\nAttachments",
-  "module": "Exim",
-  "is_system_generated": 0,
-  "docstatus": 0,
-  "modified": "2026-11-19 13:00:00"
+  "row_name": null,
+  "value": "wkhtmltopdf\nchrome\nAttachments"
  }
 ]
