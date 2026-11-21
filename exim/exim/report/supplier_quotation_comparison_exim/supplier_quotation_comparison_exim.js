@@ -98,17 +98,17 @@ frappe.query_reports["Supplier Quotation Comparison Exim"] = {
 			default: "Submitted",
 		},
 		{
-			fieldname: "rate_wise",
+			fieldname: "amount_wise",
 			on_change: () => {
 				// only one split at a time: ticking this one clears the other
-				if (frappe.query_report.get_filter_value("rate_wise")) {
+				if (frappe.query_report.get_filter_value("amount_wise")) {
 					frappe.query_report.set_filter_value("qty_wise", 0);
 				} else if (!frappe.query_report.get_filter_value("qty_wise")) {
 					frappe.query_report.set_filter_value("qty_wise", 1);
 				}
 				frappe.query_report.refresh();
 			},
-			label: __("Rate Wise Charges"),
+			label: __("Amount Wise Charges"),
 			fieldtype: "Check",
 			default: 1,
 		},
@@ -117,9 +117,9 @@ frappe.query_reports["Supplier Quotation Comparison Exim"] = {
 			on_change: () => {
 				// only one split at a time: ticking this one clears the other
 				if (frappe.query_report.get_filter_value("qty_wise")) {
-					frappe.query_report.set_filter_value("rate_wise", 0);
-				} else if (!frappe.query_report.get_filter_value("rate_wise")) {
-					frappe.query_report.set_filter_value("rate_wise", 1);
+					frappe.query_report.set_filter_value("amount_wise", 0);
+				} else if (!frappe.query_report.get_filter_value("amount_wise")) {
+					frappe.query_report.set_filter_value("amount_wise", 1);
 				}
 				frappe.query_report.refresh();
 			},
@@ -150,11 +150,11 @@ frappe.query_reports["Supplier Quotation Comparison Exim"] = {
 		const colours = {
 			base_rate: "#2563EB",
 			price_per_box: "#2563EB",
-			rate_ratio: "#B45309",
+			amount_ratio: "#B45309",
 			qty_ratio: "#B45309",
-			rate_charges: "#B45309",
+			amount_charges: "#B45309",
 			qty_charges: "#B45309",
-			rate_landed_amount: "#15803D",
+			amount_landed_amount: "#15803D",
 			qty_landed_amount: "#15803D",
 		};
 		if (colours[column.fieldname] && data[column.fieldname]) {
@@ -162,7 +162,9 @@ frappe.query_reports["Supplier Quotation Comparison Exim"] = {
 		}
 
 		// cheapest quote per item, decided on landed price (price + tentative charges)
-		const split = ["rate", "qty"].find((key) => column.fieldname === `${key}_landed_price_per_unit`);
+		const split = ["amount", "qty"].find((key) =>
+			[`${key}_landed_price_per_unit`, `${key}_landed_price_per_unit_foreign`].includes(column.fieldname)
+		);
 		if (split && data[column.fieldname] && data[`min_${split}`] === 1) {
 			value = `<div style="color:green; font-weight:600">${value}</div>`;
 		}

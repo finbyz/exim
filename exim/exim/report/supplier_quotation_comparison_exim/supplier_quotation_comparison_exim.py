@@ -5,8 +5,8 @@
 
 Same as ERPNext's Supplier Quotation Comparison, plus the Tentative Amount from
 each quotation's Import Export Charges table. A quotation's charges are split
-across its items in proportion to each item's rate in company currency (or its qty, per the
-"Split Charges" filter), and
+across its items in proportion to each item's amount in company currency (or its qty, per the
+"Split Charges" filter), the same "By Amount" / "By Qty" split used on Jasma, and
 the cheapest quote per item is decided on the landed price per stock unit.
 """
 
@@ -15,6 +15,8 @@ from collections import defaultdict
 import frappe
 from frappe import _
 from frappe.utils import cint, flt
+
+from erpnext.setup.utils import get_exchange_rate
 
 from erpnext.buying.report.supplier_quotation_comparison.supplier_quotation_comparison import (
 	get_columns as get_base_columns,
@@ -27,6 +29,8 @@ from erpnext.buying.report.supplier_quotation_comparison.supplier_quotation_comp
 
 CHARGE_DOCTYPE = "Supplier Quotation Import Export Charge"
 CHARGE_FIELD = "port_charges"
+# extra landed cost column shown in this currency
+LANDED_FOREIGN_CURRENCY = "USD"
 
 
 def execute(filters=None):
@@ -97,20 +101,20 @@ def get_supplier_chart(rows, filters):
 	}
 
 
-SPLITS = {"rate": "Rate Wise", "qty": "Qty Wise"}
+SPLITS = {"amount": "Amount Wise", "qty": "Qty Wise"}
 
 
 def get_splits(filters):
-	"""Selected charge splits, in display order. Rate Wise when nothing is ticked."""
+	"""Selected charge splits, in display order. Amount Wise when nothing is ticked."""
 	selected = [key for key in SPLITS if cint(filters.get(f"{key}_wise"))]
-	return selected or ["rate"]
+	return selected or ["amount"]
 
 
 def allocate_charges(rows):
 	"""Set `port` and, for both splits, `<key>_ratio` (%) and `<key>_charges` (company currency).
 
-	Rate wise shares a quotation's charges by each item's rate in company currency, qty wise by each
-	item's quantity.
+	Amount wise shares a quotation's charges by each item's amount in company currency, qty wise by
+	each item's quantity.
 	"""
 	quotations = list({d.parent for d in rows})
 	if not quotations:
@@ -125,11 +129,14 @@ def allocate_charges(rows):
 			as_list=True,
 		)
 	)
-	ports = dict(
-		frappe.get_all(
-			"Supplier Quotation", filters={"name": ("in", quotations)}, fields=["name", "port"], as_list=True
+	quotation_details = {
+		d.name: d
+		for d in frappe.get_all(
+			"Supplier Quotation",
+			filters={"name": ("in", quotations)},
+			fields=["name", "port", "currency", "conversion_rate", "transaction_date"],
 		)
-	)
+	}
 
 	# Split basis covers every item of the quotation, not only the rows matching the
 	# report filters, so an item's share does not change when filtering by item.
@@ -137,20 +144,23 @@ def allocate_charges(rows):
 	for d in frappe.get_all(
 		"Supplier Quotation Item",
 		filters={"parent": ("in", quotations), "parenttype": "Supplier Quotation"},
-		fields=["parent", "item_code", "base_rate", "qty"],
+		fields=["parent", "item_code", "base_amount", "qty"],
 	):
 		items_by_quotation[d.parent].append(d)
 
 	for row in rows:
-		row.port = ports.get(row.parent)
+		details = quotation_details.get(row.parent) or frappe._dict()
+		row.port = details.port
+		row.quotation_conversion_rate = details.conversion_rate
+		row.transaction_date = details.transaction_date
 		total_charges = flt(charges.get(row.parent))
 		siblings = items_by_quotation.get(row.parent) or []
-		total_rate = sum(flt(d.base_rate) for d in siblings)
+		total_amount = sum(flt(d.base_amount) for d in siblings)
 		total_qty = sum(flt(d.qty) for d in siblings)
 		even = 1.0 / (len(siblings) or 1)
 
 		shares = {
-			"rate": flt(row.base_rate) / total_rate if total_rate else even,
+			"amount": flt(row.base_amount) / total_amount if total_amount else even,
 			"qty": flt(row.qty) / total_qty if total_qty else even,
 		}
 		for key, share in shares.items():
@@ -170,6 +180,7 @@ def prepare_data(supplier_quotation_data, filters):
 	)
 	float_precision = cint(frappe.db.get_default("float_precision")) or 2
 	company_currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
+	exchange_rates = {}
 
 	for data in supplier_quotation_data:
 		group = data.get(group_by_field)
@@ -186,6 +197,7 @@ def prepare_data(supplier_quotation_data, filters):
 			"price_list_currency": data.get("price_list_currency"),
 			"currency": data.get("currency"),
 			"company_currency": company_currency,
+			"landed_foreign_currency": LANDED_FOREIGN_CURRENCY,
 			"stock_uom": data.get("stock_uom"),
 			"base_amount": base_amount,
 			"base_rate": flt(data.get("base_rate"), float_precision),
@@ -205,6 +217,11 @@ def prepare_data(supplier_quotation_data, filters):
 			row[f"{key}_landed_amount"] = landed_amount
 			row[f"{key}_landed_price_per_unit"] = get_landed_price_per_unit(
 				landed_amount, row["base_rate"], charges_amount, data
+			)
+			row[f"{key}_landed_price_per_unit_foreign"] = flt(
+				row[f"{key}_landed_price_per_unit"]
+				/ get_foreign_exchange_rate(data, company_currency, exchange_rates),
+				float_precision,
 			)
 
 		# the chart and the price per box follow the first selected split
@@ -249,6 +266,23 @@ def get_landed_price_per_unit(landed_amount, base_rate, charges_amount, data):
 	return per_uom / (flt(data.get("conversion_factor")) or 1)
 
 
+def get_foreign_exchange_rate(data, company_currency, cache):
+	"""Company-currency units per 1 LANDED_FOREIGN_CURRENCY (USD).
+
+	Uses the quotation's own conversion rate when it is in USD, else the exchange rate
+	on the quotation date.
+	"""
+	if company_currency == LANDED_FOREIGN_CURRENCY:
+		return 1.0
+	if data.get("currency") == LANDED_FOREIGN_CURRENCY and flt(data.get("quotation_conversion_rate")):
+		return flt(data.get("quotation_conversion_rate"))
+
+	date = data.get("transaction_date")
+	if date not in cache:
+		cache[date] = flt(get_exchange_rate(LANDED_FOREIGN_CURRENCY, company_currency, date)) or 1.0
+	return cache[date]
+
+
 def flag_cheapest_quotes(rows_by_item, splits):
 	for rows in rows_by_item.values():
 		for key in splits:
@@ -260,57 +294,78 @@ def flag_cheapest_quotes(rows_by_item, splits):
 
 
 def get_columns(filters):
+	"""Column order: Price per Unit, Price Per Unit (INR), Landed Price per Unit (INR),
+	Landed Cost Per Unit (USD), Charge Share (%), Price per Box, Landed Cost Per Box,
+	Amount after Charges, Port, then the rest of the base columns.
+	"""
 	currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
-	# "price" (amount in quotation currency) and "base_amount" (Price in company currency) are not shown
-	columns = [c for c in get_base_columns(filters) if c["fieldname"] not in ("price", "base_amount")]
+	# not shown: "price" (amount in quotation currency), "base_amount" (Price in company currency),
+	# "stock_uom" and "currency"
+	hidden = ("price", "base_amount", "stock_uom", "currency")
+	columns = [c for c in get_base_columns(filters) if c["fieldname"] not in hidden]
 
-	charge_columns = [
+	charge_columns = []
+	for key in get_splits(filters):
+		charge_columns += [
+			{
+				"fieldname": f"{key}_landed_price_per_unit",
+				"label": _("Landed Price per Unit ({0})").format(currency),
+				"fieldtype": "Currency",
+				"options": "company_currency",
+				"width": 180,
+			},
+			{
+				"fieldname": f"{key}_landed_price_per_unit_foreign",
+				"label": _("Landed Cost Per Unit ({0})").format(LANDED_FOREIGN_CURRENCY),
+				"fieldtype": "Currency",
+				"options": "landed_foreign_currency",
+				"width": 180,
+			},
+			{
+				"fieldname": f"{key}_ratio",
+				"label": _("Charge Share (%)"),
+				"fieldtype": "Percent",
+				"width": 130,
+			},
+		]
+
+	charge_columns.append(
 		{
 			"fieldname": "price_per_box",
 			"label": _("Price per Box ({0})").format(currency),
 			"fieldtype": "Currency",
 			"options": "company_currency",
 			"width": 150,
-		},
-		{
-			"fieldname": "port",
-			"label": _("Port"),
-			"fieldtype": "Link",
-			"options": "Port Details",
-			"width": 110,
-		},
-	]
+		}
+	)
 
 	for key in get_splits(filters):
 		charge_columns += [
-			{
-				"fieldname": f"{key}_ratio",
-				"label": _("Charge Share (%)"),
-				"fieldtype": "Percent",
-				"width": 150,
-			},
 			{
 				"fieldname": f"{key}_charges",
 				"label": _("Landed Cost Per Box"),
 				"fieldtype": "Currency",
 				"options": "company_currency",
-				"width": 180,
+				"width": 160,
 			},
 			{
 				"fieldname": f"{key}_landed_amount",
 				"label": _("Amount after Charges ({0})").format(currency),
 				"fieldtype": "Currency",
 				"options": "company_currency",
-				"width": 200,
-			},
-			{
-				"fieldname": f"{key}_landed_price_per_unit",
-				"label": _("Landed Price per Unit ({0})").format(currency),
-				"fieldtype": "Currency",
-				"options": "company_currency",
-				"width": 200,
+				"width": 190,
 			},
 		]
+
+	charge_columns.append(
+		{
+			"fieldname": "port",
+			"label": _("Port"),
+			"fieldtype": "Link",
+			"options": "Port Details",
+			"width": 110,
+		}
+	)
 
 	insert_at = next(
 		(i + 1 for i, c in enumerate(columns) if c["fieldname"] == "base_rate"), len(columns)
