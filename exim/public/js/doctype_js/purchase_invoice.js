@@ -83,36 +83,20 @@ frappe.ui.form.on("Purchase Invoice", {
 
 	onload(frm) {
 		if (frm.doc.supplier_address || frm.doc.shipping_address) {
-			frappe.db.get_value(
-				"Address",
-				frm.doc.supplier_address,
-				"country",
-				(r) => {
-					frappe.db.get_value(
-						"Address",
-						frm.doc.shipping_address,
-						"country",
-						(d) => {
-							if (
-								r.country === "India" ||
-								d.country === "India"
-							) {
-								frm.set_df_property(
-									"shipping_details",
-									"hidden",
-									1
-								);
-							} else {
-								frm.set_df_property(
-									"shipping_details",
-									"hidden",
-									0
-								);
-							}
-						}
-					);
-				}
-			);
+			// One address can be empty: get_value then returns nothing and
+			// r.country / d.country threw "Cannot read properties of undefined".
+			const get_country = (address) =>
+				address
+					? frappe.db.get_value("Address", address, "country").then((res) => res?.message?.country)
+					: Promise.resolve(null);
+
+			Promise.all([
+				get_country(frm.doc.supplier_address),
+				get_country(frm.doc.shipping_address),
+			]).then(([supplier_country, shipping_country]) => {
+				const is_india = supplier_country === "India" || shipping_country === "India";
+				frm.set_df_property("shipping_details", "hidden", is_india ? 1 : 0);
+			});
 		}
 	},
 
@@ -221,7 +205,9 @@ frappe.ui.form.on("Purchase Invoice Item", {
 });
 
 function sync_import_shipment_from_po(frm) {
-	if (frm.doc.import_shipment) return;
+	// import_shipment is "Allow on Submit", so this also works on submitted invoices (as before).
+	// Only skip cancelled invoices, which cannot be updated.
+	if (frm.doc.import_shipment || frm.doc.docstatus === 2) return;
 
 	let po_name = null;
 	(frm.doc.items || []).forEach(row => {
