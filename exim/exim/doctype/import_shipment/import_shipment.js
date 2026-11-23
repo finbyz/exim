@@ -976,28 +976,47 @@ function sync_container_summary_from_details(frm) {
 
 // Required Documents (shared child table): on Import Shipment the attachment is the
 // "Draft Document" and a "Final Document" column is shown next to it. Other forms keep "Attachment".
+// Runs on every refresh: the grid rebuilds its columns from a docfield copy keyed by the
+// parent docname (frappe.meta.get_docfields), so a new copy with the standard "Attachment"
+// label appears after the first save (new-... -> real name) or when another shipment is
+// opened in the same form. A one-time flag on the grid missed those, which was the glitch.
 function setup_required_documents_grid(frm) {
 	const field = frm.fields_dict.required_documents;
 	const grid = field && field.grid;
-	if (!grid || grid.__exim_draft_final) return;
-	grid.__exim_draft_final = true;
+	if (!grid) return;
 
-	const set_prop = (fieldname, prop, value) => {
-		// grid.docfields is this form's copy, so other forms keep their labels
-		(grid.docfields || []).forEach((df) => df.fieldname === fieldname && (df[prop] = value));
-		(grid.grid_rows || []).forEach((row) =>
-			(row.docfields || []).forEach((df) => df.fieldname === fieldname && (df[prop] = value))
-		);
+	const props = { attachment: { label: __("Draft Document") } };
+	if (frappe.meta.has_field("Required Document", "final_document")) {
+		props.final_document = { in_list_view: 1, columns: 2 };
+	}
+
+	let changed = false;
+	const apply = (df) => {
+		const wanted = df && props[df.fieldname];
+		if (!wanted) return;
+		Object.keys(wanted).forEach((prop) => {
+			if (df[prop] !== wanted[prop]) {
+				df[prop] = wanted[prop];
+				changed = true;
+			}
+		});
 	};
 
-	set_prop("attachment", "label", __("Draft Document"));
-	if (frappe.meta.has_field("Required Document", "final_document")) {
-		set_prop("final_document", "in_list_view", 1);
-		set_prop("final_document", "columns", 2);
-	}
-	// rebuild the grid header/columns with the new labels
-	grid.visible_columns = [];
-	grid.refresh();
+	// docfield copy for this docname (what grid.setup_fields reads), plus the copies
+	// already held by the grid and its rows. All are per-form copies, other forms keep "Attachment".
+	Object.keys(props).forEach((fieldname) =>
+		apply(frappe.meta.get_docfield("Required Document", fieldname, frm.docname))
+	);
+	(grid.docfields || []).forEach(apply);
+	(grid.user_defined_columns || []).forEach(apply);
+	(grid.grid_rows || []).forEach((row) => (row.docfields || []).forEach(apply));
+
+	if (!changed) return;
+	// Rebuild header AND rows. Rows cache their cells (grid_row.columns), so a plain
+	// visible_columns reset + refresh only rebuilt the header and appended the new
+	// Final Document cell at the end of each row (cells shifted under the wrong headings).
+	// reset_grid() drops the row elements, same as Frappe's Configure Columns dialog.
+	grid.reset_grid();
 }
 
 

@@ -10,6 +10,7 @@
   "container",
   "item_code",
   "item_name",
+  "column_break_qty",
   "qty",
   "boxes",
   "net_weight"
@@ -43,6 +44,10 @@
    "read_only": 1
   },
   {
+   "fieldname": "column_break_qty",
+   "fieldtype": "Column Break"
+  },
+  {
    "columns": 1,
    "fieldname": "qty",
    "fieldtype": "Float",
@@ -51,7 +56,6 @@
   },
   {
    "columns": 1,
-   "description": "Auto filled: Item Boxes x Qty / Item Qty (from Shipment Items). Can be changed.",
    "fieldname": "boxes",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -59,7 +63,6 @@
   },
   {
    "columns": 1,
-   "description": "Auto filled: Item Net Weight x Qty / Item Qty (from Shipment Items). Can be changed.",
    "fieldname": "net_weight",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -70,7 +73,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-11-21 12:00:00.000000",
+ "modified": "2026-11-23 18:30:00.000000",
  "modified_by": "Administrator",
  "module": "Exim",
  "name": "Import Shipment Container Details",
