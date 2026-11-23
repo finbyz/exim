@@ -295,7 +295,7 @@ def flag_cheapest_quotes(rows_by_item, splits):
 
 def get_columns(filters):
 	"""Column order: Price per Unit, Price Per Unit (INR), Landed Price per Unit (INR),
-	Landed Cost Per Unit (USD), Charge Share (%), Price per Box, Landed Cost Per Box,
+	Landed Cost Per Unit (USD), Charge Share (%), Price per Box, Charges,
 	Amount after Charges, Port, then the rest of the base columns.
 	"""
 	currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
@@ -343,7 +343,7 @@ def get_columns(filters):
 		charge_columns += [
 			{
 				"fieldname": f"{key}_charges",
-				"label": _("Landed Cost Per Box"),
+				"label": _("Charges ({0})").format(currency),
 				"fieldtype": "Currency",
 				"options": "company_currency",
 				"width": 160,
