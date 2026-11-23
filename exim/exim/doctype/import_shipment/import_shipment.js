@@ -870,11 +870,35 @@ frappe.ui.form.on("Import Shipment Container Details", {
 				frappe.model.set_value(cdt, cdn, "item_name", r.item_name);
 			}
 		});
+		set_container_boxes_and_weight(frm, cdt, cdn);
+	},
+	qty(frm, cdt, cdn) {
+		set_container_boxes_and_weight(frm, cdt, cdn);
 	},
 	container(frm, cdt, cdn) {
 		sync_container_summary_from_details(frm);
 	}
 });
+
+// Boxes and Net Weight of a container row come from the Shipment Items table (same item).
+// When the container row has a Qty, they are split in proportion: item value x row qty / item qty.
+function set_container_boxes_and_weight(frm, cdt, cdn) {
+	let row = locals[cdt] && locals[cdt][cdn];
+	if (!row || !row.item_code) return;
+
+	let items = (frm.doc.items || []).filter((d) => (d.product || d.item_code) === row.item_code);
+	if (!items.length) return;
+
+	let item_qty = items.reduce((sum, d) => sum + flt(d.qty), 0);
+	let item_boxes = items.reduce((sum, d) => sum + flt(d.boxes), 0);
+	let item_net_weight = items.reduce((sum, d) => sum + flt(d.net_weight), 0);
+	let ratio = flt(row.qty) && item_qty ? flt(row.qty) / item_qty : 1;
+
+	frappe.model.set_value(cdt, cdn, {
+		boxes: flt(item_boxes * ratio, precision("boxes", row)),
+		net_weight: flt(item_net_weight * ratio, precision("net_weight", row)),
+	});
+}
 
 function setup_container_details_queries(frm) {
 	if (!frm.fields_dict.container_details || !frm.fields_dict.container_details.grid) return;

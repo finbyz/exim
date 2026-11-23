@@ -11,7 +11,6 @@
   "container_name",
   "column_break_1",
   "enable",
-  "disable",
   "section_break_remarks",
   "remarks"
  ],
@@ -45,14 +44,6 @@
    "label": "Enable"
   },
   {
-   "default": "0",
-   "fieldname": "disable",
-   "fieldtype": "Check",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Disable"
-  },
-  {
    "fieldname": "section_break_remarks",
    "fieldtype": "Section Break",
    "label": "Remarks"
@@ -66,7 +57,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-18 13:31:05.332759",
+ "modified": "2026-11-21 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Exim",
  "name": "Container",

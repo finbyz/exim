@@ -192,7 +192,7 @@
         {
             "fieldname": "lot_no",
             "fieldtype": "Data",
-            "label": "Lot No",
+            "label": "Batch No",
             "reqd": 1
         },
         {
@@ -274,14 +274,18 @@
             "label": "Transport Details"
         },
         {
+            "description": "Auto set from Container Details",
             "fieldname": "no_of_containers",
             "fieldtype": "Int",
-            "label": "No of Cont"
+            "label": "No of Cont",
+            "read_only": 1
         },
         {
+            "description": "Auto set from Container Details",
             "fieldname": "container_nos",
             "fieldtype": "Small Text",
-            "label": "Container Nos"
+            "label": "Container Nos",
+            "read_only": 1
         },
         {
             "fieldname": "sec_items",
@@ -623,7 +627,7 @@
     "grid_page_length": 50,
     "index_web_pages_for_search": 1,
     "links": [],
-    "modified": "2026-10-28 16:33:42.160633",
+    "modified": "2026-11-21 12:00:00.000000",
     "modified_by": "Administrator",
     "module": "Exim",
     "name": "Import Shipment",

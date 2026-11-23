@@ -21,6 +21,8 @@ class ImportShipment(Document):
 		self.set_currency_and_company_defaults()
 		self.validate_purchase_order_qty()
 		self.validate_container_details_items()
+		self.set_container_boxes_and_weight()
+		self.set_container_summary()
 		self.calculate_week()
 		self.calculate_item_totals()
 		self.calculate_charge_totals()
@@ -51,6 +53,39 @@ class ImportShipment(Document):
 
 		if invalid_rows:
 			frappe.throw("<br>".join(invalid_rows), title=_("Invalid Container Item"))
+
+	def set_container_boxes_and_weight(self):
+		"""Fill blank Boxes / Net Weight of container rows from the Shipment Items table
+		(same item), split by the row's qty: item value x row qty / item qty.
+		No qty on the row means the whole item is in that container.
+		Values entered by the user are kept."""
+		totals = {}
+		for item in self.get("items") or []:
+			code = item.get("product") or item.get("item_code")
+			if not code:
+				continue
+			t = totals.setdefault(code, frappe._dict(qty=0.0, boxes=0.0, net_weight=0.0))
+			t.qty += flt(item.qty)
+			t.boxes += flt(item.boxes)
+			t.net_weight += flt(item.net_weight)
+
+		for row in self.get("container_details") or []:
+			t = totals.get(row.item_code)
+			if not t:
+				continue
+			ratio = flt(row.qty) / t.qty if flt(row.qty) and t.qty else 1
+			if not flt(row.boxes):
+				row.boxes = flt(t.boxes * ratio, row.precision("boxes"))
+			if not flt(row.net_weight):
+				row.net_weight = flt(t.net_weight * ratio, row.precision("net_weight"))
+
+	def set_container_summary(self):
+		"""No of Cont / Container Nos are read only: set them from the Container Details table.
+		Older shipments without container rows keep their existing values."""
+		containers = list(dict.fromkeys(row.container for row in self.get("container_details") or [] if row.container))
+		if containers:
+			self.no_of_containers = len(containers)
+			self.container_nos = ", ".join(containers)
 
 	def auto_fill_destination_port_charges(self):
 		if not getattr(self, "destination_port", None):
