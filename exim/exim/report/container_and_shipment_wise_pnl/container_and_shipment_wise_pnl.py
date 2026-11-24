@@ -79,20 +79,21 @@ def get_shipments(filters):
 	conditions = {"status": ("!=", "Cancelled")}
 	if filters.company:
 		conditions["company"] = filters.company
-	if filters.import_shipment:
-		conditions["name"] = filters.import_shipment
+	names = None
 	if filters.container:
 		# only the shipments that carried this container
-		conditions["name"] = (
-			"in",
+		names = set(
 			frappe.get_all(
 				"Import Shipment Container Details",
 				filters={"container": filters.container, "parenttype": "Import Shipment"},
 				pluck="parent",
 				distinct=True,
 			)
-			or [""],
 		)
+	if filters.import_shipment:
+		names = {filters.import_shipment} if names is None else names & {filters.import_shipment}
+	if names is not None:
+		conditions["name"] = ("in", list(names) or [""])
 
 	rows = frappe.get_list(
 		"Import Shipment",
@@ -501,6 +502,10 @@ def get_entities(shipments, containers, filters):
 				continue  # filtered on a container this shipment did not carry
 			# every shipment is shown, even with no containers or costs booked yet
 			title = _("Shipment: {0} ({1} Container(s))").format(s.name, len(s.containers))
+			if filters.container:
+				title = _("Shipment: {0} (showing Container {1} of {2})").format(
+					s.name, filters.container, len(s.containers)
+				)
 			entities.append(make_entity(s.name, title, rows, None if rows else dict(s.charges)))
 	else:
 		for c in containers:
