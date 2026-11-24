@@ -39,11 +39,11 @@ frappe.query_reports["Container and Shipment Wise PNL"] = {
 			options: "Container",
 		},
 		{
-			fieldname: "group_by",
-			label: __("Group By"),
+			fieldname: "view",
+			label: __("View"),
 			fieldtype: "Select",
-			options: ["Shipment", "Container"],
-			default: "Shipment",
+			options: ["Container Wise", "Shipment Wise"],
+			default: "Container Wise",
 		},
 		{
 			fieldname: "show_batches",
@@ -53,32 +53,35 @@ frappe.query_reports["Container and Shipment Wise PNL"] = {
 		},
 	],
 
-	tree: true,
-	name_field: "row_id",
-	parent_field: "parent_row",
-	initial_depth: 1,
-
+	// T format: Expenses | Amount | Income | Amount, one block per container / shipment
 	formatter(value, row, column, data, default_formatter) {
 		value = default_formatter(value, row, column, data);
 		if (!data) return value;
+		const left = ["expense", "expense_amount"].includes(column.fieldname);
+		const is_label = ["expense", "income"].includes(column.fieldname);
 
-		if (["profit", "profit_pct"].includes(column.fieldname) && data.profit) {
-			const color = data.profit < 0 ? "var(--red-600)" : "var(--green-600)";
-			value = `<span style="color:${color}">${value}</span>`;
+		switch (data.row_type) {
+			case "gap":
+				return "";
+			case "title":
+				return `<b style="color:var(--text-color)">${value || ""}</b>`;
+			case "side_head":
+				return is_label ? `<b style="text-transform:uppercase;letter-spacing:.4px">${value}</b>` : "";
+			case "total":
+				return `<b>${value}</b>`;
 		}
-		if (column.fieldname === "status" && data.status) {
-			const colors = {
-				Closed: "green",
-				"Partly Sold": "orange",
-				"In Stock": "blue",
-				"Not Received": "gray",
-			};
-			const color = colors[data.status] || "gray";
-			value = `<span class="indicator-pill ${color}">${value}</span>`;
-		}
-		if (data.indent === 0) {
-			value = `<b>${value}</b>`;
-		}
+
+		const indent = left ? data.l_indent : data.r_indent;
+		const bold = left ? data.l_bold : data.r_bold;
+		const kind = left ? data.l_kind : data.r_kind;
+		const label = left ? data.expense : data.income;
+		if (!label) return "";
+
+		if (is_label && indent) value = `<span style="padding-left:${indent * 18}px">${value}</span>`;
+		if (indent > 1) value = `<span style="color:var(--text-muted)">${value}</span>`;
+		if (kind === "profit") value = `<span style="color:var(--green-600)">${value}</span>`;
+		if (kind === "loss") value = `<span style="color:var(--red-600)">${value}</span>`;
+		if (bold) value = `<b>${value}</b>`;
 		return value;
 	},
 };

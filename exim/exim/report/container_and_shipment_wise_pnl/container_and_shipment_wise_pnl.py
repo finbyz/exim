@@ -50,6 +50,7 @@ AMOUNT_FIELDS = (
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
+	currency = get_currency(filters)
 	shipments = get_shipments(filters)
 	containers = get_containers(shipments)
 	track_batches(containers)
@@ -58,14 +59,16 @@ def execute(filters=None):
 	if filters.container:
 		containers = [c for c in containers if c.container == filters.container]
 
-	data = get_data(shipments, containers, filters)
-	currency = get_currency(filters)
+	entities = get_entities(shipments, containers, filters)
+	if not entities:
+		return get_columns(currency), []
+
 	return (
-		get_columns(filters, currency),
-		data,
+		get_columns(currency),
+		get_data(entities, filters),
 		None,
-		get_chart(shipments, containers, filters),
-		get_report_summary(data, filters, currency),
+		get_chart(entities),
+		get_report_summary(entities, currency),
 	)
 
 
@@ -78,6 +81,18 @@ def get_shipments(filters):
 		conditions["company"] = filters.company
 	if filters.import_shipment:
 		conditions["name"] = filters.import_shipment
+	if filters.container:
+		# only the shipments that carried this container
+		conditions["name"] = (
+			"in",
+			frappe.get_all(
+				"Import Shipment Container Details",
+				filters={"container": filters.container, "parenttype": "Import Shipment"},
+				pluck="parent",
+				distinct=True,
+			)
+			or [""],
+		)
 
 	rows = frappe.get_list(
 		"Import Shipment",
@@ -123,11 +138,12 @@ def get_containers(shipments):
 	charge_rows = frappe.get_all(
 		"Import Shipment Charge",
 		filters={"parent": ("in", names), "parenttype": "Import Shipment"},
-		fields=["parent", "amount", "actual_amount"],
+		fields=["parent", "charge_type", "item_name", "amount", "actual_amount"],
+		order_by="parent, idx",
 	)
 
 	for s in shipments:
-		s.containers, s.item_codes, s.expenses = [], set(), 0.0
+		s.containers, s.item_codes, s.expenses, s.charges = [], set(), 0.0, defaultdict(float)
 		s.has_actual = s.has_estimate = False
 	for r in container_rows:
 		s = by_name[r.parent]
@@ -141,16 +157,20 @@ def get_containers(shipments):
 	for r in charge_rows:
 		s = by_name[r.parent]
 		# Actual amount once the expense bill is booked, the estimate until then
+		name = r.charge_type or r.item_name or _("Other Charges")
 		if flt(r.actual_amount):
 			s.expenses += flt(r.actual_amount)
+			s.charges[name] += flt(r.actual_amount)
 			s.has_actual = True
 		elif flt(r.amount):
 			s.expenses += flt(r.amount)
+			s.charges[_("{0} (Estimated)").format(name)] += flt(r.amount)
 			s.has_estimate = True
 
 	containers = []
 	for s in shipments:
-		share = s.expenses / len(s.containers) if s.containers else 0.0
+		n = len(s.containers)
+		share = s.expenses / n if n else 0.0
 		for c in s.containers:
 			containers.append(
 				frappe._dict(
@@ -160,6 +180,7 @@ def get_containers(shipments):
 					shipment_date=s.shipment_date,
 					item_codes=s.item_codes,
 					expenses=share,
+					charges={k: v / n for k, v in s.charges.items()},
 					batches=defaultdict(new_batch_stats),
 				)
 			)
@@ -444,76 +465,181 @@ def sum_rows(rows):
 	return total
 
 
+
+
 # ---------------------------------------------------------------- output
+# T format, like a Trading / P&L account: Expenses on the left, Income on the right, one block per
+# container (Container Wise) or per shipment (Shipment Wise), and a combined block when there are several.
+# Net Profit sits on the Expenses side and Net Loss on the Income side, so both sides add up to the same total.
+
+TOTAL_FIELDS = (
+	"purchase_value",
+	"expenses",
+	"total_cost",
+	"sales_value",
+	"balance_value",
+	"total_income",
+	"profit",
+	"purchase_qty",
+	"sold_qty",
+	"other_out_qty",
+	"balance_qty",
+)
 
 
-def get_data(shipments, containers, filters):
-	show_batches = filters.get("show_batches")
+def get_entities(shipments, containers, filters):
+	"""The report blocks. Each one adds up one or more container records."""
 	by_shipment = defaultdict(list)
 	for c in containers:
 		by_shipment[c.shipment].append(c)
 
-	def container_row(c, indent, parent):
-		row = frappe._dict(
-			row_id=f"{c.shipment}::{c.container}",
-			parent_row=parent,
-			indent=indent,
-			label=c.container,
-			shipment=c.shipment,
-			container=c.container,
-		)
-		row.update({f: c.get(f) for f in (*AMOUNT_FIELDS, "profit_pct", "status")})
-		out = [row]
-		if show_batches:
-			for batch_no, b in sorted(c.batches.items()):
-				brow = frappe._dict(b)
-				brow.update(
-					row_id=f"{row.row_id}::{batch_no}",
-					parent_row=row.row_id,
-					indent=indent + 1,
-					label=_("{0} (from {1})").format(batch_no, b.source_batch) if b.source_batch else batch_no,
-					shipment=c.shipment,
-					container=c.container,
-					batch_no=batch_no,
-				)
-				out.append(brow)
-		return out
+	entities = []
+	if filters.get("view") == "Shipment Wise":
+		for s in shipments:
+			rows = by_shipment.get(s.name) or []
+			if not rows and filters.container:
+				continue  # filtered on a container this shipment did not carry
+			# every shipment is shown, even with no containers or costs booked yet
+			title = _("Shipment: {0} ({1} Container(s))").format(s.name, len(s.containers))
+			entities.append(make_entity(s.name, title, rows, None if rows else dict(s.charges)))
+	else:
+		for c in containers:
+			title = _("Container: {0} (Shipment: {1})").format(c.container, c.shipment)
+			entities.append(make_entity(c.container, title, [c]))
+	return entities
+
+
+def make_entity(label, title, containers, charges=None):
+	e = frappe._dict(label=label, title=title, purchase=defaultdict(float), sales=defaultdict(float))
+	e.charges = defaultdict(float, charges or {})
+	# item -> [(batch label, qty, value)] for Show Batches
+	e.purchase_batches, e.sales_batches = defaultdict(list), defaultdict(list)
+	for c in containers:
+		if charges is None:
+			for name, amount in c.charges.items():
+				e.charges[name] += amount
+		for batch_no, b in sorted(c.batches.items()):
+			item = b.item_code or _("Unknown Item")
+			batch = _("{0} (from {1})").format(batch_no, b.source_batch) if b.source_batch else batch_no
+			if flt(b.purchase_value):
+				e.purchase[item] += flt(b.purchase_value)
+				e.purchase_batches[item].append((batch, b.purchase_qty, b.purchase_value))
+			if flt(b.sales_value):
+				e.sales[item] += flt(b.sales_value)
+				e.sales_batches[item].append((batch, b.sold_qty, b.sales_value))
+
+	totals = sum_rows(containers)
+	totals.expenses = sum(e.charges.values())
+	set_totals(totals)
+	e.totals = totals
+	return e
+
+
+def set_totals(t):
+	t.total_cost = flt(t.purchase_value) + flt(t.expenses)
+	t.total_income = flt(t.sales_value) + flt(t.balance_value)
+	t.profit = t.total_income - t.total_cost
+	t.profit_pct = t.profit / t.total_cost * 100 if t.total_cost else 0.0
+
+
+def combine(entities, title):
+	e = frappe._dict(label=_("Total"), title=title, purchase_batches={}, sales_batches={})
+	for attr in ("purchase", "sales", "charges"):
+		e[attr] = defaultdict(float)
+		for x in entities:
+			for k, v in x[attr].items():
+				e[attr][k] += v
+	e.totals = frappe._dict({f: sum(flt(x.totals.get(f)) for x in entities) for f in TOTAL_FIELDS})
+	set_totals(e.totals)
+	return e
+
+
+def get_data(entities, filters):
+	items = list({i for e in entities for i in (*e.purchase, *e.sales)})
+	item_names = (
+		dict(frappe.get_all("Item", filters={"name": ("in", items)}, fields=["name", "item_name"], as_list=True))
+		if items
+		else {}
+	)
+
+	blocks = list(entities)
+	if len(entities) > 1:
+		what = _("Shipments") if filters.get("view") == "Shipment Wise" else _("Containers")
+		blocks.append(combine(entities, _("Total of {0} {1}").format(len(entities), what)))
 
 	data = []
-	if filters.get("group_by") == "Container":
-		for c in containers:
-			data += container_row(c, 0, None)
-		return data
-
-	for s in shipments:
-		rows = by_shipment.get(s.name) or []
-		if not rows and (filters.container or not s.expenses):
-			continue  # nothing to show: no container rows and no expenses
-		head = sum_rows(rows)
-		if not rows:
-			head.expenses = s.expenses
-			set_pnl(head, recompute_balance_value=False)
-		head.update(
-			row_id=s.name,
-			parent_row=None,
-			indent=0,
-			label=s.name,
-			shipment=s.name,
-			container=_("{0} Container(s)").format(len(s.containers)),
-			expense_basis=expense_basis(s),
-		)
-		data.append(head)
-		for c in rows:
-			data += container_row(c, 1, s.name)
+	for i, e in enumerate(blocks):
+		if i:
+			data.append(frappe._dict(row_type="gap"))
+		data += t_block(e, item_names, filters.get("show_batches"))
 	return data
 
 
-def expense_basis(s):
-	if s.has_actual and s.has_estimate:
-		return _("Mixed")
-	if s.has_estimate:
-		return _("Estimated")
-	return _("Actual") if s.has_actual else ""
+def t_block(e, item_names, show_batches=False):
+	t = e.totals
+
+	def line(label, amount, indent=0, bold=0, kind=""):
+		return (label, flt(amount, 2), indent, bold, kind)
+
+	def name_of(item):
+		return item_names.get(item) or item
+
+	def qty(v):
+		v = flt(v)
+		return frappe.format(v, {"fieldtype": "Float", "precision": 2 if v % 1 else 0})
+
+	def item_lines(values, batches):
+		out = []
+		for item, value in sorted(values.items(), key=lambda x: name_of(x[0]).lower()):
+			out.append(line(name_of(item), value, 1))
+			if show_batches:
+				out += [line(_("Batch {0} - Qty {1}").format(b, qty(q)), v, 2) for b, q, v in batches.get(item, [])]
+		return out
+
+	left = [line(_("Purchase (from Purchase Receipt)"), t.purchase_value, bold=1)]
+	left += item_lines(e.purchase, e.purchase_batches)
+	left.append(line(_("Shipment Expenses (shared per container)"), t.expenses, bold=1))
+	left += [line(k, v, 1) for k, v in sorted(e.charges.items())]
+
+	right = [line(_("Sales"), t.sales_value, bold=1)]
+	right += item_lines(e.sales, e.sales_batches)
+	right.append(line(_("Closing Stock (at landed cost)"), t.balance_value, bold=1))
+
+	# balancing figure
+	pct = _("{0}%").format(frappe.format(abs(flt(t.profit_pct, 2)), {"fieldtype": "Float", "precision": 2}))
+	if t.profit >= 0:
+		left.append(line(_("Net Profit ({0})").format(pct), t.profit, bold=1, kind="profit"))
+	else:
+		right.append(line(_("Net Loss ({0})").format(pct), -t.profit, bold=1, kind="loss"))
+	side_total = max(t.total_cost, t.total_income)
+
+	rows = [
+		frappe._dict(
+			row_type="title",
+			expense=e.title,
+			income=_("Qty: In {0} | Sold {1} | Wastage {2} | Stock {3}").format(
+				qty(t.purchase_qty), qty(t.sold_qty), qty(t.other_out_qty), qty(t.balance_qty)
+			),
+		),
+		frappe._dict(row_type="side_head", expense=_("Expenses"), income=_("Income")),
+	]
+	for i in range(max(len(left), len(right))):
+		row = frappe._dict(row_type="line")
+		if i < len(left):
+			row.expense, row.expense_amount, row.l_indent, row.l_bold, row.l_kind = left[i]
+		if i < len(right):
+			row.income, row.income_amount, row.r_indent, row.r_bold, row.r_kind = right[i]
+		rows.append(row)
+	rows.append(
+		frappe._dict(
+			row_type="total",
+			expense=_("Total"),
+			expense_amount=flt(side_total, 2),
+			income=_("Total"),
+			income_amount=flt(side_total, 2),
+		)
+	)
+	return rows
 
 
 def get_currency(filters):
@@ -521,91 +647,48 @@ def get_currency(filters):
 	return frappe.get_cached_value("Company", company, "default_currency") if company else None
 
 
-def get_columns(filters, currency):
-	def money(label, fieldname, width=130):
-		return {"label": label, "fieldname": fieldname, "fieldtype": "Currency", "options": currency, "width": width}
+def get_columns(currency):
+	def money(fieldname):
+		return {"label": _("Amount"), "fieldname": fieldname, "fieldtype": "Currency", "options": currency, "width": 150}
 
-	def qty(label, fieldname, width=105):
-		return {"label": label, "fieldname": fieldname, "fieldtype": "Float", "width": width}
-
-	columns = [
-		{"label": _("Shipment / Container / Batch"), "fieldname": "label", "fieldtype": "Data", "width": 230},
-		{"label": _("Shipment"), "fieldname": "shipment", "fieldtype": "Link", "options": "Import Shipment", "width": 140},
-		{"label": _("Container"), "fieldname": "container", "fieldtype": "Data", "width": 120},
+	return [
+		{"label": _("Expenses"), "fieldname": "expense", "fieldtype": "Data", "width": 330},
+		money("expense_amount"),
+		{"label": _("Income"), "fieldname": "income", "fieldtype": "Data", "width": 330},
+		money("income_amount"),
 	]
-	if filters.get("show_batches"):
-		columns += [
-			{"label": _("Item"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 180},
-			{"label": _("Batch"), "fieldname": "batch_no", "fieldtype": "Link", "options": "Batch", "width": 110},
-		]
-	columns += [
-		{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 100},
-		qty(_("Purchase Qty"), "purchase_qty"),
-		money(_("Purchase Value"), "purchase_value"),
-		money(_("Expenses"), "expenses", 120),
-		money(_("Total Cost"), "total_cost"),
-		qty(_("Sold Qty"), "sold_qty", 95),
-		money(_("Sales Value"), "sales_value"),
-		qty(_("Inter Co. Transfer Qty"), "transfer_qty", 120),
-		qty(_("Other Out Qty"), "other_out_qty", 110),
-		qty(_("Balance Qty"), "balance_qty", 100),
-		money(_("Balance Stock Value"), "balance_value"),
-		money(_("Profit / Loss"), "profit"),
-		{"label": _("Profit %"), "fieldname": "profit_pct", "fieldtype": "Percent", "width": 90},
-		{"label": _("Expense Basis"), "fieldname": "expense_basis", "fieldtype": "Data", "width": 100},
-	]
-	return columns
 
 
-def get_chart(shipments, containers, filters):
-	"""Total Cost against Sales Value per container (or per shipment), largest 12."""
-	if not containers:
-		return None
-
-	if filters.get("group_by") == "Container":
-		points = [(f"{c.container} ({c.shipment})", c.total_cost, c.sales_value) for c in containers]
-	else:
-		grouped = defaultdict(list)
-		for c in containers:
-			grouped[c.shipment].append(c)
-		points = [
-			(name, sum(c.total_cost for c in rows), sum(c.sales_value for c in rows)) for name, rows in grouped.items()
-		]
-
-	points = sorted(points, key=lambda p: p[1] + p[2], reverse=True)[:12]
+def get_chart(entities):
+	"""Expenses against Income per column (first 15)."""
+	points = entities[:15]
 	return {
 		"data": {
-			"labels": [p[0] for p in points],
+			"labels": [e.label for e in points],
 			"datasets": [
-				{"name": _("Sales Value"), "values": [flt(p[2], 2) for p in points]},
-				{"name": _("Total Cost"), "values": [flt(p[1], 2) for p in points]},
+				{"name": _("Expenses"), "values": [flt(e.totals.total_cost, 2) for e in points]},
+				{"name": _("Income"), "values": [flt(e.totals.total_income, 2) for e in points]},
 			],
 		},
 		"type": "bar",
-		"colors": ["#2563EB", "#F59E0B"],
+		"colors": ["#F59E0B", "#2563EB"],
 		"fieldtype": "Currency",
 	}
 
 
-def get_report_summary(data, filters, currency):
-	"""Cards add up the top level rows shown, so they always match the table."""
-	by_container = filters.get("group_by") == "Container"
-	top = [r for r in data if r.indent == 0]
-	container_rows = [r for r in data if r.indent == (0 if by_container else 1)]
-	total = sum_rows(top)
+def get_report_summary(entities, currency):
+	def total(field):
+		return sum(flt(e.totals.get(field)) for e in entities)
 
 	def money(label, value, indicator):
 		return {"value": value, "label": label, "datatype": "Currency", "currency": currency, "indicator": indicator}
 
-	def count(label, value, indicator):
-		return {"value": value, "label": label, "datatype": "Int", "indicator": indicator}
-
+	profit = total("profit")
 	return [
-		count(_("Shipments"), len({r.shipment for r in top}), "Purple"),
-		count(_("Containers"), len(container_rows), "Cyan"),
-		money(_("Purchase Value"), total.purchase_value, "Blue"),
-		money(_("Expenses"), total.expenses, "Orange"),
-		money(_("Sales Value"), total.sales_value, "Blue"),
-		money(_("Balance Stock Value"), total.balance_value, "Cyan"),
-		money(_("Profit / Loss"), total.profit, "Green" if total.profit >= 0 else "Red"),
+		money(_("Purchase"), total("purchase_value"), "Blue"),
+		money(_("Shipment Expenses"), total("expenses"), "Orange"),
+		money(_("Total Expenses"), total("total_cost"), "Red"),
+		money(_("Sales"), total("sales_value"), "Blue"),
+		money(_("Closing Stock"), total("balance_value"), "Cyan"),
+		money(_("Profit / Loss"), profit, "Green" if profit >= 0 else "Red"),
 	]
