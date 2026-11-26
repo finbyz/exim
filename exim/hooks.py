@@ -243,3 +243,7 @@ jinja = {
 
 # Print Format with PDF Generator = "Attachments": PDF made of the real attached files
 pdf_generator = ["exim.exim.utils.shipment_attachments.attachments_pdf_generator"]
+
+# NewV16: make sure the monkey patches in this file are applied in every worker process
+before_request = ["exim.ensure_monkey_patches"]
+before_job = ["exim.ensure_monkey_patches"]
