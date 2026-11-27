@@ -22,7 +22,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
-from frappe.utils import flt, getdate
+from frappe.utils import cint, flt, getdate
 
 SALE_ITEM = {"Sales Invoice": "Sales Invoice Item", "Delivery Note": "Delivery Note Item"}
 PURCHASE_ITEM = {"Purchase Receipt": "Purchase Receipt Item", "Purchase Invoice": "Purchase Invoice Item"}
@@ -102,8 +102,10 @@ def get_shipments(filters):
 		order_by="creation asc",
 	)
 
-	from_date = getdate(filters.from_date) if filters.from_date else None
-	to_date = getdate(filters.to_date) if filters.to_date else None
+	# a picked shipment or container is shown whatever its date; the range only narrows "all shipments"
+	use_dates = not (filters.import_shipment or filters.container)
+	from_date = getdate(filters.from_date) if use_dates and filters.from_date else None
+	to_date = getdate(filters.to_date) if use_dates and filters.to_date else None
 	out = []
 	for s in rows:
 		# Shipment date: ETA, or the date it was created when ETA is blank
@@ -469,9 +471,11 @@ def sum_rows(rows):
 
 
 # ---------------------------------------------------------------- output
-# T format, like a Trading / P&L account: Expenses on the left, Income on the right, one block per
-# container (Container Wise) or per shipment (Shipment Wise), and a combined block when there are several.
-# Net Profit sits on the Expenses side and Net Loss on the Income side, so both sides add up to the same total.
+# T format, like a Trading / P&L account: cost on the left, realisation on the right, one block per container
+# (Container Wise) or per shipment (Shipment Wise), plus a combined block when there are several.
+# Each block is a tree. Its groups pair one heading from each side (Purchase | Sales, Shipment Expenses |
+# Closing Stock, Key Figures): collapsed they show the totals, expanded they list every item and every charge.
+# Net Profit sits on the cost side and Net Loss on the realisation side, so both sides add up to the same total.
 
 TOTAL_FIELDS = (
 	"purchase_value",
@@ -486,6 +490,7 @@ TOTAL_FIELDS = (
 	"other_out_qty",
 	"balance_qty",
 )
+ITEM_FIELDS = ("p_qty", "p_val", "s_qty", "s_val", "b_qty", "b_val", "o_qty")
 
 
 def get_entities(shipments, containers, filters):
@@ -514,24 +519,33 @@ def get_entities(shipments, containers, filters):
 	return entities
 
 
+def new_item():
+	return frappe._dict({f: 0.0 for f in ITEM_FIELDS}, batches=[])
+
+
 def make_entity(label, title, containers, charges=None):
-	e = frappe._dict(label=label, title=title, purchase=defaultdict(float), sales=defaultdict(float))
+	"""Per item: purchased, sold, in stock and wasted qty / value, plus the shipment charges by name."""
+	e = frappe._dict(label=label, title=title, item_stats=defaultdict(new_item))
 	e.charges = defaultdict(float, charges or {})
-	# item -> [(batch label, qty, value)] for Show Batches
-	e.purchase_batches, e.sales_batches = defaultdict(list), defaultdict(list)
 	for c in containers:
 		if charges is None:
 			for name, amount in c.charges.items():
 				e.charges[name] += amount
 		for batch_no, b in sorted(c.batches.items()):
-			item = b.item_code or _("Unknown Item")
+			it = e.item_stats[b.item_code or _("Unknown Item")]
+			values = dict(
+				p_qty=flt(b.purchase_qty),
+				p_val=flt(b.purchase_value),
+				s_qty=flt(b.sold_qty),
+				s_val=flt(b.sales_value),
+				b_qty=max(flt(b.balance_qty), 0),
+				b_val=flt(b.balance_value),
+				o_qty=flt(b.other_out_qty),
+			)
+			for f, v in values.items():
+				it[f] += v
 			batch = _("{0} (from {1})").format(batch_no, b.source_batch) if b.source_batch else batch_no
-			if flt(b.purchase_value):
-				e.purchase[item] += flt(b.purchase_value)
-				e.purchase_batches[item].append((batch, b.purchase_qty, b.purchase_value))
-			if flt(b.sales_value):
-				e.sales[item] += flt(b.sales_value)
-				e.sales_batches[item].append((batch, b.sold_qty, b.sales_value))
+			it.batches.append(frappe._dict(values, batch=batch))
 
 	totals = sum_rows(containers)
 	totals.expenses = sum(e.charges.values())
@@ -545,25 +559,27 @@ def set_totals(t):
 	t.total_income = flt(t.sales_value) + flt(t.balance_value)
 	t.profit = t.total_income - t.total_cost
 	t.profit_pct = t.profit / t.total_cost * 100 if t.total_cost else 0.0
+	t.status = status_of(t)
 
 
 def combine(entities, title):
-	e = frappe._dict(label=_("Total"), title=title, purchase_batches={}, sales_batches={})
-	for attr in ("purchase", "sales", "charges"):
-		e[attr] = defaultdict(float)
-		for x in entities:
-			for k, v in x[attr].items():
-				e[attr][k] += v
+	e = frappe._dict(label=_("Total"), title=title, item_stats=defaultdict(new_item), charges=defaultdict(float))
+	for x in entities:
+		for k, v in x.charges.items():
+			e.charges[k] += v
+		for item, it in x.item_stats.items():
+			for f in ITEM_FIELDS:
+				e.item_stats[item][f] += it[f]
 	e.totals = frappe._dict({f: sum(flt(x.totals.get(f)) for x in entities) for f in TOTAL_FIELDS})
 	set_totals(e.totals)
 	return e
 
 
 def get_data(entities, filters):
-	items = list({i for e in entities for i in (*e.purchase, *e.sales)})
+	codes = list({i for e in entities for i in e.item_stats})
 	item_names = (
-		dict(frappe.get_all("Item", filters={"name": ("in", items)}, fields=["name", "item_name"], as_list=True))
-		if items
+		dict(frappe.get_all("Item", filters={"name": ("in", codes)}, fields=["name", "item_name"], as_list=True))
+		if codes
 		else {}
 	)
 
@@ -575,74 +591,109 @@ def get_data(entities, filters):
 	data = []
 	for i, e in enumerate(blocks):
 		if i:
-			data.append(frappe._dict(row_type="gap"))
-		data += t_block(e, item_names, filters.get("show_batches"))
+			data.append(frappe._dict(row_id=f"gap{i}", indent=0, row_type="gap"))
+		data += t_block(e, f"b{i}", item_names, filters.get("show_batches") and e.label != _("Total"))
 	return data
 
 
-def t_block(e, item_names, show_batches=False):
-	t = e.totals
+def rate(value, qty):
+	return flt(value) / flt(qty) if flt(qty) else None
 
-	def line(label, amount, indent=0, bold=0, kind=""):
-		return (label, flt(amount, 2), indent, bold, kind)
+
+def pct(part, whole):
+	value = flt(part) / flt(whole) * 100 if flt(whole) else 0.0
+	return frappe.format(flt(value, 2), {"fieldtype": "Float", "precision": 2}) + "%"
+
+
+def side(label, qty=None, rate_=None, amount=None, bold=0, sub=0, kind=""):
+	"""One side of a T row."""
+	return frappe._dict(label=label, qty=qty, rate=rate_, amount=amount, bold=bold, sub=sub, kind=kind)
+
+
+def t_block(e, block_id, item_names, show_batches=False):
+	t = e.totals
 
 	def name_of(item):
 		return item_names.get(item) or item
 
-	def qty(v):
-		v = flt(v)
-		return frappe.format(v, {"fieldtype": "Float", "precision": 2 if v % 1 else 0})
-
-	def item_lines(values, batches):
+	def item_sides(qty_f, val_f, rate_of=rate):
 		out = []
-		for item, value in sorted(values.items(), key=lambda x: name_of(x[0]).lower()):
-			out.append(line(name_of(item), value, 1))
+		for item, it in sorted(e.item_stats.items(), key=lambda x: name_of(x[0]).lower()):
+			if not flt(it[qty_f]) and not flt(it[val_f]):
+				continue
+			out.append(side(name_of(item), it[qty_f], rate_of(it[val_f], it[qty_f]), it[val_f]))
 			if show_batches:
-				out += [line(_("Batch {0} - Qty {1}").format(b, qty(q)), v, 2) for b, q, v in batches.get(item, [])]
+				for b in it.get("batches") or []:
+					if flt(b[qty_f]) or flt(b[val_f]):
+						out.append(side(_("Batch {0}").format(b.batch), b[qty_f], rate_of(b[val_f], b[qty_f]), b[val_f], sub=1))
 		return out
 
-	left = [line(_("Purchase (from Purchase Receipt)"), t.purchase_value, bold=1)]
-	left += item_lines(e.purchase, e.purchase_batches)
-	left.append(line(_("Shipment Expenses (shared per container)"), t.expenses, bold=1))
-	left += [line(k, v, 1) for k, v in sorted(e.charges.items())]
+	rows = []
 
-	right = [line(_("Sales"), t.sales_value, bold=1)]
-	right += item_lines(e.sales, e.sales_batches)
-	right.append(line(_("Closing Stock (at landed cost)"), t.balance_value, bold=1))
-
-	# balancing figure
-	pct = _("{0}%").format(frappe.format(abs(flt(t.profit_pct, 2)), {"fieldtype": "Float", "precision": 2}))
-	if t.profit >= 0:
-		left.append(line(_("Net Profit ({0})").format(pct), t.profit, bold=1, kind="profit"))
-	else:
-		right.append(line(_("Net Loss ({0})").format(pct), -t.profit, bold=1, kind="loss"))
-	side_total = max(t.total_cost, t.total_income)
-
-	rows = [
-		frappe._dict(
-			row_type="title",
-			expense=e.title,
-			income=_("Qty: In {0} | Sold {1} | Wastage {2} | Stock {3}").format(
-				qty(t.purchase_qty), qty(t.sold_qty), qty(t.other_out_qty), qty(t.balance_qty)
-			),
-		),
-		frappe._dict(row_type="side_head", expense=_("Expenses"), income=_("Income")),
-	]
-	for i in range(max(len(left), len(right))):
-		row = frappe._dict(row_type="line")
-		if i < len(left):
-			row.expense, row.expense_amount, row.l_indent, row.l_bold, row.l_kind = left[i]
-		if i < len(right):
-			row.income, row.income_amount, row.r_indent, row.r_bold, row.r_kind = right[i]
+	def add(row_id, parent, indent, row_type, left=None, right=None):
+		row = frappe._dict(row_id=f"{block_id}:{row_id}", parent_row=f"{block_id}:{parent}" if parent else None, indent=indent, row_type=row_type)
+		for prefix, s in (("e", left), ("i", right)):
+			if not s:
+				continue
+			row["expense" if prefix == "e" else "income"] = s.label
+			row[f"{prefix}_qty"], row[f"{prefix}_rate"], row[f"{prefix}_amount"] = s.qty, s.rate, s.amount
+			row[f"{prefix}_bold"], row[f"{prefix}_sub"], row[f"{prefix}_kind"] = s.bold, s.sub, s.kind
 		rows.append(row)
-	rows.append(
-		frappe._dict(
-			row_type="total",
-			expense=_("Total"),
-			expense_amount=flt(side_total, 2),
-			income=_("Total"),
-			income_amount=flt(side_total, 2),
-		)
+
+	def add_pairs(parent, lefts, rights):
+		for n in range(max(len(lefts), len(rights))):
+			add(f"{parent}:{n}", parent, 2, "detail", lefts[n] if n < len(lefts) else None, rights[n] if n < len(rights) else None)
+
+	add("title", None, 0, "title", side(e.title), side(_("Status: {0}").format(t.status)))
+	add("head", "title", 1, "side_head", side(_("Cost")), side(_("Realisation")))
+
+	# Purchase | Sales
+	add(
+		"trade",
+		"title",
+		1,
+		"group",
+		side(_("Purchase (Purchase Receipt)"), t.purchase_qty, rate(t.purchase_value, t.purchase_qty), t.purchase_value, bold=1),
+		side(_("Sales"), t.sold_qty, rate(t.sales_value, t.sold_qty), t.sales_value, bold=1),
+	)
+	add_pairs("trade", item_sides("p_qty", "p_val"), item_sides("s_qty", "s_val"))
+
+	# Shipment Expenses | Closing Stock
+	stock = item_sides("b_qty", "b_val")
+	if flt(t.other_out_qty):
+		stock.append(side(_("Wastage / Other Out (qty, no value)"), t.other_out_qty))
+	add(
+		"exp",
+		"title",
+		1,
+		"group",
+		side(_("Shipment Expenses"), amount=t.expenses, bold=1),
+		side(_("Closing Stock (at landed cost)"), t.balance_qty, rate(t.balance_value, t.balance_qty), t.balance_value, bold=1),
+	)
+	add_pairs("exp", [side(k, amount=v) for k, v in sorted(e.charges.items())], stock)
+
+	# balancing figure, then the equal totals
+	side_total = max(t.total_cost, t.total_income)
+	if t.profit >= 0:
+		add("net", "title", 1, "net", left=side(_("Net Profit"), amount=t.profit, bold=1, kind="profit"))
+	else:
+		add("net", "title", 1, "net", right=side(_("Net Loss"), amount=-t.profit, bold=1, kind="loss"))
+	add("total", "title", 1, "total", side(_("Total"), amount=side_total, bold=1), side(_("Total"), amount=side_total, bold=1))
+
+	# Key figures
+	add("keys", "title", 1, "group", side(_("Key Figures"), bold=1), side(""))
+	add_pairs(
+		"keys",
+		[
+			side(_("Landed Cost per Unit"), rate_=rate(t.total_cost, t.purchase_qty)),
+			side(_("Expenses on Purchase: {0}").format(pct(t.expenses, t.purchase_value))),
+			side(_("Profit / Loss on Cost: {0}").format(pct(t.profit, t.total_cost)), kind="profit" if t.profit >= 0 else "loss"),
+		],
+		[
+			side(_("Average Sale Rate per Unit"), rate_=rate(t.sales_value, t.sold_qty)),
+			side(_("Qty Sold: {0} of purchased").format(pct(t.sold_qty, t.purchase_qty))),
+			side(_("Qty in Stock: {0} of purchased").format(pct(t.balance_qty, t.purchase_qty))),
+		],
 	)
 	return rows
 
@@ -653,14 +704,21 @@ def get_currency(filters):
 
 
 def get_columns(currency):
-	def money(fieldname):
-		return {"label": _("Amount"), "fieldname": fieldname, "fieldtype": "Currency", "options": currency, "width": 150}
+	def money(label, fieldname, width=120):
+		return {"label": label, "fieldname": fieldname, "fieldtype": "Currency", "options": currency, "width": width}
+
+	def qty(fieldname):
+		return {"label": _("Qty"), "fieldname": fieldname, "fieldtype": "Float", "width": 85}
 
 	return [
-		{"label": _("Expenses"), "fieldname": "expense", "fieldtype": "Data", "width": 330},
-		money("expense_amount"),
-		{"label": _("Income"), "fieldname": "income", "fieldtype": "Data", "width": 330},
-		money("income_amount"),
+		{"label": _("Cost"), "fieldname": "expense", "fieldtype": "Data", "width": 260},
+		qty("e_qty"),
+		money(_("Rate"), "e_rate", 100),
+		money(_("Amount"), "e_amount"),
+		{"label": _("Realisation"), "fieldname": "income", "fieldtype": "Data", "width": 260},
+		qty("i_qty"),
+		money(_("Rate"), "i_rate", 100),
+		money(_("Amount"), "i_amount"),
 	]
 
 
@@ -697,3 +755,35 @@ def get_report_summary(entities, currency):
 		money(_("Closing Stock"), total("balance_value"), "Cyan"),
 		money(_("Profit / Loss"), profit, "Green" if profit >= 0 else "Red"),
 	]
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def container_query(doctype, txt, searchfield, start, page_len, filters):
+	"""Container filter: containers of the selected Import Shipment (else of every shipment the user can read)."""
+	filters = frappe._dict(filters or {})
+	conditions = {"status": ("!=", "Cancelled")}
+	if filters.company:
+		conditions["company"] = filters.company
+	if filters.import_shipment:
+		conditions["name"] = filters.import_shipment
+	shipments = frappe.get_list("Import Shipment", filters=conditions, pluck="name")
+	if not shipments:
+		return []
+
+	rows = frappe.get_all(
+		"Import Shipment Container Details",
+		filters={
+			"parent": ("in", shipments),
+			"parenttype": "Import Shipment",
+			"container": ("like", f"%{txt}%"),
+		},
+		fields=["container", "parent"],
+		order_by="parent desc, idx asc",
+	)
+	seen, out = set(), []
+	for r in rows:
+		if r.container and r.container not in seen:
+			seen.add(r.container)
+			out.append([r.container, r.parent])
+	return out[cint(start) : cint(start) + cint(page_len)]
