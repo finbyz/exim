@@ -1,0 +1,657 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2026-11-27 12:53:12.953361",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "tab_shipment_details",
+  "sec_parties",
+  "naming_series",
+  "shipment_no",
+  "customer",
+  "customer_name",
+  "notify_party",
+  "notify_party_address",
+  "col_parties",
+  "status",
+  "company",
+  "currency",
+  "sales_order",
+  "proforma_invoice_no",
+  "proforma_invoice_date",
+  "sec_route",
+  "port_of_loading",
+  "port_of_discharge",
+  "final_destination",
+  "col_route",
+  "country_of_destination",
+  "country_of_origin",
+  "incoterm",
+  "sec_logistics",
+  "shipping_line",
+  "vessel_name",
+  "voyage_no",
+  "transporter",
+  "cha",
+  "col_logistics",
+  "etd",
+  "eta",
+  "loading_date",
+  "shipped_on",
+  "arrived_on",
+  "delivered_on",
+  "sec_containers",
+  "containers",
+  "sec_container_summary",
+  "no_of_containers",
+  "container_nos",
+  "col_container_summary",
+  "total_boxes",
+  "total_net_weight",
+  "total_gross_weight",
+  "remarks",
+  "tab_costing",
+  "sec_charges",
+  "charges",
+  "sec_charge_summary",
+  "total_shipping_line_charges",
+  "total_transport_charges",
+  "total_other_charges",
+  "col_charge_summary",
+  "total_expenses",
+  "total_actual_expenses",
+  "differ",
+  "sec_final_costing",
+  "total_sales_value",
+  "col_final_costing",
+  "net_value_after_charges",
+  "tab_documents",
+  "sec_export_docs",
+  "bl_no",
+  "bl_date",
+  "shipping_bill_no",
+  "shipping_bill_date",
+  "col_export_docs",
+  "certificate_of_origin_no",
+  "certificate_of_origin_date",
+  "ebrc_no",
+  "ebrc_date",
+  "duty_drawback_amount",
+  "sec_required_documents",
+  "document_template",
+  "required_documents"
+ ],
+ "fields": [
+  {
+   "fieldname": "tab_shipment_details",
+   "fieldtype": "Tab Break",
+   "label": "Shipment Details"
+  },
+  {
+   "fieldname": "sec_parties",
+   "fieldtype": "Section Break",
+   "label": "Buyer & Order"
+  },
+  {
+   "default": "ES-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "no_copy": 1,
+   "options": "ES-.####",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "shipment_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Shipment No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "sales_order.customer",
+   "fetch_if_empty": 1,
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Customer / Buyer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "sales_order.notify_party",
+   "fetch_if_empty": 1,
+   "fieldname": "notify_party",
+   "fieldtype": "Link",
+   "label": "Notify Party",
+   "options": "Address"
+  },
+  {
+   "fieldname": "notify_party_address",
+   "fieldtype": "Small Text",
+   "label": "Notify Party Address",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_parties",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Planning",
+   "description": "Set from the dates: Loading Date, Shipped On, Arrived On, Delivered On. Final Costing from the button once Delivered.",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Planning\nLoading\nShipped\nArrived\nDelivered\nFinal Costing",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "remember_last_selected_value": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "sales_order.currency",
+   "fetch_if_empty": 1,
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Sales Order",
+   "options": "Sales Order"
+  },
+  {
+   "fieldname": "proforma_invoice_no",
+   "fieldtype": "Data",
+   "label": "Proforma Invoice No"
+  },
+  {
+   "fieldname": "proforma_invoice_date",
+   "fieldtype": "Date",
+   "label": "Proforma Invoice Date"
+  },
+  {
+   "fieldname": "sec_route",
+   "fieldtype": "Section Break",
+   "label": "Route"
+  },
+  {
+   "fetch_from": "sales_order.port_of_loading",
+   "fetch_if_empty": 1,
+   "fieldname": "port_of_loading",
+   "fieldtype": "Link",
+   "label": "Port of Loading",
+   "options": "Port Details"
+  },
+  {
+   "fetch_from": "sales_order.port_of_discharge",
+   "fetch_if_empty": 1,
+   "fieldname": "port_of_discharge",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Port of Discharge",
+   "options": "Port Details"
+  },
+  {
+   "fetch_from": "sales_order.final_destination",
+   "fetch_if_empty": 1,
+   "fieldname": "final_destination",
+   "fieldtype": "Data",
+   "label": "Final Destination"
+  },
+  {
+   "fieldname": "col_route",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "sales_order.country_of_destination",
+   "fetch_if_empty": 1,
+   "fieldname": "country_of_destination",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Country of Destination",
+   "options": "Country"
+  },
+  {
+   "fetch_from": "sales_order.country_of_origin",
+   "fetch_if_empty": 1,
+   "fieldname": "country_of_origin",
+   "fieldtype": "Link",
+   "label": "Country of Origin",
+   "options": "Country"
+  },
+  {
+   "fetch_from": "sales_order.incoterm",
+   "fetch_if_empty": 1,
+   "fieldname": "incoterm",
+   "fieldtype": "Link",
+   "label": "Incoterm",
+   "options": "Incoterm"
+  },
+  {
+   "fieldname": "sec_logistics",
+   "fieldtype": "Section Break",
+   "label": "Shipping & Transport"
+  },
+  {
+   "fieldname": "shipping_line",
+   "fieldtype": "Link",
+   "label": "Shipping Line",
+   "options": "Supplier"
+  },
+  {
+   "fetch_from": "sales_order.vessel_no",
+   "fetch_if_empty": 1,
+   "fieldname": "vessel_name",
+   "fieldtype": "Data",
+   "label": "Vessel Name"
+  },
+  {
+   "fieldname": "voyage_no",
+   "fieldtype": "Data",
+   "label": "Voyage No"
+  },
+  {
+   "fieldname": "transporter",
+   "fieldtype": "Link",
+   "label": "Transporter",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "cha",
+   "fieldtype": "Link",
+   "label": "CHA",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "col_logistics",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "etd",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "ETD"
+  },
+  {
+   "fieldname": "eta",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "ETA"
+  },
+  {
+   "fieldname": "loading_date",
+   "fieldtype": "Date",
+   "label": "Loading Date"
+  },
+  {
+   "fieldname": "shipped_on",
+   "fieldtype": "Date",
+   "label": "Shipped On (ATD)"
+  },
+  {
+   "fieldname": "arrived_on",
+   "fieldtype": "Date",
+   "label": "Arrived On (ATA)"
+  },
+  {
+   "fieldname": "delivered_on",
+   "fieldtype": "Date",
+   "label": "Delivered On"
+  },
+  {
+   "fieldname": "sec_containers",
+   "fieldtype": "Section Break",
+   "label": "Containers"
+  },
+  {
+   "fieldname": "containers",
+   "fieldtype": "Table",
+   "label": "Containers",
+   "options": "Export Shipment Container"
+  },
+  {
+   "fieldname": "sec_container_summary",
+   "fieldtype": "Section Break",
+   "label": "Container Summary"
+  },
+  {
+   "fieldname": "no_of_containers",
+   "fieldtype": "Int",
+   "label": "No of Containers",
+   "read_only": 1
+  },
+  {
+   "fieldname": "container_nos",
+   "fieldtype": "Small Text",
+   "label": "Container Nos",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_container_summary",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_boxes",
+   "fieldtype": "Float",
+   "label": "Total Boxes",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_net_weight",
+   "fieldtype": "Float",
+   "label": "Total Net Weight (Kg)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_gross_weight",
+   "fieldtype": "Float",
+   "label": "Total Gross Weight (Kg)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "tab_costing",
+   "fieldtype": "Tab Break",
+   "label": "Charges & Costing"
+  },
+  {
+   "fieldname": "sec_charges",
+   "fieldtype": "Section Break",
+   "label": "Export Charges"
+  },
+  {
+   "fieldname": "charges",
+   "fieldtype": "Table",
+   "label": "Charges",
+   "options": "Export Shipment Charge"
+  },
+  {
+   "fieldname": "sec_charge_summary",
+   "fieldtype": "Section Break",
+   "label": "Charge Summary"
+  },
+  {
+   "fieldname": "total_shipping_line_charges",
+   "fieldtype": "Currency",
+   "label": "Shipping Line Charges",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_transport_charges",
+   "fieldtype": "Currency",
+   "label": "Transport Charges",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_other_charges",
+   "fieldtype": "Currency",
+   "label": "CHA & Other Charges",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_charge_summary",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_expenses",
+   "fieldtype": "Currency",
+   "label": "Total Tentative Charges",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_actual_expenses",
+   "fieldtype": "Currency",
+   "label": "Total Actual Charges",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "description": "Only for charges with an actual amount",
+   "fieldname": "differ",
+   "fieldtype": "Currency",
+   "label": "Difference (Actual - Tentative)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sec_final_costing",
+   "fieldtype": "Section Break",
+   "label": "Final Costing"
+  },
+  {
+   "description": "Net total in company currency of the submitted Sales Invoices against the containers",
+   "fieldname": "total_sales_value",
+   "fieldtype": "Currency",
+   "label": "Sales Value (Linked Invoices)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_final_costing",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Sales Value less charges (actual amount where entered, else tentative)",
+   "fieldname": "net_value_after_charges",
+   "fieldtype": "Currency",
+   "label": "Net Value After Charges",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tab_documents",
+   "fieldtype": "Tab Break",
+   "label": "Export Documents"
+  },
+  {
+   "fieldname": "sec_export_docs",
+   "fieldtype": "Section Break",
+   "label": "Document References"
+  },
+  {
+   "fieldname": "bl_no",
+   "fieldtype": "Data",
+   "label": "Bill of Lading No"
+  },
+  {
+   "fieldname": "bl_date",
+   "fieldtype": "Date",
+   "label": "Bill of Lading Date"
+  },
+  {
+   "fieldname": "shipping_bill_no",
+   "fieldtype": "Data",
+   "label": "Shipping Bill No"
+  },
+  {
+   "fieldname": "shipping_bill_date",
+   "fieldtype": "Date",
+   "label": "Shipping Bill Date"
+  },
+  {
+   "fieldname": "col_export_docs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "certificate_of_origin_no",
+   "fieldtype": "Data",
+   "label": "Certificate of Origin No"
+  },
+  {
+   "fieldname": "certificate_of_origin_date",
+   "fieldtype": "Date",
+   "label": "Certificate of Origin Date"
+  },
+  {
+   "fieldname": "ebrc_no",
+   "fieldtype": "Data",
+   "label": "EBRC No"
+  },
+  {
+   "fieldname": "ebrc_date",
+   "fieldtype": "Date",
+   "label": "EBRC Date"
+  },
+  {
+   "fieldname": "duty_drawback_amount",
+   "fieldtype": "Currency",
+   "label": "Duty Drawback Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "description": "Invoice, packing list, bill of lading, certificate of origin, EBRC / duty drawback. The list comes from the Document Template.",
+   "fieldname": "sec_required_documents",
+   "fieldtype": "Section Break",
+   "label": "Required Documents"
+  },
+  {
+   "fieldname": "document_template",
+   "fieldtype": "Link",
+   "label": "Document Template",
+   "options": "Document Template"
+  },
+  {
+   "fieldname": "required_documents",
+   "fieldtype": "Table",
+   "label": "Required Documents",
+   "options": "Required Document"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-11-27 13:07:17.284325",
+ "modified_by": "Administrator",
+ "module": "Exim",
+ "name": "Export Shipment",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "search_fields": "customer_name,port_of_discharge,status",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [
+  {
+   "color": "Gray",
+   "title": "Planning"
+  },
+  {
+   "color": "Orange",
+   "title": "Loading"
+  },
+  {
+   "color": "Blue",
+   "title": "Shipped"
+  },
+  {
+   "color": "Purple",
+   "title": "Arrived"
+  },
+  {
+   "color": "Green",
+   "title": "Delivered"
+  },
+  {
+   "color": "Cyan",
+   "title": "Final Costing"
+  }
+ ],
+ "title_field": "customer_name",
+ "track_changes": 1
+}

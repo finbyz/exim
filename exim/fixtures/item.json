@@ -97,6 +97,7 @@
    }
   ],
   "use_default_naming": 1,
+  "use_serial_no_wise_valuation": 0,
   "valuation_method": "",
   "valuation_rate": 0.0,
   "variant_based_on": "Item Attribute",
@@ -107,4 +108,3 @@
   "weight_uom": null
  }
 ]
-

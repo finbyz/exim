@@ -1,0 +1,109 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "creation": "2026-11-27 12:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "container",
+  "container_type",
+  "seal_no",
+  "item_code",
+  "item_name",
+  "column_break_qty",
+  "boxes",
+  "net_weight",
+  "gross_weight",
+  "sales_invoice"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "container",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Container No",
+   "options": "Container",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "container_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Container Type",
+   "options": "\n20' Reefer\n40' Reefer\n40' HC Reefer\n20' GP\n40' GP\n40' HC"
+  },
+  {
+   "columns": 1,
+   "fieldname": "seal_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Seal No"
+  },
+  {
+   "columns": 2,
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_qty",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "boxes",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "No of Boxes"
+  },
+  {
+   "columns": 1,
+   "fieldname": "net_weight",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Net Weight (Kg)"
+  },
+  {
+   "columns": 1,
+   "fieldname": "gross_weight",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Gross Weight (Kg)"
+  },
+  {
+   "columns": 1,
+   "description": "One Sales Invoice can cover several containers of this shipment",
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sales Invoice No",
+   "options": "Sales Invoice"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-11-27 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Exim",
+ "name": "Export Shipment Container",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 0
+}

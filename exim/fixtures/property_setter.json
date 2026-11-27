@@ -94,5 +94,37 @@
   "property_type": "Text",
   "row_name": null,
   "value": "wkhtmltopdf\nchrome\nAttachments"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Sales Order",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocType",
+  "field_name": null,
+  "is_system_generated": 0,
+  "modified": "2026-11-27 12:59:02.428835",
+  "module": "Exim",
+  "name": "Sales Order-main-links_order",
+  "property": "links_order",
+  "property_type": "Small Text",
+  "row_name": null,
+  "value": "[\"qqm1rh3g07\"]"
+ },
+ {
+  "default_value": null,
+  "doc_type": "Sales Invoice",
+  "docstatus": 0,
+  "doctype": "Property Setter",
+  "doctype_or_field": "DocType",
+  "field_name": null,
+  "is_system_generated": 0,
+  "modified": "2026-11-27 13:08:42.660094",
+  "module": "Exim",
+  "name": "Sales Invoice-main-links_order",
+  "property": "links_order",
+  "property_type": "Small Text",
+  "row_name": null,
+  "value": "[\"s8qc6os35t\", \"to8jsuev31\"]"
  }
 ]
